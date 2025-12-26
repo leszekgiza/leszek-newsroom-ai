@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zapisane artykuly - Leszek Newsroom AI</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        h1 { color: #58a6ff; font-size: 1.8em; }
+        .back-link {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .back-link:hover { background: #21262d; color: #58a6ff; }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b949e;
+        }
+        .empty-state h2 { margin-bottom: 10px; color: #58a6ff; }
+        .article-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        .article-card:hover { border-color: #58a6ff; }
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .article-title {
+            color: #ffa657;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-decoration: none;
+        }
+        .article-title:hover { text-decoration: underline; }
+        .article-date { color: #8b949e; font-size: 0.8em; }
+        .article-desc { color: #c9d1d9; font-size: 0.9em; line-height: 1.5; margin-bottom: 12px; }
+        .article-url {
+            color: #7ee787;
+            font-size: 0.75em;
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+        .article-url a { color: #7ee787; text-decoration: none; }
+        .article-url a:hover { text-decoration: underline; }
+        .article-actions { display: flex; gap: 10px; }
+        .btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #238636; color: white; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-danger { background: transparent; color: #f85149; border: 1px solid #f85149; }
+        .btn-danger:hover { background: #f85149; color: white; }
+        .loading { text-align: center; padding: 40px; color: #8b949e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Zapisane artykuly</h1>
+            <a href="/" class="back-link">Powrot do prezentacji</a>
+        </header>
+        <main id="content">
+            <div class="loading">Ladowanie...</div>
+        </main>
+    </div>
+
+    <script>
+        const content = document.getElementById('content');
+
+        async function loadSaved() {
+            try {
+                const res = await fetch('/api/saved');
+                const data = await res.json();
+
+                if (!data.saved || data.saved.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <h2>Brak zapisanych artykulow</h2>
+                            <p>Kliknij "Zapisz na pozniej" przy artykule, aby dodac go tutaj.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                content.innerHTML = data.saved.map(article => `
+                    <div class="article-card" data-url="${encodeURIComponent(article.url)}">
+                        <div class="article-header">
+                            <a href="${article.url}" target="_blank" class="article-title">${article.title || 'Bez tytulu'}</a>
+                            <span class="article-date">${new Date(article.savedAt).toLocaleDateString('pl-PL')}</span>
+                        </div>
+                        ${article.description ? `<p class="article-desc">${article.description}</p>` : ''}
+                        <div class="article-url"><a href="${article.url}" target="_blank">${article.url}</a></div>
+                        <div class="article-actions">
+                            <a href="${article.url}" target="_blank" class="btn btn-primary">Otworz artykul</a>
+                            <button class="btn btn-danger" onclick="removeArticle('${encodeURIComponent(article.url)}')">Usun</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                content.innerHTML = `<div class="empty-state"><h2>Blad ladowania</h2><p>${err.message}</p></div>`;
+            }
+        }
+
+        async function removeArticle(encodedUrl) {
+            if (!confirm('Czy na pewno chcesz usunac ten artykul z zapisanych?')) return;
+
+            try {
+                await fetch(`/api/saved/${encodedUrl}`, { method: 'DELETE' });
+                const card = document.querySelector(`[data-url="${encodedUrl}"]`);
+                if (card) card.remove();
+
+                if (document.querySelectorAll('.article-card').length === 0) {
+                    loadSaved();
+                }
+            } catch (err) {
+                alert('Blad usuwania: ' + err.message);
+            }
+        }
+
+        loadSaved();
+    </script>
+</body>
+</html>

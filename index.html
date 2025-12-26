@@ -3,15 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leszek Newsroom AI - Przegląd 20.12.2025</title>
+    <title>Leszek Newsroom AI - Przeglad 20.12.2025</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/night.css">
     <style>
-        :root {
-            --r-heading-font: 'Segoe UI', system-ui, sans-serif;
-            --r-main-font: 'Segoe UI', system-ui, sans-serif;
-        }
+        :root { --r-heading-font: 'Segoe UI', system-ui, sans-serif; --r-main-font: 'Segoe UI', system-ui, sans-serif; }
         .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
         .reveal h1 { font-size: 2.2em; }
         .reveal h2 { font-size: 1.6em; color: #58a6ff; }
@@ -20,365 +17,212 @@
         .reveal li { margin-bottom: 0.5em; font-size: 0.85em; }
         .source { font-size: 0.6em; color: #8b949e; margin-top: 1em; }
         .highlight { color: #ffa657; font-weight: bold; }
-        .tag {
-            display: inline-block;
-            background: #238636;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.6em;
-            margin: 2px;
-        }
+        .tag { display: inline-block; background: #238636; padding: 2px 8px; border-radius: 12px; font-size: 0.6em; margin: 2px; }
         .tag-strategy { background: #8957e5; }
         .tag-llm { background: #1f6feb; }
         .tag-agents { background: #f85149; }
-        .insight-box {
-            background: rgba(88, 166, 255, 0.1);
-            border-left: 4px solid #58a6ff;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: left;
-            font-size: 0.8em;
-        }
-        .two-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            text-align: left;
-        }
-        .author-card {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            text-align: left;
-        }
+        .insight-box { background: rgba(88, 166, 255, 0.1); border-left: 4px solid #58a6ff; padding: 15px; margin: 20px 0; text-align: left; font-size: 0.8em; }
+        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
+        .author-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin: 10px 0; text-align: left; }
         .author-name { color: #58a6ff; font-weight: bold; }
         .reveal a { color: #58a6ff; text-decoration: none; }
         .reveal a:hover { text-decoration: underline; color: #79c0ff; }
-        .article-title {
-            color: #ffa657;
-            font-weight: bold;
-            font-size: 1em;
-        }
-        .article-url {
-            display: block;
-            font-size: 0.55em;
-            color: #7ee787;
-            word-break: break-all;
-            margin-top: 4px;
-            font-family: monospace;
-        }
-        .article-url a {
-            color: #7ee787;
-        }
-        .article-url a:hover {
-            color: #aff5b4;
-        }
-        .article-desc {
-            font-size: 0.7em;
-            color: #c9d1d9;
-            margin-top: 6px;
-        }
+        .article-title { color: #ffa657; font-weight: bold; font-size: 1em; }
+        .article-url { display: block; font-size: 0.55em; color: #7ee787; word-break: break-all; margin-top: 4px; font-family: monospace; }
+        .article-url a { color: #7ee787; }
+        .article-url a:hover { color: #aff5b4; }
+        .article-desc { font-size: 0.7em; color: #c9d1d9; margin-top: 6px; }
+        .btn-more { background: #238636; color: white; border: none; padding: 4px 12px; border-radius: 6px; font-size: 0.65em; cursor: pointer; margin-left: 8px; }
+        .btn-more:hover { background: #2ea043; }
+        .btn-save { background: transparent; color: #58a6ff; border: 1px solid #58a6ff; padding: 4px 12px; border-radius: 6px; font-size: 0.65em; cursor: pointer; margin-left: 4px; }
+        .btn-save:hover { background: #58a6ff; color: #0d1117; }
+        .btn-save.saved { background: #238636; color: white; border-color: #238636; cursor: default; }
+        .nav-link { position: fixed; top: 20px; right: 20px; background: #21262d; color: #8b949e; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 0.8em; z-index: 50; border: 1px solid #30363d; }
+        .nav-link:hover { background: #30363d; color: #58a6ff; }
+        .side-panel { position: fixed; top: 0; right: 0; width: 450px; height: 100vh; background: #161b22; border-left: 1px solid #30363d; transform: translateX(100%); transition: transform 0.3s; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .side-panel.open { transform: translateX(0); }
+        .side-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #30363d; }
+        .side-panel-title { color: #58a6ff; font-size: 1.1em; margin: 0; flex: 1; }
+        .btn-close { background: transparent; color: #8b949e; border: none; font-size: 1.5em; cursor: pointer; }
+        .btn-close:hover { color: #f85149; }
+        .side-panel-content { color: #c9d1d9; font-size: 0.9em; line-height: 1.6; text-align: left; }
+        .side-panel-content h2, .side-panel-content h3 { color: #58a6ff; font-size: 1em; margin-top: 20px; }
+        .side-panel-content strong { color: #ffa657; }
+        .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: #8b949e; }
+        .loading::after { content: ''; width: 20px; height: 20px; border: 2px solid #30363d; border-top-color: #58a6ff; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .panel-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999; opacity: 0; visibility: hidden; transition: opacity 0.3s; }
+        .panel-overlay.visible { opacity: 1; visibility: visible; }
+        .tts-controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #21262d; border: 1px solid #30363d; border-radius: 30px; padding: 10px 20px; display: none; align-items: center; gap: 15px; z-index: 100; }
+        .tts-controls.visible { display: flex; }
+        .tts-btn { background: transparent; border: none; color: #c9d1d9; font-size: 1.2em; cursor: pointer; padding: 8px; border-radius: 50%; }
+        .tts-btn:hover { background: #30363d; color: #58a6ff; }
+        .tts-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .tts-status { font-size: 0.75em; color: #8b949e; min-width: 100px; }
+        .voice-select { background: #30363d; color: #c9d1d9; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8em; }
+        .error-message { color: #f85149; padding: 20px; text-align: center; }
     </style>
 </head>
 <body>
+    <a href="/saved" class="nav-link">Zapisane</a>
+    <div class="panel-overlay" id="panelOverlay"></div>
+    <div class="side-panel" id="sidePanel">
+        <div class="side-panel-header">
+            <h3 class="side-panel-title" id="panelTitle">Szczegoly artykulu</h3>
+            <button class="btn-close" id="closePanel">&times;</button>
+        </div>
+        <div class="panel-tts-controls" id="panelTtsControls" style="display: none; padding: 10px 0; border-bottom: 1px solid #30363d; margin-bottom: 15px;">
+            <select class="voice-select" id="panelVoiceSelect">
+                <option value="pl-PL-ZofiaNeural">Zofia</option>
+                <option value="pl-PL-MarekNeural">Marek</option>
+            </select>
+            <button class="tts-btn" id="panelTtsPlay" style="margin-left: 10px;">&#9654; Odsluchaj</button>
+            <button class="tts-btn" id="panelTtsPause" disabled>&#10074;&#10074;</button>
+            <button class="tts-btn" id="panelTtsStop" disabled>&#9632;</button>
+            <span class="tts-status" id="panelTtsStatus" style="margin-left: 10px;">Gotowy</span>
+        </div>
+        <div class="side-panel-content" id="panelContent"></div>
+    </div>
+    <div class="tts-controls" id="ttsControls">
+        <select class="voice-select" id="voiceSelect">
+            <option value="pl-PL-ZofiaNeural">Zofia</option>
+            <option value="pl-PL-MarekNeural">Marek</option>
+        </select>
+        <button class="tts-btn" id="ttsPlay">&#9654;</button>
+        <button class="tts-btn" id="ttsPause" disabled>&#10074;&#10074;</button>
+        <button class="tts-btn" id="ttsStop" disabled>&#9632;</button>
+        <span class="tts-status" id="ttsStatus">Gotowy</span>
+    </div>
     <div class="reveal">
         <div class="slides">
-
-            <!-- SLAJD TYTUŁOWY -->
             <section>
                 <h1>Leszek Newsroom AI</h1>
-                <h3>Przegląd Dzienny</h3>
+                <h3>Przeglad Dzienny</h3>
                 <p style="font-size: 1.2em;">20 grudnia 2025</p>
-                <p class="source">14 źródeł | AI, ML, Technologia, Strategia</p>
+                <p class="source">14 zrodel | AI, ML, Technologia, Strategia</p>
             </section>
-
-            <!-- AGENDA -->
             <section>
                 <h2>Agenda</h2>
                 <ul>
-                    <li>Najważniejsze artykuły tygodnia</li>
+                    <li>Najwazniejsze artykuly tygodnia</li>
                     <li>Kluczowe insighty</li>
                     <li>Trendy: Gemini 3, Agenci AI, Open Source</li>
                     <li>Podsumowanie i rekomendacje</li>
                 </ul>
             </section>
-
-            <!-- SEKCJA A: LISTA ARTYKUŁÓW -->
             <section>
                 <section>
-                    <h2>A) Najnowsze Artykuły</h2>
-                    <p>Przegląd z 14 źródeł</p>
-                    <p style="font-size: 0.7em; color: #8b949e;">Użyj strzałek w dół, aby zobaczyć szczegóły</p>
+                    <h2>A) Najnowsze Artykuly</h2>
+                    <p>Przeglad z 14 zrodel</p>
                 </section>
-
-                <section>
+                <section data-tts="true">
                     <h3>Stratechery - Ben Thompson</h3>
-                    <div class="author-card">
+                    <div class="author-card" data-url="https://stratechery.com/2025/the-2025-stratechery-year-in-review/" data-title="The 2025 Stratechery Year in Review">
                         <span class="article-title">The 2025 Stratechery Year in Review</span> <span class="tag tag-strategy">Strategia</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
                         <span class="article-url"><a href="https://stratechery.com/2025/the-2025-stratechery-year-in-review/" target="_blank">stratechery.com/2025/the-2025-stratechery-year-in-review/</a></span>
-                        <p class="article-desc">18.12.2025 - Podsumowanie 13. roku Stratechery, powrót do USA po 12 latach na Tajwanie.</p>
+                        <p class="article-desc">18.12.2025 - Podsumowanie 13. roku Stratechery.</p>
                     </div>
-                    <div class="author-card">
+                    <div class="author-card" data-url="https://stratechery.com/2025/netflix-and-the-hollywood-end-game/" data-title="Netflix and the Hollywood End Game">
                         <span class="article-title">Netflix and the Hollywood End Game</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
                         <span class="article-url"><a href="https://stratechery.com/2025/netflix-and-the-hollywood-end-game/" target="_blank">stratechery.com/2025/netflix-and-the-hollywood-end-game/</a></span>
-                        <p class="article-desc">8.12.2025 - Przejęcie Warner Bros. za $72 mld. Netflix chce posiadać IP.</p>
+                        <p class="article-desc">8.12.2025 - Przejecie Warner Bros. za $72 mld.</p>
                     </div>
-                    <div class="author-card">
+                    <div class="author-card" data-url="https://stratechery.com/2025/google-nvidia-and-openai/" data-title="Google, Nvidia, and OpenAI">
                         <span class="article-title">Google, Nvidia, and OpenAI</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
                         <span class="article-url"><a href="https://stratechery.com/2025/google-nvidia-and-openai/" target="_blank">stratechery.com/2025/google-nvidia-and-openai/</a></span>
-                        <p class="article-desc">1.12.2025 - Gemini 3 + AMD jako wyzwanie dla OpenAI i Nvidii.</p>
+                        <p class="article-desc">1.12.2025 - Gemini 3 + AMD jako wyzwanie.</p>
                     </div>
                 </section>
-
-                <section>
+                <section data-tts="true">
                     <h3>Marginal Revolution</h3>
-                    <div class="author-card">
+                    <div class="author-card" data-url="https://marginalrevolution.com/marginalrevolution/2025/12/falling-costs.html" data-title="Falling Costs">
                         <span class="article-title">Falling Costs</span> <span class="tag tag-llm">LLM</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
                         <span class="article-url"><a href="https://marginalrevolution.com/marginalrevolution/2025/12/falling-costs.html" target="_blank">marginalrevolution.com/.../falling-costs.html</a></span>
-                        <p class="article-desc">19.12.2025 - Gemini 3 Flash pokonał ARC-AGI-1 przy niższych kosztach.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">Friday Assorted Links</span>
-                        <span class="article-url"><a href="https://marginalrevolution.com/marginalrevolution/2025/12/friday-assorted-links-552.html" target="_blank">marginalrevolution.com/.../friday-assorted-links-552.html</a></span>
-                        <p class="article-desc">19.12.2025 - GPT-5 mathematical breakthroughs, AI ethics, Vitalik.</p>
+                        <p class="article-desc">19.12.2025 - Gemini 3 Flash pokonal ARC-AGI-1.</p>
                     </div>
                 </section>
-
-                <section>
+                <section data-tts="true">
                     <h3>Hugging Face Blog</h3>
-                    <div class="author-card">
+                    <div class="author-card" data-url="https://huggingface.co/blog/jeffboudier/shadow-ai" data-title="Shadow AI">
                         <span class="article-title">Shadow AI - Where are the CIOs?</span> <span class="tag tag-strategy">Enterprise</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
                         <span class="article-url"><a href="https://huggingface.co/blog/jeffboudier/shadow-ai" target="_blank">huggingface.co/blog/jeffboudier/shadow-ai</a></span>
-                        <p class="article-desc">19.12.2025 - Rola CIO w kontekście shadow AI w organizacjach.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">Nemotron 3 Nano</span> <span class="tag tag-agents">Agents</span>
-                        <span class="article-url"><a href="https://huggingface.co/blog/nvidia/nemotron-3-nano-efficient-open-intelligent-models" target="_blank">huggingface.co/blog/nvidia/nemotron-3-nano-efficient-open-intelligent-models</a></span>
-                        <p class="article-desc">16.12.2025 - NVIDIA: nowy standard dla efektywnych modeli agentowych.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">Spinning Up a CPU-Only Micro-LLM with LoRA</span>
-                        <span class="article-url"><a href="https://huggingface.co/blog/salakash/cpu-only-micro-llm-tolstoy" target="_blank">huggingface.co/blog/salakash/cpu-only-micro-llm-tolstoy</a></span>
-                        <p class="article-desc">17.12.2025 - Tutorial: lekki LLM na CPU z fine-tuningiem LoRA.</p>
+                        <p class="article-desc">19.12.2025 - Rola CIO w kontekscie shadow AI.</p>
                     </div>
                 </section>
-
-                <section>
-                    <h3>Machine Learning Mastery</h3>
-                    <div class="author-card">
-                        <span class="article-title">How to Fine-Tune Mistral or Llama 3 Locally</span> <span class="tag tag-llm">Tutorial</span>
-                        <span class="article-url"><a href="https://machinelearningmastery.com/how-to-fine-tune-a-local-mistral-or-llama-3-model-on-your-own-dataset/" target="_blank">machinelearningmastery.com/how-to-fine-tune-a-local-mistral-or-llama-3-model-on-your-own-dataset/</a></span>
-                        <p class="article-desc">19.12.2025 - Porównanie fine-tuningu na dwóch modelach.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">5 Agentic Coding Tips & Tricks</span> <span class="tag tag-agents">Agents</span>
-                        <span class="article-url"><a href="https://machinelearningmastery.com/5-agentic-coding-tips-tricks/" target="_blank">machinelearningmastery.com/5-agentic-coding-tips-tricks/</a></span>
-                        <p class="article-desc">19.12.2025 - Agentic coding jest smart gdy shipuje poprawne diffy.</p>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>Sebastian Raschka</h3>
-                    <div class="author-card">
-                        <span class="article-title">From DeepSeek V3 to V3.2: Architecture, Sparse Attention, and RL</span>
-                        <span class="article-url"><a href="https://sebastianraschka.com/blog/2025/technical-deepseek.html" target="_blank">sebastianraschka.com/blog/2025/technical-deepseek.html</a></span>
-                        <p class="article-desc">3.12.2025 - Analiza techniczna ewolucji modeli DeepSeek.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">From Random Forests to RLVR: ML/AI Hello Worlds</span>
-                        <span class="article-url"><a href="https://sebastianraschka.com/blog/2025/hello-world-ai.html" target="_blank">sebastianraschka.com/blog/2025/hello-world-ai.html</a></span>
-                        <p class="article-desc">8.12.2025 - Ewolucja przykładów dla początkujących w ML/AI.</p>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>Interconnects - Nathan Lambert</h3>
-                    <div class="author-card">
-                        <span class="article-title">2025 Open Models Year in Review</span> <span class="tag">Open Source</span>
-                        <span class="article-url"><a href="https://interconnects.ai/p/2025-open-models-year-in-review" target="_blank">interconnects.ai/p/2025-open-models-year-in-review</a></span>
-                        <p class="article-desc">15.12.2025 - Tier list modeli open source. DeepSeek R1 i Qwen 3 to household names.</p>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>Hamel Husain</h3>
-                    <div class="author-card">
-                        <span class="article-title">LLM Evals: Everything You Need to Know</span> <span class="tag tag-llm">Evals</span>
-                        <span class="article-url"><a href="https://hamel.dev/blog/posts/evals-faq/index.html" target="_blank">hamel.dev/blog/posts/evals-faq/index.html</a></span>
-                        <p class="article-desc">17.12.2025 - Kompletny przewodnik po ewaluacji LLM.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">Selecting The Right AI Evals Tool</span>
-                        <span class="article-url"><a href="https://hamel.dev/blog/posts/eval-tools/index.html" target="_blank">hamel.dev/blog/posts/eval-tools/index.html</a></span>
-                        <p class="article-desc">1.10.2025 - Jak wybrać odpowiednie narzędzie do ewaluacji AI.</p>
-                    </div>
-                </section>
-
-                <section>
+                <section data-tts="true">
                     <h3>Phil Schmid</h3>
-                    <div class="author-card">
+                    <div class="author-card" data-url="https://www.philschmid.de/context-engineering-part-2" data-title="Context Engineering for AI Agents: Part 2">
                         <span class="article-title">Context Engineering for AI Agents: Part 2</span> <span class="tag tag-agents">Agents</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
                         <span class="article-url"><a href="https://www.philschmid.de/context-engineering-part-2" target="_blank">philschmid.de/context-engineering-part-2</a></span>
-                        <p class="article-desc">4.12.2025 - Techniki context engineering dla agentów.</p>
+                        <p class="article-desc">4.12.2025 - Techniki context engineering.</p>
                     </div>
-                    <div class="author-card">
-                        <span class="article-title">Why (Senior) Engineers Struggle to Build AI Agents</span>
-                        <span class="article-url"><a href="https://www.philschmid.de/why-engineers-struggle-building-agents" target="_blank">philschmid.de/why-engineers-struggle-building-agents</a></span>
-                        <p class="article-desc">26.11.2025 - Wyzwania doświadczonych inżynierów przy budowie agentów.</p>
-                    </div>
-                    <div class="author-card">
+                    <div class="author-card" data-url="https://www.philschmid.de/building-agents" data-title="Build an Agent from scratch with Gemini 3">
                         <span class="article-title">Build an Agent from scratch with Gemini 3</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
                         <span class="article-url"><a href="https://www.philschmid.de/building-agents" target="_blank">philschmid.de/building-agents</a></span>
                         <p class="article-desc">21.11.2025 - Tutorial krok po kroku.</p>
                     </div>
                 </section>
-
-                <section>
-                    <h3>Eugene Yan</h3>
-                    <div class="author-card">
-                        <span class="article-title">2025 Year in Review</span>
-                        <span class="article-url"><a href="https://eugeneyan.com/writing/2025-review/" target="_blank">eugeneyan.com/writing/2025-review/</a></span>
-                        <p class="article-desc">14.12.2025 - Refleksje nad rokiem: zdrowie, kariera, podróże.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">Product Evals in Three Simple Steps</span> <span class="tag tag-llm">Evals</span>
-                        <span class="article-url"><a href="https://eugeneyan.com/writing/product-evals/" target="_blank">eugeneyan.com/writing/product-evals/</a></span>
-                        <p class="article-desc">23.11.2025 - Labeling, alignment LLM-ewaluatorów, workflow.</p>
+                <section data-tts="true">
+                    <h3>Hamel Husain</h3>
+                    <div class="author-card" data-url="https://hamel.dev/blog/posts/evals-faq/index.html" data-title="LLM Evals: Everything You Need to Know">
+                        <span class="article-title">LLM Evals: Everything You Need to Know</span> <span class="tag tag-llm">Evals</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
+                        <span class="article-url"><a href="https://hamel.dev/blog/posts/evals-faq/index.html" target="_blank">hamel.dev/blog/posts/evals-faq/index.html</a></span>
+                        <p class="article-desc">17.12.2025 - Kompletny przewodnik po ewaluacji LLM.</p>
                     </div>
                 </section>
-
-                <section>
-                    <h3>Ethan Mollick - One Useful Thing</h3>
-                    <div class="author-card">
-                        <span class="article-title">Three Years from GPT-3 to Gemini 3</span>
-                        <span class="article-url"><a href="https://www.oneusefulthing.org/p/three-years-from-gpt-3-to-gemini" target="_blank">oneusefulthing.org/p/three-years-from-gpt-3-to-gemini</a></span>
-                        <p class="article-desc">18.11.2025 - Test Gemini 3: jak daleko zaszło AI w 3 lata.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">Giving your AI a Job Interview</span>
-                        <span class="article-url"><a href="https://www.oneusefulthing.org/p/giving-your-ai-a-job-interview" target="_blank">oneusefulthing.org/p/giving-your-ai-a-job-interview</a></span>
-                        <p class="article-desc">12.11.2025 - Jak lepiej oceniać systemy AI przed wdrożeniem.</p>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>Benedict Evans</h3>
-                    <div class="author-card">
-                        <span class="article-title">AI, Networks and Mechanical Turks</span>
-                        <span class="article-url"><a href="https://www.ben-evans.com/benedictevans/2025/11/23/ai-networks-and-mechanical-turks" target="_blank">ben-evans.com/benedictevans/2025/11/23/ai-networks-and-mechanical-turks</a></span>
-                        <p class="article-desc">23.11.2025 - Czy LLM umożliwiają lepszy search bez masowej bazy użytkowników?</p>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>Jason Liu - jxnl.co</h3>
-                    <div class="author-card">
-                        <span class="article-title">What Is the Coding Agents Speaker Series?</span> <span class="tag tag-agents">Agents</span>
-                        <span class="article-url"><a href="https://jxnl.co/writing/2025/09/11/coding-series-index/" target="_blank">jxnl.co/writing/2025/09/11/coding-series-index/</a></span>
-                        <p class="article-desc">Rozmowy z twórcami Devin, Sourcegraph Amp, Cline, Augment.</p>
-                    </div>
-                    <div class="author-card">
-                        <span class="article-title">What Is the RAG Master Series?</span>
-                        <span class="article-url"><a href="https://jxnl.co/writing/2025/09/11/rag-series-index/" target="_blank">jxnl.co/writing/2025/09/11/rag-series-index/</a></span>
-                        <p class="article-desc">Kompletny przewodnik po RAG - od podstaw do enterprise.</p>
+                <section data-tts="true">
+                    <h3>Interconnects - Nathan Lambert</h3>
+                    <div class="author-card" data-url="https://interconnects.ai/p/2025-open-models-year-in-review" data-title="2025 Open Models Year in Review">
+                        <span class="article-title">2025 Open Models Year in Review</span> <span class="tag">Open Source</span>
+                        <button class="btn-more">Wiecej</button>
+                        <button class="btn-save">Zapisz</button>
+                        <span class="article-url"><a href="https://interconnects.ai/p/2025-open-models-year-in-review" target="_blank">interconnects.ai/p/2025-open-models-year-in-review</a></span>
+                        <p class="article-desc">15.12.2025 - DeepSeek R1 i Qwen 3.</p>
                     </div>
                 </section>
             </section>
-
-            <!-- SEKCJA B: KLUCZOWE INSIGHTY -->
             <section>
                 <section>
                     <h2>B) Kluczowe Insighty</h2>
-                    <p>Co naprawdę warto zapamiętać</p>
                 </section>
-
                 <section>
-                    <h3>Gemini 3 zmienia grę</h3>
+                    <h3>Gemini 3 zmienia gre</h3>
                     <div class="insight-box">
-                        <p><strong>Marginal Revolution:</strong> "Gemini 3 Flash praktycznie pokonał ARC-AGI-1 przy znacznie niższych kosztach."</p>
-                        <span class="article-url"><a href="https://marginalrevolution.com/marginalrevolution/2025/12/falling-costs.html" target="_blank">marginalrevolution.com/.../falling-costs.html</a></span>
+                        <p><strong>Marginal Revolution:</strong> "Gemini 3 Flash pokonal ARC-AGI-1 przy nizszych kosztach."</p>
                     </div>
                     <div class="insight-box">
                         <p><strong>Stratechery:</strong> Google z Gemini 3 + AMD rzuca wyzwanie OpenAI i Nvidii.</p>
-                        <span class="article-url"><a href="https://stratechery.com/2025/google-nvidia-and-openai/" target="_blank">stratechery.com/2025/google-nvidia-and-openai/</a></span>
-                    </div>
-                    <div class="insight-box">
-                        <p><strong>Phil Schmid:</strong> Nowe tutoriale o budowaniu agentów z Gemini 3.</p>
-                        <span class="article-url"><a href="https://www.philschmid.de/building-agents" target="_blank">philschmid.de/building-agents</a></span>
                     </div>
                 </section>
-
                 <section>
                     <h3>Open Source dogania Closed</h3>
                     <div class="insight-box">
-                        <p><strong>Interconnects:</strong> "DeepSeek i Qwen stały się household names. Otwarte modele rywalizują z zamkniętymi na benchmarkach."</p>
-                        <span class="article-url"><a href="https://interconnects.ai/p/2025-open-models-year-in-review" target="_blank">interconnects.ai/p/2025-open-models-year-in-review</a></span>
+                        <p><strong>Interconnects:</strong> "DeepSeek i Qwen staly sie household names."</p>
                     </div>
                     <ul>
-                        <li><span class="highlight">DeepSeek R1</span> - "trudno przecenić wpływ tego modelu"</li>
-                        <li><span class="highlight">Qwen 3</span> - kolejny przełom od Alibaby</li>
-                        <li><span class="highlight">Nemotron 2</span> - mamba2-transformer od NVIDIA</li>
-                        <li><span class="highlight">Granite 4</span> - IBM "rock-solid releases"</li>
+                        <li><span class="highlight">DeepSeek R1</span> - trudno przecenic wplyw</li>
+                        <li><span class="highlight">Qwen 3</span> - przelom od Alibaby</li>
                     </ul>
                 </section>
-
-                <section>
-                    <h3>AI Agents - główny temat</h3>
-                    <div class="author-card">
-                        <p class="author-name">Phil Schmid</p>
-                        <ul style="font-size: 0.75em;">
-                            <li>Context Engineering cz. 2 <span class="article-url"><a href="https://www.philschmid.de/context-engineering-part-2" target="_blank">philschmid.de/context-engineering-part-2</a></span></li>
-                            <li>Dlaczego seniorzy mają problem z agentami <span class="article-url"><a href="https://www.philschmid.de/why-engineers-struggle-building-agents" target="_blank">philschmid.de/why-engineers-struggle-building-agents</a></span></li>
-                        </ul>
-                    </div>
-                    <div class="insight-box">
-                        <p><strong>Jason Liu:</strong> "Coding agents to najbardziej ekonomicznie opłacalne agenty dzisiaj."</p>
-                        <span class="article-url"><a href="https://jxnl.co/writing/2025/09/11/coding-series-index/" target="_blank">jxnl.co/writing/2025/09/11/coding-series-index/</a></span>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>LLM Evals - rosnące znaczenie</h3>
-                    <div class="author-card">
-                        <p class="author-name">Hamel Husain</p>
-                        <p style="font-size: 0.8em;">"LLM Evals: Everything You Need to Know" - kompletny przewodnik</p>
-                        <span class="article-url"><a href="https://hamel.dev/blog/posts/evals-faq/index.html" target="_blank">hamel.dev/blog/posts/evals-faq/index.html</a></span>
-                    </div>
-                    <div class="author-card">
-                        <p class="author-name">Eugene Yan</p>
-                        <p style="font-size: 0.8em;">"Product Evals in Three Simple Steps" - labeling, alignment, workflow</p>
-                        <span class="article-url"><a href="https://eugeneyan.com/writing/product-evals/" target="_blank">eugeneyan.com/writing/product-evals/</a></span>
-                    </div>
-                    <div class="insight-box">
-                        <p><strong>Mollick:</strong> "W miarę jak rady AI stają się ważniejsze, musimy lepiej je oceniać."</p>
-                        <span class="article-url"><a href="https://www.oneusefulthing.org/p/giving-your-ai-a-job-interview" target="_blank">oneusefulthing.org/p/giving-your-ai-a-job-interview</a></span>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>Strategiczne przesunięcia</h3>
-                    <div class="author-card">
-                        <span class="highlight">Netflix kupuje Warner Bros. za $72 mld</span>
-                        <p class="article-desc">Pivot od dystrybucji do posiadania IP</p>
-                        <span class="article-url"><a href="https://stratechery.com/2025/netflix-and-the-hollywood-end-game/" target="_blank">stratechery.com/2025/netflix-and-the-hollywood-end-game/</a></span>
-                    </div>
-                    <div class="author-card">
-                        <span class="highlight">Robotaxi + Suburbia</span>
-                        <p class="article-desc">Autonomiczne pojazdy mogą zmienić atrakcyjność przedmieść</p>
-                        <span class="article-url"><a href="https://stratechery.com/2025/robotaxis-and-suburbia/" target="_blank">stratechery.com/2025/robotaxis-and-suburbia/</a></span>
-                    </div>
-                    <div class="author-card">
-                        <span class="highlight">Shadow AI</span>
-                        <p class="article-desc">CIO muszą reagować na nieautoryzowane użycie AI w firmach</p>
-                        <span class="article-url"><a href="https://huggingface.co/blog/jeffboudier/shadow-ai" target="_blank">huggingface.co/blog/jeffboudier/shadow-ai</a></span>
-                    </div>
-                </section>
             </section>
-
-            <!-- TRENDY -->
             <section>
-                <h2>Dominujące Trendy</h2>
+                <h2>Dominujace Trendy</h2>
                 <div class="two-columns">
                     <div>
                         <h3 style="color: #ffa657;">HOT</h3>
@@ -387,53 +231,168 @@
                             <li>AI Agents</li>
                             <li>Open Source LLMs</li>
                             <li>LLM Evaluations</li>
-                            <li>DeepSeek / Qwen</li>
                         </ul>
                     </div>
                     <div>
                         <h3 style="color: #58a6ff;">WATCH</h3>
                         <ul>
                             <li>Shadow AI w enterprise</li>
-                            <li>Robotaxi</li>
-                            <li>CPU-only LLMs</li>
                             <li>Context Engineering</li>
                             <li>Agentic Coding</li>
                         </ul>
                     </div>
                 </div>
             </section>
-
-            <!-- PODSUMOWANIE -->
             <section>
-                <h2>Podsumowanie</h2>
-                <ol style="font-size: 0.85em;">
-                    <li><strong>Gemini 3</strong> to główny temat - Google wraca do gry</li>
-                    <li><strong>Open Source</strong> już rywalizuje z closed (DeepSeek, Qwen)</li>
-                    <li><strong>AI Agents</strong> to najgorętszy temat praktyczny</li>
-                    <li><strong>Ewaluacje LLM</strong> stają się kluczowe</li>
-                    <li><strong>Enterprise</strong> mierzy się z Shadow AI</li>
-                </ol>
-            </section>
-
-            <!-- KOŃCOWY -->
-            <section>
-                <h2>Dziękuję!</h2>
+                <h2>Dziekuje!</h2>
                 <p>Leszek Newsroom AI</p>
                 <p class="source">Wygenerowano: 20.12.2025</p>
-                <p class="source">14 blogów śledzonych</p>
             </section>
-
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
     <script>
-        Reveal.initialize({
-            hash: true,
-            slideNumber: true,
-            transition: 'slide',
-            backgroundTransition: 'fade'
+        // Redirect to slide #2 if no hash present
+        if (!window.location.hash) {
+            window.location.hash = '#/2';
+        }
+        Reveal.initialize({ hash: true, slideNumber: true, transition: 'slide', backgroundTransition: 'fade' });
+        const sidePanel = document.getElementById('sidePanel');
+        const panelOverlay = document.getElementById('panelOverlay');
+        const panelTitle = document.getElementById('panelTitle');
+        const panelContent = document.getElementById('panelContent');
+        const closePanel = document.getElementById('closePanel');
+        function openPanel(title, url) {
+            panelTitle.textContent = title;
+            panelContent.innerHTML = '<div class="loading">Ladowanie streszczenia</div>';
+            sidePanel.classList.add('open');
+            panelOverlay.classList.add('visible');
+            fetch('/api/summarize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, title }) })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) { panelContent.innerHTML = '<div class="error-message">Blad: ' + data.error + '</div>'; document.getElementById('panelTtsControls').style.display = 'none'; }
+                else {
+                    let html = data.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/^### (.*$)/gm, '<h3>$1</h3>').replace(/^## (.*$)/gm, '<h2>$1</h2>').replace(/^- (.*$)/gm, '<li>$1</li>').replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+                    panelContent.innerHTML = '<p>' + html + '</p>';
+                    document.getElementById('panelTtsControls').style.display = 'block';
+                    window.currentSummaryText = data.summary.replace(/[#*]/g, '').replace(/\n+/g, ' ');
+                }
+            })
+            .catch(err => { panelContent.innerHTML = '<div class="error-message">Blad: ' + err.message + '</div>'; });
+        }
+        function closePanelFn() { sidePanel.classList.remove('open'); panelOverlay.classList.remove('visible'); stopPanelAudio(); }
+        closePanel.addEventListener('click', closePanelFn);
+        panelOverlay.addEventListener('click', closePanelFn);
+        document.querySelectorAll('.btn-more').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); const card = btn.closest('.author-card'); openPanel(card.dataset.title, card.dataset.url); });
         });
+        // Save article functionality
+        let savedUrls = new Set();
+        async function loadSavedUrls() {
+            try {
+                const res = await fetch('/api/saved');
+                const data = await res.json();
+                if (data.saved) {
+                    data.saved.forEach(a => savedUrls.add(a.url));
+                    document.querySelectorAll('.btn-save').forEach(btn => {
+                        const card = btn.closest('.author-card');
+                        if (savedUrls.has(card.dataset.url)) {
+                            btn.textContent = 'Zapisano';
+                            btn.classList.add('saved');
+                        }
+                    });
+                }
+            } catch (e) { console.error('Error loading saved:', e); }
+        }
+        async function saveArticle(btn) {
+            const card = btn.closest('.author-card');
+            const url = card.dataset.url;
+            const title = card.dataset.title;
+            const descEl = card.querySelector('.article-desc');
+            const description = descEl ? descEl.textContent : '';
+            if (savedUrls.has(url)) return;
+            try {
+                await fetch('/api/saved', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, title, description })
+                });
+                savedUrls.add(url);
+                btn.textContent = 'Zapisano';
+                btn.classList.add('saved');
+            } catch (e) { console.error('Error saving:', e); }
+        }
+        document.querySelectorAll('.btn-save').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); saveArticle(btn); });
+        });
+        loadSavedUrls();
+        const ttsControls = document.getElementById('ttsControls');
+        const ttsPlay = document.getElementById('ttsPlay');
+        const ttsPause = document.getElementById('ttsPause');
+        const ttsStop = document.getElementById('ttsStop');
+        const ttsStatus = document.getElementById('ttsStatus');
+        const voiceSelect = document.getElementById('voiceSelect');
+        let currentAudio = null, isPlaying = false;
+        Reveal.on('slidechanged', event => {
+            if (event.currentSlide.hasAttribute('data-tts')) { ttsControls.classList.add('visible'); } else { ttsControls.classList.remove('visible'); stopAudio(); }
+        });
+        function getSlideText() {
+            const slide = Reveal.getCurrentSlide();
+            const texts = [];
+            const h3 = slide.querySelector('h3'); if (h3) texts.push(h3.textContent);
+            slide.querySelectorAll('.author-card').forEach(card => {
+                const t = card.querySelector('.article-title'), d = card.querySelector('.article-desc');
+                if (t) texts.push(t.textContent); if (d) texts.push(d.textContent);
+            });
+            return texts.join('. ');
+        }
+        async function playAudio() {
+            if (isPlaying) return;
+            const text = getSlideText(); if (!text) return;
+            ttsStatus.textContent = 'Generowanie...'; ttsPlay.disabled = true;
+            try {
+                const res = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, voice: voiceSelect.value }) });
+                if (!res.ok) throw new Error('TTS failed');
+                const blob = await res.blob();
+                currentAudio = new Audio(URL.createObjectURL(blob));
+                currentAudio.play(); isPlaying = true;
+                ttsStatus.textContent = 'Odtwarzanie...'; ttsPlay.disabled = true; ttsPause.disabled = false; ttsStop.disabled = false;
+                currentAudio.onended = () => stopAudio();
+            } catch (err) { ttsStatus.textContent = 'Blad'; ttsPlay.disabled = false; }
+        }
+        function pauseAudio() { if (currentAudio && isPlaying) { currentAudio.pause(); isPlaying = false; ttsStatus.textContent = 'Pauza'; ttsPlay.disabled = false; ttsPause.disabled = true; } }
+        function resumeAudio() { if (currentAudio && !isPlaying) { currentAudio.play(); isPlaying = true; ttsStatus.textContent = 'Odtwarzanie...'; ttsPlay.disabled = true; ttsPause.disabled = false; } }
+        function stopAudio() { if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; } isPlaying = false; ttsStatus.textContent = 'Gotowy'; ttsPlay.disabled = false; ttsPause.disabled = true; ttsStop.disabled = true; }
+        ttsPlay.addEventListener('click', () => { if (currentAudio && !isPlaying) resumeAudio(); else playAudio(); });
+        ttsPause.addEventListener('click', pauseAudio);
+        ttsStop.addEventListener('click', stopAudio);
+        // Panel TTS for summaries
+        const panelTtsPlay = document.getElementById('panelTtsPlay');
+        const panelTtsPause = document.getElementById('panelTtsPause');
+        const panelTtsStop = document.getElementById('panelTtsStop');
+        const panelTtsStatus = document.getElementById('panelTtsStatus');
+        const panelVoiceSelect = document.getElementById('panelVoiceSelect');
+        let panelAudio = null, panelIsPlaying = false;
+        async function playPanelAudio() {
+            if (panelIsPlaying || !window.currentSummaryText) return;
+            panelTtsStatus.textContent = 'Generowanie...'; panelTtsPlay.disabled = true;
+            try {
+                const res = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: window.currentSummaryText, voice: panelVoiceSelect.value }) });
+                if (!res.ok) throw new Error('TTS failed');
+                const blob = await res.blob();
+                panelAudio = new Audio(URL.createObjectURL(blob));
+                panelAudio.play(); panelIsPlaying = true;
+                panelTtsStatus.textContent = 'Odtwarzanie...'; panelTtsPlay.disabled = true; panelTtsPause.disabled = false; panelTtsStop.disabled = false;
+                panelAudio.onended = () => stopPanelAudio();
+            } catch (err) { panelTtsStatus.textContent = 'Blad'; panelTtsPlay.disabled = false; }
+        }
+        function pausePanelAudio() { if (panelAudio && panelIsPlaying) { panelAudio.pause(); panelIsPlaying = false; panelTtsStatus.textContent = 'Pauza'; panelTtsPlay.disabled = false; panelTtsPause.disabled = true; } }
+        function resumePanelAudio() { if (panelAudio && !panelIsPlaying) { panelAudio.play(); panelIsPlaying = true; panelTtsStatus.textContent = 'Odtwarzanie...'; panelTtsPlay.disabled = true; panelTtsPause.disabled = false; } }
+        function stopPanelAudio() { if (panelAudio) { panelAudio.pause(); panelAudio.currentTime = 0; panelAudio = null; } panelIsPlaying = false; panelTtsStatus.textContent = 'Gotowy'; panelTtsPlay.disabled = false; panelTtsPause.disabled = true; panelTtsStop.disabled = true; }
+        panelTtsPlay.addEventListener('click', () => { if (panelAudio && !panelIsPlaying) resumePanelAudio(); else playPanelAudio(); });
+        panelTtsPause.addEventListener('click', pausePanelAudio);
+        panelTtsStop.addEventListener('click', stopPanelAudio);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && sidePanel.classList.contains('open')) closePanelFn(); });
     </script>
 </body>
 </html>

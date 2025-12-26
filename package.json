@@ -1,0 +1,22 @@
+{
+  "name": "leszek-newsroom-ai",
+  "version": "1.0.0",
+  "description": "AI/ML Newsroom - daily digest presentation with AI summaries and TTS",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "@supabase/supabase-js": "^2.89.0",
+    "cheerio": "^1.1.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "node-edge-tts": "^1.2.8",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

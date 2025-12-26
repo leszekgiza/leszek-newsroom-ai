@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.js",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/tts/voices",
+      "dest": "/api/tts/voices.js"
+    },
+    {
+      "src": "/api/tts",
+      "dest": "/api/tts.js"
+    },
+    {
+      "src": "/api/summarize",
+      "dest": "/api/summarize.js"
+    },
+    {
+      "src": "/api/articles/seen",
+      "dest": "/api/articles/seen.js"
+    },
+    {
+      "src": "/api/articles",
+      "dest": "/api/articles/index.js"
+    },
+    {
+      "src": "/api/saved/(.*)",
+      "dest": "/api/saved/[url].js?url=$1"
+    },
+    {
+      "src": "/api/saved",
+      "dest": "/api/saved/index.js"
+    },
+    {
+      "src": "/api/fetch-log",
+      "dest": "/api/fetch-log.js"
+    },
+    {
+      "src": "/saved",
+      "dest": "/saved.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
