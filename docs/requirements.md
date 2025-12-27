@@ -1,0 +1,266 @@
+# Leszek Newsroom AI - Dokument Wymagań
+
+**Wersja:** 2.0
+**Data:** 2025-12-27
+**Status:** Draft do Figma Design
+
+---
+
+## 1. Wprowadzenie
+
+### 1.1 Cel Aplikacji
+Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śledzenie najnowszych artykułów, newsletterów i postów z social media w jednym miejscu.
+
+### 1.2 Główna Persona
+**Profesjonalista AI/ML** - osoba pracująca w branży technologicznej, która:
+- Codziennie śledzi nowości z AI/ML
+- Ma ograniczony czas na przeglądanie wielu źródeł
+- Potrzebuje szybkich streszczeń aby ocenić wartość artykułu
+- Korzysta z telefonu w drodze do pracy
+
+### 1.3 Scenariusze Użycia
+1. **Poranny przegląd** - 10 min przeglądania najnowszych artykułów przy kawie
+2. **Deep dive** - szczegółowe czytanie wybranych artykułów na desktopie
+3. **Mobile check** - szybkie sprawdzenie nowości w komunikacji/transporcie
+
+---
+
+## 2. Wymagania Funkcjonalne
+
+### F1: Agregacja Treści
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F1.1 | Pobieranie artykułów z RSS feeds | MUST |
+| F1.2 | Integracja z Gmail (newslettery) | SHOULD |
+| F1.3 | Integracja z LinkedIn (posty) | SHOULD |
+| F1.4 | Integracja z Twitter/X przez Nitter | COULD |
+| F1.5 | Automatyczne odświeżanie co X minut | MUST |
+| F1.6 | Deduplikacja artykułów (ten sam URL) | MUST |
+
+### F2: Czytanie i Konsumpcja
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F2.1 | **2-zdaniowe intro widoczne od razu** (generowane przez AI) | MUST |
+| F2.2 | Pełne AI streszczenie po kliknięciu "Więcej" | MUST |
+| F2.3 | Text-to-Speech dla streszczeń | SHOULD |
+| F2.4 | Otwieranie pełnego artykułu w nowej karcie | MUST |
+| F2.5 | Badge NEW dla nieprzeczytanych artykułów | MUST |
+| F2.6 | Automatyczne oznaczanie jako przeczytane | MUST |
+
+### F3: Organizacja
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F3.1 | Zapisywanie artykułów na później | MUST |
+| F3.2 | Usuwanie zapisanych artykułów | MUST |
+| F3.3 | Filtrowanie po źródle | MUST |
+| F3.4 | Wyszukiwanie w artykułach | SHOULD |
+| F3.5 | Tagowanie/kategoryzacja artykułów | COULD |
+
+### F4: Personalizacja
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F4.1 | Wybór głosu TTS (męski/żeński) | SHOULD |
+| F4.2 | **Dodawanie własnych źródeł RSS/stron** | MUST |
+| F4.3 | Zarządzanie listą źródeł (CRUD) | MUST |
+| F4.4 | Ukrywanie niechcianych źródeł | SHOULD |
+| F4.5 | Ustawienia per użytkownik | MUST |
+| F4.6 | **Konfiguracja stron do scrapowania** (w ustawieniach) | MUST |
+| F4.7 | **Przełączanie dark/light theme** | MUST |
+| F4.8 | **Przechowywanie login/hasło do stron** (encrypted) | SHOULD |
+
+### F5: Autentykacja
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F5.1 | Rejestracja nowego użytkownika | MUST |
+| F5.2 | Logowanie (email/hasło lub OAuth) | MUST |
+| F5.3 | Wylogowanie | MUST |
+| F5.4 | Resetowanie hasła | SHOULD |
+| F5.5 | Sesje per urządzenie | SHOULD |
+
+### F6: Integracje Zewnętrzne
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F6.1 | Gmail OAuth - pobieranie newsletterów | SHOULD |
+| F6.2 | LinkedIn - śledzenie hashtagów AI/ML | SHOULD |
+| F6.3 | Twitter/Nitter - śledzenie kont ekspertów | COULD |
+
+### F7: Zaawansowane Funkcje (z research'u)
+
+| ID | Wymaganie | Priorytet | Źródło |
+|----|-----------|-----------|--------|
+| F7.1 | Czytanie offline (cache artykułów) | COULD | [Zapier](https://zapier.com/blog/best-news-apps/) |
+| F7.2 | **AI Voice Chatbot** - rozmowa głosowa o artykule (STT+TTS) | COULD | Best practices |
+| F7.3 | Wskaźnik bias/wiarygodności źródła | COULD | Ground News pattern |
+| F7.4 | Powiadomienia o nowych artykułach z ulubionych źródeł | SHOULD | [Stfalcon](https://stfalcon.com/en/blog/post/10-best-news-apps) |
+| F7.5 | Zapisywanie artykułów do przeczytania później z przypomnieniem | COULD | Pocket pattern |
+| F7.6 | Statystyki czytania (ile przeczytano, z jakich źródeł) | COULD | Analytics |
+
+---
+
+## 3. Wymagania Niefunkcjonalne
+
+### NF1: Wydajność
+
+| ID | Wymaganie | Metryka |
+|----|-----------|---------|
+| NF1.1 | Czas ładowania strony głównej | < 2 sekundy |
+| NF1.2 | Czas generowania intro | < 5 sekund |
+| NF1.3 | Płynne przewijanie listy | 60 FPS |
+| NF1.4 | Obsługa 100+ artykułów na liście | Bez lagów |
+
+### NF2: Responsywność (Mobile-First)
+
+| ID | Wymaganie | Specyfikacja |
+|----|-----------|--------------|
+| NF2.1 | Breakpoint mobile | 320px - 767px |
+| NF2.2 | Breakpoint tablet | 768px - 1023px |
+| NF2.3 | Breakpoint desktop | 1024px+ |
+| NF2.4 | Touch-friendly buttons | Min 44x44px |
+| NF2.5 | Bottom navigation na mobile | Zamiast top |
+
+### NF3: Dostępność (A11y)
+
+| ID | Wymaganie |
+|----|-----------|
+| NF3.1 | Kontrast kolorów WCAG AA |
+| NF3.2 | Nawigacja klawiaturą |
+| NF3.3 | Screen reader compatible |
+| NF3.4 | Focus states widoczne |
+
+### NF4: Bezpieczeństwo
+
+| ID | Wymaganie |
+|----|-----------|
+| NF4.1 | HTTPS (SSL) |
+| NF4.2 | Hashowanie haseł (bcrypt) |
+| NF4.3 | Secure session tokens |
+| NF4.4 | CORS policy |
+| NF4.5 | Rate limiting API |
+| NF4.6 | **Szyfrowanie credentials stron zewnętrznych (AES-256)** |
+| NF4.7 | Credential storage w bezpiecznej lokalizacji (env vars) |
+
+---
+
+## 4. Architektura Danych
+
+### 4.1 Nowe Tabele
+
+```sql
+-- Użytkownicy
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    name TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Źródła użytkownika
+CREATE TABLE user_sources (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    url TEXT NOT NULL,
+    name TEXT,
+    type TEXT, -- rss, website, gmail, linkedin, twitter
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, url)
+);
+
+-- Rozszerzenie news_items
+ALTER TABLE news_items ADD COLUMN intro TEXT;
+ALTER TABLE news_items ADD COLUMN intro_generated_at TIMESTAMPTZ;
+```
+
+### 4.2 Modyfikacje Istniejących Tabel
+
+```sql
+-- saved: dodanie user_id
+ALTER TABLE saved ADD COLUMN user_id INTEGER REFERENCES users(id);
+
+-- articles: dodanie user_id
+ALTER TABLE articles ADD COLUMN user_id INTEGER REFERENCES users(id);
+
+-- settings: dodanie user_id
+ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
+```
+
+---
+
+## 5. Decyzje Techniczne
+
+### 5.1 UI Framework
+- **Decyzja:** Lista/karty (porzucenie Reveal.js)
+- **Uzasadnienie:** Lepszy UX na mobile, prostszy kod, scroll myszką działa
+
+### 5.2 Auto-Intro
+- **Decyzja:** Pełne AI Claude (~0.01$/artykuł)
+- **Implementacja:** Background job po dodaniu artykułu
+- **Cache:** Zapisywane w bazie, generowane raz
+
+### 5.3 Autentykacja
+- **Opcja 1:** Email/hasło (prostsze)
+- **Opcja 2:** OAuth (Google/GitHub)
+- **Do ustalenia:** Podczas designu
+
+---
+
+## 6. Priorytety MoSCoW
+
+### MUST (MVP)
+- Lista artykułów z kartami
+- 2-zdaniowe intro od razu
+- Pełne streszczenie po kliknięciu
+- Logowanie/rejestracja
+- Zapisywanie artykułów
+- Dodawanie własnych źródeł RSS
+
+### SHOULD
+- TTS dla streszczeń
+- Gmail integration
+- LinkedIn integration
+- Wyszukiwanie
+
+### COULD
+- Twitter/Nitter
+- Tagowanie artykułów
+- PWA (offline mode)
+- Widgety na pulpit (desktop/mobile)
+- Powiadomienia push o nowych artykułach
+- Udostępnianie kolekcji artykułów
+
+### WON'T (na razie)
+- Internacjonalizacja (i18n)
+- Export do PDF
+
+---
+
+## 7. Załączniki
+
+### 7.1 Obecne Źródła RSS (domyślne)
+1. Ethan Mollick - One Useful Thing
+2. Benedict Evans
+3. Stratechery
+4. Marginal Revolution
+5. Hugging Face Blog
+6. Simon Willison
+7. Hamel Husain
+8. Phil Schmid
+9. Eugene Yan
+10. Lilian Weng
+11. Interconnects
+12. Sebastian Raschka
+13. Chip Huyen
+14. The Batch (DeepLearning.AI)
+
+### 7.2 Infrastruktura
+- **Serwer:** Oracle Cloud Free Tier (Ubuntu 22.04)
+- **Baza:** PostgreSQL (lokalna)
+- **Backend:** Node.js + Express
+- **AI:** Claude API (Anthropic)
+- **TTS:** Edge TTS
