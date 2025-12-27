@@ -96,10 +96,9 @@ Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śled
 |----|-----------|-----------|--------|
 | F7.1 | Czytanie offline (cache artykułów) | COULD | [Zapier](https://zapier.com/blog/best-news-apps/) |
 | F7.2 | **AI Voice Chatbot** - rozmowa głosowa o artykule (STT+TTS) | COULD | Best practices |
-| F7.3 | Wskaźnik bias/wiarygodności źródła | COULD | Ground News pattern |
-| F7.4 | Powiadomienia o nowych artykułach z ulubionych źródeł | SHOULD | [Stfalcon](https://stfalcon.com/en/blog/post/10-best-news-apps) |
-| F7.5 | Zapisywanie artykułów do przeczytania później z przypomnieniem | COULD | Pocket pattern |
-| F7.6 | Statystyki czytania (ile przeczytano, z jakich źródeł) | COULD | Analytics |
+| F7.3 | Powiadomienia o nowych artykułach z ulubionych źródeł | SHOULD | [Stfalcon](https://stfalcon.com/en/blog/post/10-best-news-apps) |
+| F7.4 | Zapisywanie artykułów do przeczytania później z przypomnieniem | COULD | Pocket pattern |
+| F7.5 | Statystyki czytania (ile przeczytano, z jakich źródeł) | COULD | Analytics |
 
 ---
 
