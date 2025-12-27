@@ -21,6 +21,8 @@
         .tag-strategy { background: #8957e5; }
         .tag-llm { background: #1f6feb; }
         .tag-agents { background: #f85149; }
+        .badge-new { background: #f85149; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.6em; font-weight: bold; margin-left: 8px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .insight-box { background: rgba(88, 166, 255, 0.1); border-left: 4px solid #58a6ff; padding: 15px; margin: 20px 0; text-align: left; font-size: 0.8em; }
         .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
         .author-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin: 10px 0; text-align: left; }
@@ -287,6 +289,55 @@
         document.querySelectorAll('.btn-more').forEach(btn => {
             btn.addEventListener('click', (e) => { e.stopPropagation(); const card = btn.closest('.author-card'); openPanel(card.dataset.title, card.dataset.url); });
         });
+        // Track seen articles and show NEW badge
+        let seenUrls = new Set();
+        async function loadSeenArticles() {
+            try {
+                const res = await fetch('/api/articles');
+                const data = await res.json();
+                if (data.articles) {
+                    data.articles.forEach(a => { if (a.seen) seenUrls.add(a.url); });
+                    updateNewBadges();
+                }
+            } catch (e) { console.error('Error loading seen:', e); }
+        }
+        function updateNewBadges() {
+            document.querySelectorAll('.author-card').forEach(card => {
+                const url = card.dataset.url;
+                const existingBadge = card.querySelector('.badge-new');
+                if (!seenUrls.has(url) && !existingBadge) {
+                    const title = card.querySelector('.article-title');
+                    if (title) {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge-new';
+                        badge.textContent = 'NEW';
+                        title.parentNode.insertBefore(badge, title.nextSibling);
+                    }
+                } else if (seenUrls.has(url) && existingBadge) {
+                    existingBadge.remove();
+                }
+            });
+        }
+        async function markSlideAsSeen(slide) {
+            const cards = slide.querySelectorAll('.author-card[data-url]');
+            for (const card of cards) {
+                const url = card.dataset.url;
+                if (!seenUrls.has(url)) {
+                    try {
+                        await fetch('/api/articles/seen', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url })
+                        });
+                        seenUrls.add(url);
+                        const badge = card.querySelector('.badge-new');
+                        if (badge) badge.remove();
+                    } catch (e) { console.error('Error marking seen:', e); }
+                }
+            }
+        }
+        loadSeenArticles();
+
         // Save article functionality
         let savedUrls = new Set();
         async function loadSavedUrls() {
@@ -336,6 +387,8 @@
         let currentAudio = null, isPlaying = false;
         Reveal.on('slidechanged', event => {
             if (event.currentSlide.hasAttribute('data-tts')) { ttsControls.classList.add('visible'); } else { ttsControls.classList.remove('visible'); stopAudio(); }
+            // Auto-mark articles as seen after 2 seconds on slide
+            setTimeout(() => markSlideAsSeen(event.currentSlide), 2000);
         });
         function getSlideText() {
             const slide = Reveal.getCurrentSlide();
