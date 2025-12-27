@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wszystkie Newsy - Leszek Newsroom AI</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        h1 { color: #58a6ff; font-size: 1.8em; }
+        .header-controls { display: flex; gap: 10px; align-items: center; }
+        .filter-select {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        .filter-select:focus { outline: none; border-color: #58a6ff; }
+        .back-link {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .back-link:hover { background: #21262d; color: #58a6ff; }
+        .stats {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: #161b22;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b949e;
+        }
+        .empty-state h2 { margin-bottom: 10px; color: #58a6ff; }
+        .article-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+        .article-card:hover { border-color: #58a6ff; }
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+        .article-title-wrapper { flex: 1; }
+        .article-title {
+            color: #ffa657;
+            font-weight: bold;
+            font-size: 1em;
+            text-decoration: none;
+            display: block;
+        }
+        .article-title:hover { text-decoration: underline; }
+        .article-meta {
+            color: #8b949e;
+            font-size: 0.75em;
+            margin-top: 4px;
+        }
+        .article-source {
+            color: #7ee787;
+            font-weight: 500;
+        }
+        .article-category {
+            color: #a5d6ff;
+            background: rgba(165, 214, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            margin-left: 6px;
+        }
+        .badge-new {
+            background: #f85149;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.65em;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+            white-space: nowrap;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .article-desc {
+            color: #c9d1d9;
+            font-size: 0.85em;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .article-actions { display: flex; gap: 8px; }
+        .btn {
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #238636; color: white; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+        .btn-secondary:hover { background: #30363d; }
+        .btn-info { background: #1f6feb; color: white; }
+        .btn-info:hover { background: #388bfd; }
+        .loading { text-align: center; padding: 40px; color: #8b949e; }
+        .load-more {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .load-more .btn { padding: 10px 30px; }
+
+        /* Summary modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .modal-title { color: #ffa657; font-size: 1.2em; }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #8b949e;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #f85149; }
+        .modal-content {
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+        .modal-content h2, .modal-content h3 { color: #58a6ff; margin: 16px 0 8px; }
+        .modal-content p { margin-bottom: 12px; }
+        .modal-content ul, .modal-content ol { margin-left: 20px; margin-bottom: 12px; }
+        .modal-content li { margin-bottom: 6px; }
+        .modal-content strong { color: #ffa657; }
+        .summary-loading { text-align: center; padding: 40px; color: #8b949e; }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; align-items: flex-start; }
+            .header-controls { width: 100%; justify-content: space-between; }
+            .article-header { flex-direction: column; }
+            .article-actions { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Wszystkie Newsy</h1>
+            <div class="header-controls">
+                <select id="sourceFilter" class="filter-select">
+                    <option value="">Wszystkie zrodla</option>
+                </select>
+                <a href="/" class="back-link">Powrot</a>
+            </div>
+        </header>
+        <div class="stats" id="stats"></div>
+        <main id="content">
+            <div class="loading">Ladowanie...</div>
+        </main>
+        <div class="load-more" id="loadMore" style="display: none;">
+            <button class="btn btn-secondary" onclick="loadMore()">Zaladuj wiecej</button>
+        </div>
+    </div>
+
+    <!-- Summary Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Streszczenie</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content" id="modalContent">
+                <div class="summary-loading">Generowanie streszczenia...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const content = document.getElementById('content');
+        const stats = document.getElementById('stats');
+        const sourceFilter = document.getElementById('sourceFilter');
+        const loadMoreBtn = document.getElementById('loadMore');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+
+        let currentOffset = 0;
+        const LIMIT = 30;
+        let allNews = [];
+        let seenUrls = new Set();
+
+        // Load seen articles
+        async function loadSeenArticles() {
+            try {
+                const res = await fetch('/api/articles');
+                const data = await res.json();
+                if (data.articles) {
+                    data.articles.forEach(a => {
+                        if (a.seen) seenUrls.add(a.url);
+                    });
+                }
+            } catch (err) {
+                console.error('Error loading seen:', err);
+            }
+        }
+
+        // Load sources for filter
+        async function loadSources() {
+            try {
+                const res = await fetch('/api/news/sources');
+                const data = await res.json();
+                if (data.sources) {
+                    data.sources.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.source;
+                        opt.textContent = `${s.source} (${s.category})`;
+                        sourceFilter.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error('Error loading sources:', err);
+            }
+        }
+
+        // Load news
+        async function loadNews(reset = false) {
+            if (reset) {
+                currentOffset = 0;
+                allNews = [];
+            }
+
+            const source = sourceFilter.value;
+            let url = `/api/news?limit=${LIMIT}&offset=${currentOffset}`;
+            if (source) url += `&source=${encodeURIComponent(source)}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.news || data.news.length === 0) {
+                    if (reset) {
+                        content.innerHTML = `
+                            <div class="empty-state">
+                                <h2>Brak artykulow</h2>
+                                <p>Kliknij "Odswiez" na stronie glownej, aby pobrac newsy.</p>
+                            </div>
+                        `;
+                        stats.style.display = 'none';
+                    }
+                    loadMoreBtn.style.display = 'none';
+                    return;
+                }
+
+                allNews = reset ? data.news : [...allNews, ...data.news];
+                currentOffset += data.news.length;
+
+                renderNews();
+                updateStats();
+
+                loadMoreBtn.style.display = data.news.length >= LIMIT ? 'block' : 'none';
+
+            } catch (err) {
+                content.innerHTML = `<div class="empty-state"><h2>Blad ladowania</h2><p>${err.message}</p></div>`;
+            }
+        }
+
+        function renderNews() {
+            content.innerHTML = allNews.map(article => {
+                const isNew = !seenUrls.has(article.url) && !article.seen;
+                const pubDate = new Date(article.pub_date).toLocaleDateString('pl-PL', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                return `
+                    <div class="article-card" data-url="${encodeURIComponent(article.url)}">
+                        <div class="article-header">
+                            <div class="article-title-wrapper">
+                                <a href="${article.url}" target="_blank" class="article-title">${article.title}</a>
+                                <div class="article-meta">
+                                    <span class="article-source">${article.source}</span>
+                                    <span class="article-category">${article.category}</span>
+                                    <span> &bull; ${pubDate}</span>
+                                </div>
+                            </div>
+                            ${isNew ? '<span class="badge-new">NEW</span>' : ''}
+                        </div>
+                        ${article.description ? `<p class="article-desc">${article.description}</p>` : ''}
+                        <div class="article-actions">
+                            <button class="btn btn-info" onclick="showSummary('${encodeURIComponent(article.url)}', '${encodeURIComponent(article.title)}')">Wiecej</button>
+                            <button class="btn btn-primary" onclick="saveArticle('${encodeURIComponent(article.url)}', '${encodeURIComponent(article.title)}', '${encodeURIComponent(article.description || '')}')">Zapisz</button>
+                            <a href="${article.url}" target="_blank" class="btn btn-secondary">Otworz</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const newCount = allNews.filter(a => !seenUrls.has(a.url) && !a.seen).length;
+            stats.innerHTML = `
+                <span>Wyswietlono: <strong>${allNews.length}</strong> artykulow</span>
+                <span>Nowych: <strong>${newCount}</strong></span>
+            `;
+            stats.style.display = 'flex';
+        }
+
+        function loadMore() {
+            loadNews(false);
+        }
+
+        // Filter change
+        sourceFilter.addEventListener('change', () => {
+            loadNews(true);
+        });
+
+        // Show summary modal
+        async function showSummary(encodedUrl, encodedTitle) {
+            const url = decodeURIComponent(encodedUrl);
+            const title = decodeURIComponent(encodedTitle);
+
+            modalTitle.textContent = title;
+            modalContent.innerHTML = '<div class="summary-loading">Generowanie streszczenia AI...</div>';
+            modalOverlay.classList.add('visible');
+
+            // Mark as seen
+            fetch('/api/articles/seen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            }).then(() => {
+                seenUrls.add(url);
+                const card = document.querySelector(`[data-url="${encodedUrl}"]`);
+                if (card) {
+                    const badge = card.querySelector('.badge-new');
+                    if (badge) badge.remove();
+                }
+                updateStats();
+            });
+
+            try {
+                const res = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, title })
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    modalContent.innerHTML = `<p style="color: #f85149;">Blad: ${data.error}</p>`;
+                } else {
+                    modalContent.innerHTML = marked.parse(data.summary);
+                }
+            } catch (err) {
+                modalContent.innerHTML = `<p style="color: #f85149;">Blad: ${err.message}</p>`;
+            }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target === modalOverlay) {
+                modalOverlay.classList.remove('visible');
+            }
+        }
+
+        // Save article
+        async function saveArticle(encodedUrl, encodedTitle, encodedDesc) {
+            const url = decodeURIComponent(encodedUrl);
+            const title = decodeURIComponent(encodedTitle);
+            const description = decodeURIComponent(encodedDesc);
+
+            try {
+                await fetch('/api/saved', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, title, description })
+                });
+                alert('Artykul zapisany!');
+            } catch (err) {
+                alert('Blad zapisu: ' + err.message);
+            }
+        }
+
+        // Escape key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Init
+        Promise.all([loadSeenArticles(), loadSources()]).then(() => {
+            loadNews(true);
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>

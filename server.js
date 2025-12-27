@@ -219,6 +219,11 @@ app.get('/saved', (req, res) => {
     res.sendFile(path.join(__dirname, 'saved.html'));
 });
 
+// Serve news page
+app.get('/news', (req, res) => {
+    res.sendFile(path.join(__dirname, 'news.html'));
+});
+
 // Serve settings page
 app.get('/settings', (req, res) => {
     res.sendFile(path.join(__dirname, 'settings.html'));
@@ -312,20 +317,49 @@ app.post('/api/news/refresh', async (req, res) => {
     }
 });
 
-// API: Get news items
+// API: Get news items (with filtering)
 app.get('/api/news', async (req, res) => {
     try {
-        const { rows } = await pool.query(`
+        const { source, limit = 100, offset = 0 } = req.query;
+        let query = `
             SELECT n.*, a.seen
             FROM news_items n
             LEFT JOIN articles a ON n.url = a.url
             WHERE n.pub_date > NOW() - INTERVAL '14 days'
-            ORDER BY n.pub_date DESC
-            LIMIT 100
-        `);
+        `;
+        const params = [];
+
+        if (source) {
+            params.push(source);
+            query += ` AND n.source = $${params.length}`;
+        }
+
+        query += ` ORDER BY n.pub_date DESC`;
+        params.push(parseInt(limit));
+        query += ` LIMIT $${params.length}`;
+        params.push(parseInt(offset));
+        query += ` OFFSET $${params.length}`;
+
+        const { rows } = await pool.query(query, params);
         res.json({ news: rows });
     } catch (error) {
         console.error('Get news error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API: Get unique sources
+app.get('/api/news/sources', async (req, res) => {
+    try {
+        const { rows } = await pool.query(`
+            SELECT DISTINCT source, category
+            FROM news_items
+            WHERE pub_date > NOW() - INTERVAL '14 days'
+            ORDER BY source
+        `);
+        res.json({ sources: rows });
+    } catch (error) {
+        console.error('Get sources error:', error);
         res.status(500).json({ error: error.message });
     }
 });
