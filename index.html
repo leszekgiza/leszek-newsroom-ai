@@ -67,8 +67,9 @@
     </style>
 </head>
 <body>
-    <a href="/saved" class="nav-link" style="right: 120px;">Zapisane</a>
-    <a href="/settings" class="nav-link">Ustawienia</a>
+    <a href="/saved" class="nav-link" style="right: 220px;">Zapisane</a>
+    <a href="/settings" class="nav-link" style="right: 110px;">Ustawienia</a>
+    <button class="nav-link" id="refreshBtn" style="cursor: pointer; border: none;">Odswiez</button>
     <div class="panel-overlay" id="panelOverlay"></div>
     <div class="side-panel" id="sidePanel">
         <div class="side-panel-header">
@@ -448,6 +449,132 @@
         panelTtsPause.addEventListener('click', pausePanelAudio);
         panelTtsStop.addEventListener('click', stopPanelAudio);
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && sidePanel.classList.contains('open')) closePanelFn(); });
+
+        // Refresh news functionality
+        const refreshBtn = document.getElementById('refreshBtn');
+        let isRefreshing = false;
+
+        async function refreshNews() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            refreshBtn.textContent = 'Ladowanie...';
+            refreshBtn.style.background = '#9e6a03';
+
+            try {
+                const res = await fetch('/api/news/refresh', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    refreshBtn.textContent = 'Gotowe!';
+                    refreshBtn.style.background = '#238636';
+
+                    // Load and display news
+                    await loadDynamicNews();
+
+                    setTimeout(() => {
+                        refreshBtn.textContent = 'Odswiez';
+                        refreshBtn.style.background = '';
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (err) {
+                refreshBtn.textContent = 'Blad!';
+                refreshBtn.style.background = '#f85149';
+                console.error('Refresh error:', err);
+                setTimeout(() => {
+                    refreshBtn.textContent = 'Odswiez';
+                    refreshBtn.style.background = '';
+                }, 3000);
+            }
+
+            isRefreshing = false;
+        }
+
+        async function loadDynamicNews() {
+            try {
+                const res = await fetch('/api/news/grouped');
+                const data = await res.json();
+                if (!data.sources || data.sources.length === 0) return;
+
+                // Find or create dynamic slides container
+                let dynamicSection = document.getElementById('dynamicNewsSection');
+                if (!dynamicSection) {
+                    // Find the section after "A) Najnowsze Artykuly"
+                    const slidesContainer = document.querySelector('.slides');
+                    const sections = slidesContainer.querySelectorAll(':scope > section');
+
+                    // Create new section for dynamic news
+                    dynamicSection = document.createElement('section');
+                    dynamicSection.id = 'dynamicNewsSection';
+
+                    // Insert after 3rd section (after Agenda)
+                    if (sections.length > 2) {
+                        sections[2].after(dynamicSection);
+                    } else {
+                        slidesContainer.appendChild(dynamicSection);
+                    }
+                }
+
+                // Generate slides HTML
+                let slidesHTML = `<section><h2>Najnowsze Artykuly</h2><p>Zaktualizowano: ${new Date().toLocaleString('pl-PL')}</p></section>`;
+
+                data.sources.forEach(source => {
+                    if (source.articles.length === 0) return;
+
+                    let articlesHTML = source.articles.map(a => {
+                        const isNew = !a.seen;
+                        const shortUrl = new URL(a.url).hostname + new URL(a.url).pathname.substring(0, 30) + '...';
+                        const dateStr = new Date(a.pub_date).toLocaleDateString('pl-PL');
+                        return `
+                            <div class="author-card" data-url="${a.url}" data-title="${a.title.replace(/"/g, '&quot;')}">
+                                <span class="article-title">${a.title}</span>
+                                ${isNew ? '<span class="badge-new">NEW</span>' : ''}
+                                <span class="tag">${source.category}</span>
+                                <button class="btn-more">Wiecej</button>
+                                <button class="btn-save">Zapisz</button>
+                                <span class="article-url"><a href="${a.url}" target="_blank">${shortUrl}</a></span>
+                                <p class="article-desc">${dateStr} - ${a.description || ''}</p>
+                            </div>
+                        `;
+                    }).join('');
+
+                    slidesHTML += `<section data-tts="true"><h3>${source.source}</h3>${articlesHTML}</section>`;
+                });
+
+                dynamicSection.innerHTML = slidesHTML;
+
+                // Reinitialize event handlers for new elements
+                dynamicSection.querySelectorAll('.btn-more').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const card = btn.closest('.author-card');
+                        openPanel(card.dataset.title, card.dataset.url);
+                    });
+                });
+
+                dynamicSection.querySelectorAll('.btn-save').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        saveArticle(btn);
+                    });
+                });
+
+                // Sync Reveal.js
+                Reveal.sync();
+                Reveal.slide(3, 0); // Go to dynamic news section
+
+            } catch (err) {
+                console.error('Load news error:', err);
+            }
+        }
+
+        refreshBtn.addEventListener('click', refreshNews);
+
+        // Auto-load news on page load if available
+        fetch('/api/news/grouped').then(r => r.json()).then(data => {
+            if (data.sources && data.sources.length > 0) loadDynamicNews();
+        }).catch(() => {});
     </script>
 </body>
 </html>

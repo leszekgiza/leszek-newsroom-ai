@@ -7,6 +7,12 @@ const { EdgeTTS } = require('node-edge-tts');
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 const { Pool } = require('pg');
+const Parser = require('rss-parser');
+
+const rssParser = new Parser({
+    timeout: 10000,
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; NewsroomBot/1.0)' }
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -239,6 +245,116 @@ app.get('/api/settings/:key', async (req, res) => {
         res.json({ value: rows[0].value });
     } catch (error) {
         console.error('Get setting error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// RSS Feed sources
+const RSS_FEEDS = [
+    { name: 'Ethan Mollick', url: 'https://www.oneusefulthing.org/feed', category: 'AI Strategy' },
+    { name: 'Benedict Evans', url: 'https://www.ben-evans.com/benedictevans?format=rss', category: 'Tech Strategy' },
+    { name: 'Stratechery', url: 'https://stratechery.com/feed/', category: 'Strategy' },
+    { name: 'Marginal Revolution', url: 'https://marginalrevolution.com/feed', category: 'Economics' },
+    { name: 'Hugging Face', url: 'https://huggingface.co/blog/feed.xml', category: 'ML' },
+    { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/', category: 'AI Dev' },
+    { name: 'Hamel Husain', url: 'https://hamel.dev/feed.xml', category: 'ML Engineering' },
+    { name: 'Phil Schmid', url: 'https://www.philschmid.de/rss.xml', category: 'ML Engineering' },
+    { name: 'Eugene Yan', url: 'https://eugeneyan.com/rss/', category: 'ML Systems' },
+    { name: 'Lilian Weng', url: 'https://lilianweng.github.io/index.xml', category: 'AI Research' },
+    { name: 'Interconnects', url: 'https://www.interconnects.ai/feed', category: 'AI News' },
+    { name: 'Sebastian Raschka', url: 'https://magazine.sebastianraschka.com/feed', category: 'ML Research' },
+    { name: 'Chip Huyen', url: 'https://huyenchip.com/feed.xml', category: 'MLOps' },
+    { name: 'The Batch', url: 'https://www.deeplearning.ai/the-batch/feed/', category: 'AI News' },
+];
+
+// API: Fetch news from RSS feeds
+app.post('/api/news/refresh', async (req, res) => {
+    try {
+        const results = [];
+        const errors = [];
+
+        for (const feed of RSS_FEEDS) {
+            try {
+                console.log(`Fetching: ${feed.name}`);
+                const parsed = await rssParser.parseURL(feed.url);
+
+                // Get last 5 articles from each feed
+                const articles = (parsed.items || []).slice(0, 5).map(item => ({
+                    source: feed.name,
+                    category: feed.category,
+                    title: item.title || 'Untitled',
+                    url: item.link || item.guid,
+                    description: (item.contentSnippet || item.content || '').substring(0, 200),
+                    pubDate: item.pubDate || item.isoDate || new Date().toISOString()
+                }));
+
+                // Save to database
+                for (const article of articles) {
+                    await pool.query(
+                        `INSERT INTO news_items (source, category, title, url, description, pub_date, fetched_at)
+                         VALUES ($1, $2, $3, $4, $5, $6, NOW())
+                         ON CONFLICT (url) DO UPDATE SET fetched_at = NOW()`,
+                        [article.source, article.category, article.title, article.url, article.description, article.pubDate]
+                    );
+                }
+
+                results.push({ source: feed.name, count: articles.length });
+            } catch (feedError) {
+                console.error(`Error fetching ${feed.name}:`, feedError.message);
+                errors.push({ source: feed.name, error: feedError.message });
+            }
+        }
+
+        res.json({ success: true, results, errors });
+    } catch (error) {
+        console.error('Refresh news error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API: Get news items
+app.get('/api/news', async (req, res) => {
+    try {
+        const { rows } = await pool.query(`
+            SELECT n.*, a.seen
+            FROM news_items n
+            LEFT JOIN articles a ON n.url = a.url
+            WHERE n.pub_date > NOW() - INTERVAL '14 days'
+            ORDER BY n.pub_date DESC
+            LIMIT 100
+        `);
+        res.json({ news: rows });
+    } catch (error) {
+        console.error('Get news error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API: Get news grouped by source
+app.get('/api/news/grouped', async (req, res) => {
+    try {
+        const { rows } = await pool.query(`
+            SELECT n.*, a.seen
+            FROM news_items n
+            LEFT JOIN articles a ON n.url = a.url
+            WHERE n.pub_date > NOW() - INTERVAL '14 days'
+            ORDER BY n.source, n.pub_date DESC
+        `);
+
+        // Group by source
+        const grouped = {};
+        rows.forEach(item => {
+            if (!grouped[item.source]) {
+                grouped[item.source] = { source: item.source, category: item.category, articles: [] };
+            }
+            if (grouped[item.source].articles.length < 3) {
+                grouped[item.source].articles.push(item);
+            }
+        });
+
+        res.json({ sources: Object.values(grouped) });
+    } catch (error) {
+        console.error('Get grouped news error:', error);
         res.status(500).json({ error: error.message });
     }
 });

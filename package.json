@@ -14,7 +14,8 @@
     "express": "^4.21.0",
     "node-edge-tts": "^1.2.8",
     "node-fetch": "^2.7.0",
-    "pg": "^8.11.0"
+    "pg": "^8.11.0",
+    "rss-parser": "^3.13.0"
   },
   "engines": {
     "node": ">=18.0.0"
