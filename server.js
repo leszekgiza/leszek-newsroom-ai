@@ -6,16 +6,19 @@ const Anthropic = require('@anthropic-ai/sdk');
 const { EdgeTTS } = require('node-edge-tts');
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
-const { createClient } = require('@supabase/supabase-js');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Supabase client
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY
-);
+// PostgreSQL client
+const pool = new Pool({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT || 5432,
+});
 
 // Data directory for TTS temp files
 const DATA_DIR = path.join(__dirname, 'data');
@@ -36,34 +39,16 @@ const anthropic = new Anthropic({
 async function fetchArticleContent(url) {
     const response = await fetch(url, {
         headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9,pl;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html,application/xhtml+xml',
         }
     });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch URL: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Failed to fetch URL: ${response.status}`);
     const html = await response.text();
     const $ = cheerio.load(html);
-
-    // Remove scripts, styles, nav, footer, ads
-    $('script, style, nav, footer, header, aside, .ads, .advertisement, .sidebar, .comments').remove();
-
-    // Try to find main article content
+    $('script, style, nav, footer, header, aside, .ads, .sidebar, .comments').remove();
     let content = '';
-    const selectors = ['article', 'main', '.post-content', '.entry-content', '.article-content', '.content', '[role="main"]'];
-
+    const selectors = ['article', 'main', '.post-content', '.entry-content', '.content'];
     for (const selector of selectors) {
         const el = $(selector);
         if (el.length && el.text().trim().length > 500) {
@@ -71,127 +56,69 @@ async function fetchArticleContent(url) {
             break;
         }
     }
-
-    // Fallback to body if no article found
-    if (!content) {
-        content = $('body').text().trim();
-    }
-
-    // Clean up whitespace
-    content = content.replace(/\s+/g, ' ').substring(0, 15000); // Limit to ~15k chars
-
-    return content;
+    if (!content) content = $('body').text().trim();
+    return content.replace(/\s+/g, ' ').substring(0, 15000);
 }
 
-// API: Generate article summary using Claude
+// API: Generate article summary
 app.post('/api/summarize', async (req, res) => {
     try {
         const { url, title } = req.body;
+        if (!url) return res.status(400).json({ error: 'URL is required' });
+        if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
 
-        if (!url) {
-            return res.status(400).json({ error: 'URL is required' });
-        }
-
-        if (!process.env.ANTHROPIC_API_KEY) {
-            return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
-        }
-
-        // First, fetch the article content
         console.log(`Fetching article from: ${url}`);
         const articleContent = await fetchArticleContent(url);
-        console.log(`Fetched ${articleContent.length} characters`);
 
         const message = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 1024,
-            messages: [
-                {
-                    role: 'user',
-                    content: `Przeanalizuj ponizszy artykul:
-
-Tytul: ${title || 'Nieznany'}
-URL: ${url}
-
-Tresc artykulu:
-${articleContent}
-
----
-
-Prosze o:
-1. **Streszczenie** (3-5 zdan) - kluczowe informacje z artykulu
-2. **Kluczowe insighty** (3-5 punktow) - najwazniejsze wnioski i obserwacje
-3. **Implikacje** (2-3 punkty) - co to oznacza dla branzy/czytelnika
-
-Odpowiedz po polsku w formacie markdown.`
-                }
-            ]
+            messages: [{
+                role: 'user',
+                content: `Przeanalizuj artykul:\nTytul: ${title || 'Nieznany'}\nURL: ${url}\n\nTresc:\n${articleContent}\n\n---\nProsze o:\n1. **Streszczenie** (3-5 zdan)\n2. **Kluczowe insighty** (3-5 punktow)\n3. **Implikacje** (2-3 punkty)\n\nOdpowiedz po polsku w markdown.`
+            }]
         });
-
-        const summary = message.content[0].text;
-        res.json({ summary });
+        res.json({ summary: message.content[0].text });
     } catch (error) {
         console.error('Summarize error:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// API: Text-to-Speech using Edge TTS
+// API: Text-to-Speech
 app.post('/api/tts', async (req, res) => {
     try {
         const { text, voice = 'pl-PL-ZofiaNeural' } = req.body;
+        if (!text) return res.status(400).json({ error: 'Text is required' });
 
-        if (!text) {
-            return res.status(400).json({ error: 'Text is required' });
-        }
-
-        // Create temp file path
         const tempFile = path.join(DATA_DIR, `tts_${Date.now()}.mp3`);
-
-        const tts = new EdgeTTS({
-            voice: voice,
-            lang: 'pl-PL',
-            outputFormat: 'audio-24khz-48kbitrate-mono-mp3'
-        });
-
+        const tts = new EdgeTTS({ voice, lang: 'pl-PL', outputFormat: 'audio-24khz-48kbitrate-mono-mp3' });
         await tts.ttsPromise(text, tempFile);
 
-        // Read the file and send it
         const audioBuffer = fs.readFileSync(tempFile);
-
-        // Clean up temp file
         fs.unlinkSync(tempFile);
 
-        res.set({
-            'Content-Type': 'audio/mpeg',
-            'Content-Length': audioBuffer.length
-        });
+        res.set({ 'Content-Type': 'audio/mpeg', 'Content-Length': audioBuffer.length });
         res.send(audioBuffer);
-
     } catch (error) {
         console.error('TTS error:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// API: List available TTS voices
-app.get('/api/tts/voices', async (req, res) => {
-    const polishVoices = [
+// API: List TTS voices
+app.get('/api/tts/voices', (req, res) => {
+    res.json({ voices: [
         { id: 'pl-PL-ZofiaNeural', name: 'Zofia (kobieta)', gender: 'Female' },
         { id: 'pl-PL-MarekNeural', name: 'Marek (mezczyzna)', gender: 'Male' }
-    ];
-    res.json({ voices: polishVoices });
+    ]});
 });
 
-// API: Get all articles (with seen/new status)
+// API: Get all articles
 app.get('/api/articles', async (req, res) => {
     try {
-        const { data, error } = await supabase
-            .from('articles')
-            .select('*')
-            .order('seen_at', { ascending: false });
-
-        if (error) throw error;
-        res.json({ articles: data || [] });
+        const { rows } = await pool.query('SELECT * FROM articles ORDER BY seen_at DESC NULLS LAST');
+        res.json({ articles: rows });
     } catch (error) {
         console.error('Get articles error:', error);
         res.status(500).json({ error: error.message });
@@ -202,19 +129,12 @@ app.get('/api/articles', async (req, res) => {
 app.post('/api/articles/seen', async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'URL required' });
-
     try {
-        const { error } = await supabase
-            .from('articles')
-            .upsert({
-                url,
-                seen: true,
-                seen_at: new Date().toISOString()
-            }, {
-                onConflict: 'url'
-            });
-
-        if (error) throw error;
+        await pool.query(
+            `INSERT INTO articles (url, seen, seen_at) VALUES ($1, true, NOW())
+             ON CONFLICT (url) DO UPDATE SET seen = true, seen_at = NOW()`,
+            [url]
+        );
         res.json({ success: true });
     } catch (error) {
         console.error('Mark seen error:', error);
@@ -222,25 +142,16 @@ app.post('/api/articles/seen', async (req, res) => {
     }
 });
 
-// API: Save article for later
+// API: Save article
 app.post('/api/saved', async (req, res) => {
     const { url, title, description } = req.body;
     if (!url) return res.status(400).json({ error: 'URL required' });
-
     try {
-        const { error } = await supabase
-            .from('saved')
-            .upsert({
-                url,
-                title: title || '',
-                description: description || '',
-                saved_at: new Date().toISOString()
-            }, {
-                onConflict: 'url',
-                ignoreDuplicates: true
-            });
-
-        if (error) throw error;
+        await pool.query(
+            `INSERT INTO saved (url, title, description, saved_at) VALUES ($1, $2, $3, NOW())
+             ON CONFLICT (url) DO NOTHING`,
+            [url, title || '', description || '']
+        );
         res.json({ success: true });
     } catch (error) {
         console.error('Save article error:', error);
@@ -251,13 +162,8 @@ app.post('/api/saved', async (req, res) => {
 // API: Get saved articles
 app.get('/api/saved', async (req, res) => {
     try {
-        const { data, error } = await supabase
-            .from('saved')
-            .select('*')
-            .order('saved_at', { ascending: false });
-
-        if (error) throw error;
-        res.json({ saved: data || [] });
+        const { rows } = await pool.query('SELECT * FROM saved ORDER BY saved_at DESC');
+        res.json({ saved: rows });
     } catch (error) {
         console.error('Get saved error:', error);
         res.status(500).json({ error: error.message });
@@ -267,14 +173,8 @@ app.get('/api/saved', async (req, res) => {
 // API: Remove saved article
 app.delete('/api/saved/:encodedUrl', async (req, res) => {
     const url = decodeURIComponent(req.params.encodedUrl);
-
     try {
-        const { error } = await supabase
-            .from('saved')
-            .delete()
-            .eq('url', url);
-
-        if (error) throw error;
+        await pool.query('DELETE FROM saved WHERE url = $1', [url]);
         res.json({ success: true });
     } catch (error) {
         console.error('Delete saved error:', error);
@@ -285,17 +185,11 @@ app.delete('/api/saved/:encodedUrl', async (req, res) => {
 // API: Log fetch event
 app.post('/api/fetch-log', async (req, res) => {
     const { source, articlesCount } = req.body;
-
     try {
-        const { error } = await supabase
-            .from('fetch_log')
-            .insert({
-                source: source || 'unknown',
-                articles_count: articlesCount || 0,
-                fetched_at: new Date().toISOString()
-            });
-
-        if (error) throw error;
+        await pool.query(
+            'INSERT INTO fetch_log (source, articles_count, fetched_at) VALUES ($1, $2, NOW())',
+            [source || 'unknown', articlesCount || 0]
+        );
         res.json({ success: true });
     } catch (error) {
         console.error('Log fetch error:', error);
@@ -306,20 +200,15 @@ app.post('/api/fetch-log', async (req, res) => {
 // API: Get fetch log
 app.get('/api/fetch-log', async (req, res) => {
     try {
-        const { data, error } = await supabase
-            .from('fetch_log')
-            .select('*')
-            .order('fetched_at', { ascending: false });
-
-        if (error) throw error;
-        res.json({ log: data || [] });
+        const { rows } = await pool.query('SELECT * FROM fetch_log ORDER BY fetched_at DESC');
+        res.json({ log: rows });
     } catch (error) {
         console.error('Get fetch log error:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// Serve saved articles page
+// Serve saved page
 app.get('/saved', (req, res) => {
     res.sendFile(path.join(__dirname, 'saved.html'));
 });
@@ -327,15 +216,4 @@ app.get('/saved', (req, res) => {
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
-    console.log(`API endpoints:`);
-    console.log(`  POST /api/summarize - Generate article summary`);
-    console.log(`  POST /api/tts - Text-to-Speech`);
-    console.log(`  GET  /api/tts/voices - List available voices`);
-    console.log(`  GET  /api/articles - Get all articles with status`);
-    console.log(`  POST /api/articles/seen - Mark article as seen`);
-    console.log(`  GET  /api/saved - Get saved articles`);
-    console.log(`  POST /api/saved - Save article for later`);
-    console.log(`  DELETE /api/saved/:url - Remove saved article`);
-    console.log(`  GET  /api/fetch-log - Get fetch history`);
-    console.log(`  POST /api/fetch-log - Log fetch event`);
 });
