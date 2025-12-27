@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ustawienia - Leszek Newsroom AI</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        h1 { color: #58a6ff; font-size: 1.8em; }
+        .back-link {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .back-link:hover { background: #21262d; color: #58a6ff; }
+        .section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .section h2 { color: #58a6ff; font-size: 1.2em; margin: 0; }
+        .section-desc { color: #8b949e; font-size: 0.85em; margin-top: 4px; }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+        .status-connected { background: #238636; color: white; }
+        .status-disconnected { background: #30363d; color: #8b949e; }
+        .status-pending { background: #9e6a03; color: white; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            color: #c9d1d9;
+            font-size: 0.9em;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #c9d1d9;
+            font-size: 0.9em;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; font-family: monospace; }
+        .form-group small { color: #8b949e; font-size: 0.75em; display: block; margin-top: 4px; }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #238636; color: white; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+        .btn-secondary:hover { background: #30363d; }
+        .btn-danger { background: transparent; color: #f85149; border: 1px solid #f85149; }
+        .btn-danger:hover { background: #f85149; color: white; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .integration-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #21262d;
+        }
+        .integration-row:last-child { border-bottom: none; }
+        .integration-info { flex: 1; }
+        .integration-name { color: #c9d1d9; font-weight: 500; }
+        .integration-status { color: #8b949e; font-size: 0.8em; }
+        .tag-input-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            background: #21262d;
+            border: 1px solid #30363d;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.85em;
+        }
+        .tag-remove {
+            margin-left: 6px;
+            cursor: pointer;
+            color: #8b949e;
+        }
+        .tag-remove:hover { color: #f85149; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #238636;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            display: none;
+            z-index: 1000;
+        }
+        .toast.error { background: #f85149; }
+        .toast.visible { display: block; }
+        .loading { text-align: center; padding: 40px; color: #8b949e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Ustawienia</h1>
+            </div>
+            <a href="/" class="back-link">Powrot do prezentacji</a>
+        </header>
+
+        <main>
+            <!-- TTS Settings -->
+            <div class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Text-to-Speech</h2>
+                        <p class="section-desc">Ustawienia syntezy mowy</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ttsVoice">Domyslny glos</label>
+                    <select id="ttsVoice">
+                        <option value="pl-PL-ZofiaNeural">Zofia (kobieta)</option>
+                        <option value="pl-PL-MarekNeural">Marek (mezczyzna)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Gmail Integration -->
+            <div class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Gmail - Newslettery</h2>
+                        <p class="section-desc">Polacz konto Gmail aby pobierac newslettery AI/ML</p>
+                    </div>
+                    <span class="status-badge status-pending" id="gmailStatus">Wkrotce</span>
+                </div>
+                <div class="form-group">
+                    <label>Nadawcy do sledzenia</label>
+                    <div class="tag-input-container" id="newsletterTags"></div>
+                    <input type="text" id="newsletterInput" placeholder="Wpisz email nadawcy i nacisnij Enter">
+                    <small>np. deeplearning.ai, tldrai.info, substack.com</small>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" disabled>Polacz z Gmail (wkrotce)</button>
+                </div>
+            </div>
+
+            <!-- LinkedIn Integration -->
+            <div class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>LinkedIn</h2>
+                        <p class="section-desc">Sledz posty AI/ML z LinkedIn</p>
+                    </div>
+                    <span class="status-badge status-pending" id="linkedinStatus">Wkrotce</span>
+                </div>
+                <div class="form-group">
+                    <label for="linkedinCookie">Cookie li_at</label>
+                    <input type="password" id="linkedinCookie" placeholder="Wklej cookie li_at z LinkedIn">
+                    <small>Znajdziesz w DevTools -> Application -> Cookies -> linkedin.com -> li_at</small>
+                </div>
+                <div class="form-group">
+                    <label>Hashtagi do sledzenia</label>
+                    <div class="tag-input-container" id="linkedinTags"></div>
+                    <input type="text" id="linkedinHashtagInput" placeholder="Wpisz hashtag i nacisnij Enter">
+                    <small>np. #AI, #MachineLearning, #LLM</small>
+                </div>
+            </div>
+
+            <!-- Twitter/X Integration -->
+            <div class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Twitter/X (Nitter)</h2>
+                        <p class="section-desc">Sledz konta AI/ML przez Nitter (bez logowania)</p>
+                    </div>
+                    <span class="status-badge status-pending" id="twitterStatus">Wkrotce</span>
+                </div>
+                <div class="form-group">
+                    <label>Konta do sledzenia</label>
+                    <div class="tag-input-container" id="twitterTags"></div>
+                    <input type="text" id="twitterAccountInput" placeholder="Wpisz nazwe konta i nacisnij Enter">
+                    <small>np. AndrewYNg, ylecun, kaborojevic</small>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="btn-group" style="justify-content: flex-end;">
+                <button class="btn btn-primary" id="saveSettings">Zapisz ustawienia</button>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // State
+        let settings = {
+            ttsVoice: 'pl-PL-ZofiaNeural',
+            newsletterSenders: ['deeplearning.ai', 'tldrai.info', 'substack.com'],
+            linkedinCookie: '',
+            linkedinHashtags: ['#AI', '#MachineLearning', '#LLM'],
+            twitterAccounts: ['AndrewYNg', 'ylecun', 'karpathy', 'sama']
+        };
+
+        // Load settings
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                if (data.settings) {
+                    Object.keys(data.settings).forEach(key => {
+                        if (data.settings[key]) {
+                            settings[key] = typeof data.settings[key] === 'string'
+                                ? JSON.parse(data.settings[key])
+                                : data.settings[key];
+                        }
+                    });
+                }
+                renderSettings();
+            } catch (err) {
+                console.error('Load settings error:', err);
+                renderSettings();
+            }
+        }
+
+        // Render settings to UI
+        function renderSettings() {
+            document.getElementById('ttsVoice').value = settings.ttsVoice;
+            document.getElementById('linkedinCookie').value = settings.linkedinCookie || '';
+
+            renderTags('newsletterTags', settings.newsletterSenders, 'newsletterSenders');
+            renderTags('linkedinTags', settings.linkedinHashtags, 'linkedinHashtags');
+            renderTags('twitterTags', settings.twitterAccounts, 'twitterAccounts');
+        }
+
+        // Render tags
+        function renderTags(containerId, items, settingsKey) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = items.map((item, i) => `
+                <span class="tag">
+                    ${item}
+                    <span class="tag-remove" onclick="removeTag('${settingsKey}', ${i})">x</span>
+                </span>
+            `).join('');
+        }
+
+        // Remove tag
+        function removeTag(key, index) {
+            settings[key].splice(index, 1);
+            renderSettings();
+        }
+
+        // Add tag
+        function addTag(key, value) {
+            if (value && !settings[key].includes(value)) {
+                settings[key].push(value);
+                renderSettings();
+            }
+        }
+
+        // Save settings
+        async function saveSettings() {
+            settings.ttsVoice = document.getElementById('ttsVoice').value;
+            settings.linkedinCookie = document.getElementById('linkedinCookie').value;
+
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ settings })
+                });
+                if (res.ok) {
+                    showToast('Ustawienia zapisane!');
+                } else {
+                    showToast('Blad zapisu', true);
+                }
+            } catch (err) {
+                showToast('Blad: ' + err.message, true);
+            }
+        }
+
+        // Toast notification
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast visible' + (isError ? ' error' : '');
+            setTimeout(() => { toast.className = 'toast'; }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('saveSettings').addEventListener('click', saveSettings);
+
+        document.getElementById('newsletterInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTag('newsletterSenders', e.target.value.trim());
+                e.target.value = '';
+            }
+        });
+
+        document.getElementById('linkedinHashtagInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                let value = e.target.value.trim();
+                if (value && !value.startsWith('#')) value = '#' + value;
+                addTag('linkedinHashtags', value);
+                e.target.value = '';
+            }
+        });
+
+        document.getElementById('twitterAccountInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                let value = e.target.value.trim().replace('@', '');
+                addTag('twitterAccounts', value);
+                e.target.value = '';
+            }
+        });
+
+        // Init
+        loadSettings();
+    </script>
+</body>
+</html>

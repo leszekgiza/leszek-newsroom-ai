@@ -213,6 +213,57 @@ app.get('/saved', (req, res) => {
     res.sendFile(path.join(__dirname, 'saved.html'));
 });
 
+// Serve settings page
+app.get('/settings', (req, res) => {
+    res.sendFile(path.join(__dirname, 'settings.html'));
+});
+
+// API: Get all settings
+app.get('/api/settings', async (req, res) => {
+    try {
+        const { rows } = await pool.query('SELECT key, value FROM settings');
+        const settings = {};
+        rows.forEach(row => { settings[row.key] = row.value; });
+        res.json({ settings });
+    } catch (error) {
+        console.error('Get settings error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API: Get single setting
+app.get('/api/settings/:key', async (req, res) => {
+    try {
+        const { rows } = await pool.query('SELECT value FROM settings WHERE key = $1', [req.params.key]);
+        if (rows.length === 0) return res.json({ value: null });
+        res.json({ value: rows[0].value });
+    } catch (error) {
+        console.error('Get setting error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API: Save settings
+app.post('/api/settings', async (req, res) => {
+    const { settings } = req.body;
+    if (!settings || typeof settings !== 'object') {
+        return res.status(400).json({ error: 'Settings object required' });
+    }
+    try {
+        for (const [key, value] of Object.entries(settings)) {
+            await pool.query(
+                `INSERT INTO settings (key, value, updated_at) VALUES ($1, $2, NOW())
+                 ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()`,
+                [key, JSON.stringify(value)]
+            );
+        }
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Save settings error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
