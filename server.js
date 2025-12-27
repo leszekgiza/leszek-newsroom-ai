@@ -347,7 +347,7 @@ app.get('/api/news/grouped', async (req, res) => {
             if (!grouped[item.source]) {
                 grouped[item.source] = { source: item.source, category: item.category, articles: [] };
             }
-            if (grouped[item.source].articles.length < 2) {
+            if (grouped[item.source].articles.length < 3) {
                 grouped[item.source].articles.push(item);
             }
         });
