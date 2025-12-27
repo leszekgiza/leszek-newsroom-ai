@@ -98,7 +98,6 @@ Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śled
 | F7.2 | **AI Voice Chatbot** - rozmowa głosowa o artykule (STT+TTS) | COULD | Best practices |
 | F7.3 | Powiadomienia o nowych artykułach z ulubionych źródeł | SHOULD | [Stfalcon](https://stfalcon.com/en/blog/post/10-best-news-apps) |
 | F7.4 | Zapisywanie artykułów do przeczytania później z przypomnieniem | COULD | Pocket pattern |
-| F7.5 | Statystyki czytania (ile przeczytano, z jakich źródeł) | COULD | Analytics |
 
 ---
 

@@ -352,14 +352,7 @@
 
 ---
 
-### US8.3 - Statystyki czytania
-**Jako** użytkownik
-**Chcę** widzieć statystyki (ile przeczytałem, z jakich źródeł)
-**Aby** śledzić swoje nawyki czytelnicze
-
----
-
-### US8.4 - Powiadomienia push
+### US8.3 - Powiadomienia push
 **Jako** użytkownik
 **Chcę** otrzymywać powiadomienia o nowych artykułach z ulubionych źródeł
 **Aby** nie przegapić ważnych treści
