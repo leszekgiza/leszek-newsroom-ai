@@ -1,5 +1,50 @@
 # Changelog
 
+## [2.0.0] - 2025-12-28 (Design Phase)
+
+### Redesign
+Kompletny redesign aplikacji - przejście z Reveal.js na Next.js, mobile-first approach.
+
+### Added - Dokumentacja
+- `docs/requirements.md` - wymagania funkcjonalne i niefunkcjonalne (v2.0)
+- `docs/user-stories.md` - 16+ user stories dla MVP
+- `docs/hld.md` - High-Level Design z architekturą systemu
+- `README.md` - zaktualizowany opis projektu
+
+### Added - UI Designs (24 pliki)
+- 10x UI Light (Mobile) - strona główna, logowanie, rejestracja, zapisane, modal AI, ustawienia, reset hasła, Gmail, LinkedIn, ukryte źródła
+- 3x UI Dark (Mobile) - strona główna, logowanie, modal AI
+- 3x UI Desktop - strona główna, ustawienia, modal AI
+- 8x Wireframes - szkice strukturalne
+- `superdesign/gallery.html` - galeria wszystkich designów
+
+### Added - Nowe wymagania
+- PostgreSQL Full-Text Search z obsługą języka polskiego
+- Wyszukiwanie w tytułach i AI-generowanych streszczeniach
+- Integracja Gmail (OAuth, newslettery)
+- Integracja LinkedIn (li_at cookie, hashtagi, eksperci)
+- Zarządzanie ukrytymi źródłami
+- Filtrowanie po źródle z licznikami
+- Reset hasła
+- Wybór głosu TTS (polski/angielski, męski/żeński)
+
+### Changed - Architektura
+- **Frontend:** Reveal.js → Next.js 14+ (App Router)
+- **Backend:** Express/Vercel → Next.js API Routes
+- **Database:** Supabase → Self-hosted PostgreSQL
+- **Deployment:** Vercel → Oracle Cloud Free Tier (Docker)
+- **Scraping:** Dodano Crawl4AI (Python, Playwright)
+
+### Technical Decisions
+- Modular Monolith architecture
+- Prisma ORM
+- Zustand for state management
+- Tailwind CSS (design tokens)
+- Edge TTS (darmowe, polski głos)
+- Claude 3.5 Sonnet (streszczenia)
+
+---
+
 ## [1.0.0] - 2025-12-26
 
 ### Added

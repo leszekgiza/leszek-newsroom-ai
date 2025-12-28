@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe - Dodaj Źródło</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; }
+        .wireframe-box { border: 2px solid #000; background: #fff; }
+    </style>
+</head>
+<body class="bg-white min-h-screen">
+    <!-- Mobile Container -->
+    <div class="max-w-md mx-auto bg-gray-50 min-h-screen relative">
+
+        <!-- Header -->
+        <header class="wireframe-box p-4 flex items-center gap-3">
+            <button class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">✕</button>
+            <h1 class="font-bold text-sm flex-1">Dodaj nowe źródło</h1>
+            <button class="wireframe-box px-3 py-1 text-xs bg-black text-white">Zapisz</button>
+        </header>
+
+        <main class="p-4 space-y-6">
+
+            <!-- Source Type -->
+            <div class="space-y-3">
+                <label class="text-xs font-bold text-gray-500 uppercase">Typ źródła</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="wireframe-box p-3 text-center bg-black text-white">
+                        <div class="text-lg mb-1">🌐</div>
+                        <div class="text-xs font-bold">Strona WWW</div>
+                    </button>
+                    <button class="wireframe-box p-3 text-center">
+                        <div class="text-lg mb-1">📧</div>
+                        <div class="text-xs">Newsletter</div>
+                    </button>
+                    <button class="wireframe-box p-3 text-center">
+                        <div class="text-lg mb-1">💼</div>
+                        <div class="text-xs">LinkedIn</div>
+                    </button>
+                    <button class="wireframe-box p-3 text-center">
+                        <div class="text-lg mb-1">🐦</div>
+                        <div class="text-xs">Twitter/X</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- URL Input -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-gray-500 uppercase">URL strony *</label>
+                <div class="wireframe-box p-3">
+                    <span class="text-gray-400 text-sm">https://example.com/blog</span>
+                </div>
+                <p class="text-xs text-gray-500">Podaj adres strony z artykułami</p>
+            </div>
+
+            <!-- Name Input -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-gray-500 uppercase">Nazwa źródła *</label>
+                <div class="wireframe-box p-3">
+                    <span class="text-gray-400 text-sm">Nazwa bloga lub autora</span>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-gray-500 uppercase">Kategoria</label>
+                <div class="wireframe-box p-3 flex items-center justify-between">
+                    <span class="text-sm">AI / Machine Learning</span>
+                    <span class="text-xs">▼</span>
+                </div>
+            </div>
+
+            <!-- Requires Login Toggle -->
+            <div class="wireframe-box p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-bold">Wymaga logowania</p>
+                        <p class="text-xs text-gray-500">Strona z paywallem lub rejestracją</p>
+                    </div>
+                    <div class="w-12 h-6 wireframe-box rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Login Credentials (hidden by default, shown when toggle is on) -->
+            <div class="wireframe-box p-4 space-y-4 border-l-4 border-black">
+                <p class="text-xs font-bold text-gray-500 uppercase">Dane logowania</p>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-medium">Login / Email</label>
+                    <div class="wireframe-box p-3">
+                        <span class="text-gray-400 text-sm">user@example.com</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-medium">Hasło</label>
+                    <div class="wireframe-box p-3 flex items-center justify-between">
+                        <span class="text-gray-400 text-sm">••••••••</span>
+                        <span class="text-xs">👁</span>
+                    </div>
+                </div>
+
+                <div class="wireframe-box p-2 bg-gray-100 text-xs text-gray-600">
+                    🔐 Hasło będzie zaszyfrowane (AES-256)
+                </div>
+
+                <button class="wireframe-box px-3 py-2 text-xs w-full">
+                    Testuj połączenie
+                </button>
+            </div>
+
+            <!-- Advanced Settings -->
+            <details class="wireframe-box">
+                <summary class="p-3 text-sm font-bold cursor-pointer">
+                    Zaawansowane ustawienia
+                </summary>
+                <div class="p-4 pt-0 space-y-4 border-t border-gray-200">
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium">Selektor CSS (opcjonalnie)</label>
+                        <div class="wireframe-box p-3">
+                            <span class="text-gray-400 text-sm font-mono">.article-list .post</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Dla niestandardowych layoutów</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium">Częstotliwość odświeżania</label>
+                        <div class="wireframe-box p-3 flex items-center justify-between">
+                            <span class="text-sm">Co 30 minut</span>
+                            <span class="text-xs">▼</span>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Preview Button -->
+            <button class="w-full wireframe-box p-3 text-sm font-bold">
+                👁 Podgląd artykułów
+            </button>
+
+        </main>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe - Ustawienia Wyglądu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; }
+        .wireframe-box { border: 2px solid #000; background: #fff; }
+    </style>
+</head>
+<body class="bg-white min-h-screen">
+    <!-- Mobile Container -->
+    <div class="max-w-md mx-auto bg-gray-50 min-h-screen relative pb-20">
+
+        <!-- Header -->
+        <header class="wireframe-box p-4 flex items-center gap-3">
+            <button class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">←</button>
+            <h1 class="font-bold text-sm flex-1">Ustawienia</h1>
+        </header>
+
+        <!-- Settings Tabs -->
+        <div class="flex border-b border-gray-200">
+            <button class="flex-1 p-3 text-xs text-gray-500">Źródła</button>
+            <button class="flex-1 p-3 text-xs font-bold border-b-2 border-black">Wygląd</button>
+            <button class="flex-1 p-3 text-xs text-gray-500">TTS</button>
+            <button class="flex-1 p-3 text-xs text-gray-500">Konto</button>
+        </div>
+
+        <main class="p-4 space-y-6">
+
+            <!-- Theme Selection -->
+            <section class="space-y-3">
+                <h3 class="text-xs font-bold text-gray-500 uppercase">Motyw</h3>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <!-- Light Theme -->
+                    <button class="wireframe-box p-3 space-y-2 text-center">
+                        <div class="w-full h-16 wireframe-box bg-white flex items-center justify-center">
+                            <div class="w-8 h-8 wireframe-box"></div>
+                        </div>
+                        <div class="flex items-center justify-center gap-1">
+                            <div class="w-3 h-3 wireframe-box rounded-full"></div>
+                            <span class="text-xs">Jasny</span>
+                        </div>
+                    </button>
+
+                    <!-- Dark Theme -->
+                    <button class="wireframe-box p-3 space-y-2 text-center bg-black text-white">
+                        <div class="w-full h-16 wireframe-box bg-gray-800 border-white flex items-center justify-center">
+                            <div class="w-8 h-8 wireframe-box border-white bg-gray-700"></div>
+                        </div>
+                        <div class="flex items-center justify-center gap-1">
+                            <div class="w-3 h-3 bg-white rounded-full"></div>
+                            <span class="text-xs">Ciemny</span>
+                        </div>
+                    </button>
+
+                    <!-- Auto Theme -->
+                    <button class="wireframe-box p-3 space-y-2 text-center border-4">
+                        <div class="w-full h-16 wireframe-box flex">
+                            <div class="w-1/2 bg-white"></div>
+                            <div class="w-1/2 bg-gray-800"></div>
+                        </div>
+                        <div class="flex items-center justify-center gap-1">
+                            <div class="w-3 h-3 wireframe-box rounded-full bg-black"></div>
+                            <span class="text-xs font-bold">Auto</span>
+                        </div>
+                    </button>
+                </div>
+
+                <p class="text-xs text-gray-500">Auto dostosowuje motyw do ustawień systemu</p>
+            </section>
+
+            <!-- Font Size -->
+            <section class="wireframe-box p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold">Rozmiar tekstu</h3>
+                    <span class="text-xs text-gray-500">Normalny</span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <span class="text-xs">A</span>
+                    <div class="flex-1 h-2 wireframe-box rounded-full relative">
+                        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 wireframe-box rounded-full bg-black"></div>
+                    </div>
+                    <span class="text-lg font-bold">A</span>
+                </div>
+            </section>
+
+            <!-- Card Layout -->
+            <section class="space-y-3">
+                <h3 class="text-xs font-bold text-gray-500 uppercase">Układ kart</h3>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Compact -->
+                    <button class="wireframe-box p-3 space-y-2 border-4">
+                        <div class="space-y-1">
+                            <div class="h-2 wireframe-box w-3/4"></div>
+                            <div class="h-1 wireframe-box w-1/2 bg-gray-200"></div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="h-2 wireframe-box w-3/4"></div>
+                            <div class="h-1 wireframe-box w-1/2 bg-gray-200"></div>
+                        </div>
+                        <span class="text-xs font-bold block text-center">Kompaktowy</span>
+                    </button>
+
+                    <!-- Expanded -->
+                    <button class="wireframe-box p-3 space-y-2">
+                        <div class="space-y-2">
+                            <div class="h-2 wireframe-box w-3/4"></div>
+                            <div class="h-1 wireframe-box w-1/2 bg-gray-200"></div>
+                            <div class="h-1 wireframe-box w-full bg-gray-200"></div>
+                        </div>
+                        <span class="text-xs block text-center">Rozszerzony</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Other Appearance Settings -->
+            <section class="space-y-3">
+                <h3 class="text-xs font-bold text-gray-500 uppercase">Pozostałe</h3>
+
+                <div class="wireframe-box divide-y divide-gray-200">
+                    <!-- Show Images -->
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold">Pokazuj obrazki</p>
+                            <p class="text-xs text-gray-500">Miniatury artykułów</p>
+                        </div>
+                        <div class="w-12 h-6 wireframe-box rounded-full bg-black"></div>
+                    </div>
+
+                    <!-- Animations -->
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold">Animacje</p>
+                            <p class="text-xs text-gray-500">Płynne przejścia</p>
+                        </div>
+                        <div class="w-12 h-6 wireframe-box rounded-full bg-black"></div>
+                    </div>
+
+                    <!-- Show Intro -->
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold">Pokazuj intro AI</p>
+                            <p class="text-xs text-gray-500">2-zdaniowe streszczenia</p>
+                        </div>
+                        <div class="w-12 h-6 wireframe-box rounded-full bg-black"></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md wireframe-box flex justify-around py-3 bg-white">
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">📰</div>
+                <span class="text-xs">Feed</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">🔖</div>
+                <span class="text-xs">Zapisane</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">📊</div>
+                <span class="text-xs">Źródła</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs bg-black text-white">⚙️</div>
+                <span class="text-xs font-bold">Ustawienia</span>
+            </button>
+        </nav>
+
+    </div>
+</body>
+</html>

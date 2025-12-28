@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsroom AI - Modal Streszczenia (Desktop)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a2e',
+                        secondary: '#16213e',
+                        accent: '#0f3460',
+                        highlight: '#e94560',
+                        surface: '#f8fafc',
+                        muted: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900/60 min-h-screen flex items-center justify-center p-8">
+
+    <!-- Modal Overlay -->
+    <div class="w-full max-w-4xl">
+
+        <!-- Modal Panel -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+            <!-- Modal Header -->
+            <div class="bg-white px-8 py-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-xl text-primary">AI Streszczenie</h2>
+                        <p class="text-sm text-muted">Wygenerowane przez Claude 3.5 Sonnet</p>
+                    </div>
+                </div>
+                <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Article Info Bar -->
+            <div class="px-8 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-lg text-primary">The Future of AI Agents in Enterprise</h3>
+                    <div class="flex items-center gap-3 text-sm text-muted mt-1">
+                        <span class="font-medium">Ethan Mollick</span>
+                        <span class="text-slate-300">•</span>
+                        <span>oneusefulthing.substack.com</span>
+                        <span class="text-slate-300">•</span>
+                        <span>12 min czytania</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center gap-2 text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                        Zapisz
+                    </button>
+                    <button class="px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center gap-2 text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                        </svg>
+                        Udostepnij
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="grid grid-cols-3 gap-0">
+
+                <!-- Main Summary Column (2/3) -->
+                <div class="col-span-2 p-8 border-r border-slate-100 max-h-[60vh] overflow-y-auto">
+
+                    <!-- Key Summary -->
+                    <section class="mb-8">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-primary">Podsumowanie</h4>
+                        </div>
+                        <p class="text-slate-700 leading-relaxed text-base">
+                            Artykul analizuje rosnaca role autonomicznych agentow AI w srodowiskach korporacyjnych.
+                            Autor wskazuje, ze do 2026 roku ponad 50% duzych przedsiebiorstw bedzie wykorzystywac
+                            agentow AI do automatyzacji procesow decyzyjnych. Szczegolna uwage poswieaca wyzwaniom
+                            zwiazanym z nadzorem i odpowiedzialnoscia za decyzje podejmowane przez AI.
+                        </p>
+                    </section>
+
+                    <!-- Implications -->
+                    <section>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-primary">Implikacje</h4>
+                        </div>
+                        <p class="text-slate-700 leading-relaxed text-base">
+                            Dla firm technologicznych oznacza to koniecznosc inwestycji w infrastrukture agentowa.
+                            Dla pracownikow - potrzebe rozwijania umiejetnosci wspolpracy z AI. Autor rekomenduje
+                            rozpoczecie pilotazowych wdrozen w obszarach o niskim ryzyku.
+                        </p>
+                    </section>
+
+                </div>
+
+                <!-- Key Insights Sidebar (1/3) -->
+                <div class="p-6 bg-slate-50 max-h-[60vh] overflow-y-auto">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <h4 class="font-semibold text-primary">Kluczowe wnioski</h4>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wide">Trend</span>
+                            <p class="text-sm text-slate-700 mt-2">Przejscie od chatbotow do w pelni autonomicznych agentow</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-amber-600 uppercase tracking-wide">Wyzwanie</span>
+                            <p class="text-sm text-slate-700 mt-2">Potrzeba nowych frameworkow governance dla AI</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-blue-600 uppercase tracking-wide">Szansa</span>
+                            <p class="text-sm text-slate-700 mt-2">40% redukcja kosztow operacyjnych w pilot programs</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-violet-600 uppercase tracking-wide">Prognoza</span>
+                            <p class="text-sm text-slate-700 mt-2">50% duzych firm wdrozy agentow AI do 2026</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TTS Player Footer -->
+            <div class="bg-white border-t border-slate-200 px-8 py-5">
+                <div class="flex items-center gap-8">
+
+                    <!-- Playback Controls -->
+                    <div class="flex items-center gap-3">
+                        <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/>
+                            </svg>
+                        </button>
+                        <button class="w-14 h-14 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 transition-all">
+                            <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                        </button>
+                        <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="flex-1 space-y-1">
+                        <div class="h-2 bg-slate-100 rounded-full overflow-hidden cursor-pointer hover:h-2.5 transition-all">
+                            <div class="h-full w-1/3 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-muted">
+                            <span>1:24</span>
+                            <span>4:12</span>
+                        </div>
+                    </div>
+
+                    <!-- Speed Controls -->
+                    <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                        <button class="px-3 py-1.5 text-xs text-slate-500 rounded-md hover:bg-white transition-colors">0.75x</button>
+                        <button class="px-3 py-1.5 text-xs text-slate-500 rounded-md hover:bg-white transition-colors">1x</button>
+                        <button class="px-3 py-1.5 text-xs bg-white text-primary font-medium rounded-md shadow-sm">1.5x</button>
+                        <button class="px-3 py-1.5 text-xs text-slate-500 rounded-md hover:bg-white transition-colors">2x</button>
+                    </div>
+
+                    <!-- Voice Selector -->
+                    <div class="relative">
+                        <button onclick="document.getElementById('voiceMenu').classList.toggle('hidden')" class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-sm font-medium text-slate-700">Zofia</span>
+                                <span class="text-xs text-muted block">Polski</span>
+                            </div>
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+
+                        <!-- Voice Dropdown -->
+                        <div id="voiceMenu" class="hidden absolute bottom-full right-0 mb-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                            <p class="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">Wybierz glos</p>
+                            <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="text-left flex-1">
+                                    <span class="font-medium">Zofia</span>
+                                    <span class="text-xs text-muted block">Polski, kobiecy</span>
+                                </div>
+                                <svg class="w-4 h-4 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            </button>
+                            <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="text-left flex-1">
+                                    <span class="font-medium">Marek</span>
+                                    <span class="text-xs text-muted block">Polski, meski</span>
+                                </div>
+                            </button>
+                            <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="text-left flex-1">
+                                    <span class="font-medium">Aria</span>
+                                    <span class="text-xs text-muted block">English, female</span>
+                                </div>
+                            </button>
+                            <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="text-left flex-1">
+                                    <span class="font-medium">Guy</span>
+                                    <span class="text-xs text-muted block">English, male</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Open Article Button -->
+                    <button class="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white font-semibold rounded-xl flex items-center gap-2 hover:shadow-lg transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                        Otworz artykul
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>

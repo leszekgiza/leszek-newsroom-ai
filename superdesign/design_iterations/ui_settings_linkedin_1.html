@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsroom AI - Integracja LinkedIn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a2e',
+                        secondary: '#16213e',
+                        accent: '#0f3460',
+                        highlight: '#e94560',
+                        surface: '#f8fafc',
+                        muted: '#64748b',
+                        linkedin: '#0A66C2'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <!-- Mobile Container -->
+    <div class="max-w-md mx-auto bg-white min-h-screen relative pb-24">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
+            <div class="px-4 py-3 flex items-center gap-3">
+                <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h1 class="font-bold text-primary text-lg">Integracja LinkedIn</h1>
+            </div>
+        </header>
+
+        <main class="p-4 space-y-6">
+
+            <!-- LinkedIn Icon & Status -->
+            <div class="text-center py-6">
+                <div class="w-20 h-20 mx-auto bg-linkedin rounded-2xl flex items-center justify-center shadow-lg mb-4">
+                    <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-primary">LinkedIn</h2>
+                <p class="text-sm text-muted mt-1">Śledź posty ekspertów i hashtagi</p>
+            </div>
+
+            <!-- Connection Status - Connected -->
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold text-emerald-800">Połączono</p>
+                        <p class="text-sm text-emerald-700 mt-1">Ostatnia synchronizacja: 5 minut temu</p>
+                    </div>
+                    <button class="text-xs text-emerald-700 underline">Odłącz</button>
+                </div>
+            </div>
+
+            <!-- Cookie Input Section -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-linkedin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                    <h3 class="font-semibold text-primary">Token dostępu (li_at)</h3>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="relative">
+                        <input
+                            type="password"
+                            value="AQEDAQNyZ2..."
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-primary font-mono focus:outline-none focus:ring-2 focus:ring-linkedin/20 focus:border-linkedin"
+                        >
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-primary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-muted">Cookie li_at z przeglądarki. <a href="#" class="text-linkedin underline">Jak znaleźć?</a></p>
+                </div>
+
+                <button class="w-full py-2.5 bg-linkedin text-white font-medium rounded-xl hover:bg-blue-700 transition-colors">
+                    Zapisz token
+                </button>
+            </div>
+
+            <!-- Hashtags to Follow -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-semibold text-primary">Śledzone hashtagi</h3>
+                    <span class="text-xs bg-linkedin/10 text-linkedin px-2 py-1 rounded-full font-medium">5 aktywnych</span>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1.5 bg-linkedin/10 text-linkedin text-sm font-medium rounded-full flex items-center gap-1.5">
+                        #AI
+                        <button class="hover:text-linkedin/70">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </span>
+                    <span class="px-3 py-1.5 bg-linkedin/10 text-linkedin text-sm font-medium rounded-full flex items-center gap-1.5">
+                        #MachineLearning
+                        <button class="hover:text-linkedin/70">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </span>
+                    <span class="px-3 py-1.5 bg-linkedin/10 text-linkedin text-sm font-medium rounded-full flex items-center gap-1.5">
+                        #LLM
+                        <button class="hover:text-linkedin/70">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </span>
+                    <span class="px-3 py-1.5 bg-linkedin/10 text-linkedin text-sm font-medium rounded-full flex items-center gap-1.5">
+                        #GenerativeAI
+                        <button class="hover:text-linkedin/70">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </span>
+                    <span class="px-3 py-1.5 bg-linkedin/10 text-linkedin text-sm font-medium rounded-full flex items-center gap-1.5">
+                        #DataScience
+                        <button class="hover:text-linkedin/70">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </span>
+                </div>
+
+                <div class="flex gap-2">
+                    <input
+                        type="text"
+                        placeholder="Dodaj nowy hashtag..."
+                        class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-linkedin/20 focus:border-linkedin"
+                    >
+                    <button class="px-4 py-2.5 bg-linkedin text-white rounded-xl hover:bg-blue-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Followed People -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-semibold text-primary">Śledzone osoby</h3>
+                    <button class="text-sm text-linkedin font-medium">+ Dodaj</button>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50">
+                        <div class="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                            AK
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-primary">Andrej Karpathy</p>
+                            <p class="text-xs text-muted">Former Director of AI at Tesla</p>
+                        </div>
+                        <button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-highlight">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold">
+                            YL
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-primary">Yann LeCun</p>
+                            <p class="text-xs text-muted">Chief AI Scientist at Meta</p>
+                        </div>
+                        <button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-highlight">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50">
+                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold">
+                            CH
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-primary">Chip Huyen</p>
+                            <p class="text-xs text-muted">ML Engineer & Author</p>
+                        </div>
+                        <button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-highlight">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sync Stats -->
+            <div class="bg-slate-50 rounded-2xl p-4">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p class="text-2xl font-bold text-primary">47</p>
+                        <p class="text-xs text-muted">Postów dziś</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-primary">3</p>
+                        <p class="text-xs text-muted">Osoby</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-primary">5</p>
+                        <p class="text-xs text-muted">Hashtagów</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200 px-6 py-2 z-50">
+            <div class="flex justify-around">
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Feed</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Zapisane</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Źródła</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-semibold text-primary">Ustawienia</span>
+                </button>
+            </div>
+        </nav>
+
+    </div>
+</body>
+</html>

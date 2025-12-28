@@ -1,6 +1,6 @@
 # Leszek Newsroom AI - User Stories
 
-**Wersja:** 2.0
+**Wersja:** 2.1
 **Data:** 2025-12-27
 **Format:** Jako [rola] chcę [funkcja] aby [korzyść]
 
@@ -10,8 +10,8 @@
 
 ### US1.1 - Widok listy artykułów
 **Jako** użytkownik
-**Chcę** widzieć listę najnowszych artykułów AI/ML w formie kart
-**Aby** szybko przejrzeć co nowego w branży
+**Chcę** widzieć listę najnowszych artykułów z moich źródeł w formie kart
+**Aby** szybko przejrzeć co nowego
 
 **Kryteria akceptacji:**
 - [ ] Artykuły wyświetlane jako karty z tytułem, źródłem, datą
@@ -25,7 +25,7 @@
 ### US1.2 - Filtrowanie po źródle
 **Jako** użytkownik
 **Chcę** filtrować artykuły po źródle
-**Aby** skupić się na ulubionych autorach/blogach
+**Aby** skupić się na wybranych źródłach
 
 **Kryteria akceptacji:**
 - [ ] Dropdown z listą źródeł
@@ -85,15 +85,16 @@
 
 ---
 
-### US2.3 - Text-to-Speech
+### US2.3 - Text-to-Speech (MUST)
 **Jako** użytkownik
-**Chcę** odsłuchać streszczenie
-**Aby** konsumować treści w drodze/podczas innych czynności
+**Chcę** odsłuchać streszczenie artykułu
+**Aby** konsumować treści w drodze/transporcie/podczas innych czynności
 
 **Kryteria akceptacji:**
 - [ ] Play/Pause/Stop controls
 - [ ] Wybór głosu (męski/żeński)
 - [ ] Postęp odtwarzania widoczny
+- [ ] Działanie na mobile (w tle)
 
 ---
 
@@ -135,41 +136,50 @@
 
 ---
 
-### US3.3 - Wyszukiwanie
+### US3.3 - Wyszukiwanie (MUST)
 **Jako** użytkownik
 **Chcę** wyszukać artykuł po słowach kluczowych
 **Aby** znaleźć konkretny temat
 
 **Kryteria akceptacji:**
-- [ ] Pole wyszukiwania na górze strony
-- [ ] Wyszukiwanie w tytule i intro
-- [ ] Wyniki na żywo (live search)
+- [ ] Pole wyszukiwania na górze strony (mobile + desktop)
+- [ ] Wyszukiwanie w tytułach i AI-generowanych streszczeniach
+- [ ] **Wsparcie dla języka polskiego** (stemming, odmiana wyrazów)
+- [ ] Wyniki na żywo (live search, debounce 300ms)
+- [ ] Podświetlanie dopasowanych fragmentów w wynikach
+
+**Szczegóły techniczne:**
+- PostgreSQL Full-Text Search (tsvector/tsquery)
+- Konfiguracja językowa: `pg_catalog.polish`
+- Indeks GIN dla wydajności (~5ms query time)
+- Przeszukiwane kolumny: `title`, `intro`, `summary`
 
 ---
 
 ## Epic 4: Personalizacja Źródeł
 
-### US4.1 - Dodawanie własnych źródeł RSS
+### US4.1 - Dodawanie własnych źródeł stron
 **Jako** użytkownik
-**Chcę** dodać własny feed RSS
-**Aby** śledzić blogi/strony które mnie interesują
+**Chcę** dodać własną stronę internetową do obserwowania
+**Aby** śledzić blogi/portale które mnie interesują
 
 **Kryteria akceptacji:**
 - [ ] Formularz: URL, nazwa, kategoria
-- [ ] Walidacja URL (czy to poprawny RSS)
+- [ ] Walidacja URL (czy strona jest dostępna)
 - [ ] Podgląd artykułów przed zatwierdzeniem
 
 ---
 
-### US4.2 - Dodawanie stron do scrapowania
+### US4.2 - Konfiguracja scrapowania
 **Jako** użytkownik
-**Chcę** dodać stronę WWW (nie RSS) do obserwowania
-**Aby** śledzić źródła bez RSS
+**Chcę** skonfigurować jak strona jest scrapowana
+**Aby** poprawnie pobierać artykuły z różnych layoutów stron
 
 **Kryteria akceptacji:**
 - [ ] Formularz: URL strony, selektor CSS (opcjonalnie)
 - [ ] Automatyczne wykrywanie artykułów
 - [ ] Konfiguracja w ustawieniach
+- [ ] Podgląd wyników scrapowania
 
 ---
 
@@ -365,3 +375,8 @@ Wymagania oparte na analizie:
 - [Zapier - Best News Apps 2025](https://zapier.com/blog/best-news-apps/)
 - [Stfalcon - 10 Best News Apps](https://stfalcon.com/en/blog/post/10-best-news-apps)
 - [OnStipe - News Aggregator Guide](https://onstipe.com/blog/10-best-news-aggregator-sites-in-2025-the-ultimate-guide/)
+
+### Przykładowe źródła (konfigurowalne przez użytkownika)
+- Blogi: Ethan Mollick, Benedict Evans, Simon Willison, Eugene Yan, Chip Huyen, Sebastian Raschka i inne
+- Portale: strefainwestora.pl (wymaga logowania), inwestomat.eu
+- Newslettery, social media (LinkedIn, Twitter/X)

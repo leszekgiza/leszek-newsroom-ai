@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe - Ustawienia / Źródła</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; }
+        .wireframe-box { border: 2px solid #000; background: #fff; }
+    </style>
+</head>
+<body class="bg-white min-h-screen">
+    <!-- Mobile Container -->
+    <div class="max-w-md mx-auto bg-gray-50 min-h-screen relative pb-20">
+
+        <!-- Header -->
+        <header class="wireframe-box p-4 flex items-center gap-3">
+            <button class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">←</button>
+            <h1 class="font-bold text-sm flex-1">Ustawienia</h1>
+        </header>
+
+        <!-- Settings Tabs -->
+        <div class="flex border-b border-gray-200">
+            <button class="flex-1 p-3 text-xs font-bold border-b-2 border-black">Źródła</button>
+            <button class="flex-1 p-3 text-xs text-gray-500">Wygląd</button>
+            <button class="flex-1 p-3 text-xs text-gray-500">TTS</button>
+            <button class="flex-1 p-3 text-xs text-gray-500">Konto</button>
+        </div>
+
+        <main class="p-4 space-y-6">
+
+            <!-- Add Source Button -->
+            <button class="w-full wireframe-box p-3 flex items-center justify-center gap-2 text-sm font-bold">
+                <span>+</span>
+                <span>Dodaj nowe źródło</span>
+            </button>
+
+            <!-- Sources List -->
+            <div class="space-y-3">
+                <h3 class="text-xs font-bold text-gray-500 uppercase">Aktywne źródła (6)</h3>
+
+                <!-- Source Item 1 -->
+                <div class="wireframe-box p-3 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">📝</div>
+                            <div>
+                                <p class="text-sm font-bold">Ethan Mollick</p>
+                                <p class="text-xs text-gray-500">oneusefulthing.substack.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-5 wireframe-box rounded-full bg-black"></div>
+                            <button class="text-xs">⋮</button>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-500">
+                        <span>12 artykułów</span>
+                        <span>•</span>
+                        <span>Ostatnia aktualizacja: 2h</span>
+                    </div>
+                </div>
+
+                <!-- Source Item 2 -->
+                <div class="wireframe-box p-3 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">🤗</div>
+                            <div>
+                                <p class="text-sm font-bold">Hugging Face Blog</p>
+                                <p class="text-xs text-gray-500">huggingface.co/blog</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-5 wireframe-box rounded-full bg-black"></div>
+                            <button class="text-xs">⋮</button>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-500">
+                        <span>45 artykułów</span>
+                        <span>•</span>
+                        <span>Ostatnia aktualizacja: 1d</span>
+                    </div>
+                </div>
+
+                <!-- Source Item 3 - With Login -->
+                <div class="wireframe-box p-3 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">💰</div>
+                            <div>
+                                <p class="text-sm font-bold">strefainwestora.pl</p>
+                                <p class="text-xs text-gray-500">strefainwestora.pl</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-5 wireframe-box rounded-full bg-black"></div>
+                            <button class="text-xs">⋮</button>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="wireframe-box px-2 py-0.5 bg-gray-100">🔐 Wymaga logowania</span>
+                        <span class="text-green-600">✓ Połączono</span>
+                    </div>
+                </div>
+
+                <!-- Source Item 4 -->
+                <div class="wireframe-box p-3 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">🧠</div>
+                            <div>
+                                <p class="text-sm font-bold">Simon Willison</p>
+                                <p class="text-xs text-gray-500">simonwillison.net</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-5 wireframe-box rounded-full bg-black"></div>
+                            <button class="text-xs">⋮</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Hidden Sources -->
+            <div class="space-y-3">
+                <h3 class="text-xs font-bold text-gray-500 uppercase">Ukryte źródła (2)</h3>
+
+                <div class="wireframe-box p-3 opacity-50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">📊</div>
+                            <div>
+                                <p class="text-sm font-bold">Benedict Evans</p>
+                                <p class="text-xs text-gray-500">ben-evans.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-5 wireframe-box rounded-full"></div>
+                            <button class="text-xs">⋮</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md wireframe-box flex justify-around py-3 bg-white">
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">📰</div>
+                <span class="text-xs">Feed</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">🔖</div>
+                <span class="text-xs">Zapisane</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">📊</div>
+                <span class="text-xs">Źródła</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs bg-black text-white">⚙️</div>
+                <span class="text-xs font-bold">Ustawienia</span>
+            </button>
+        </nav>
+
+    </div>
+</body>
+</html>

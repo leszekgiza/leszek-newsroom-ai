@@ -9,19 +9,21 @@
 ## 1. Wprowadzenie
 
 ### 1.1 Cel Aplikacji
-Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śledzenie najnowszych artykułów, newsletterów i postów z social media w jednym miejscu.
+Uniwersalny agregator treści z dowolnych źródeł internetowych, umożliwiający śledzenie najnowszych artykułów, newsletterów i postów z social media w jednym miejscu. Użytkownik sam konfiguruje jakie strony chce obserwować.
 
 ### 1.2 Główna Persona
-**Profesjonalista AI/ML** - osoba pracująca w branży technologicznej, która:
-- Codziennie śledzi nowości z AI/ML
-- Ma ograniczony czas na przeglądanie wielu źródeł
+**Każdy, kto chce agregować newsy** - osoba, która:
+- Śledzi wiele źródeł informacji (blogi, portale, newslettery)
+- Ma ograniczony czas na przeglądanie wielu stron
 - Potrzebuje szybkich streszczeń aby ocenić wartość artykułu
-- Korzysta z telefonu w drodze do pracy
+- Korzysta z telefonu w drodze
+- Chce zapisać informacje aby użyć je później
 
 ### 1.3 Scenariusze Użycia
-1. **Poranny przegląd** - 10 min przeglądania najnowszych artykułów przy kawie
+1. **Poranny przegląd** - 20 min przeglądania najnowszych artykułów przy kawie
 2. **Deep dive** - szczegółowe czytanie wybranych artykułów na desktopie
 3. **Mobile check** - szybkie sprawdzenie nowości w komunikacji/transporcie
+4. **Sprawdzanie nowości z użyciem TTS, a kiedyś również rozmowa z STT**
 
 ---
 
@@ -31,7 +33,7 @@ Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śled
 
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
-| F1.1 | Pobieranie artykułów z RSS feeds | MUST |
+| F1.1 | Pobieranie artykułów ale to nie jest z RSS feeds po prostu robimy scraping ze strony internetowej| MUST |
 | F1.2 | Integracja z Gmail (newslettery) | SHOULD |
 | F1.3 | Integracja z LinkedIn (posty) | SHOULD |
 | F1.4 | Integracja z Twitter/X przez Nitter | COULD |
@@ -56,7 +58,7 @@ Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śled
 | F3.1 | Zapisywanie artykułów na później | MUST |
 | F3.2 | Usuwanie zapisanych artykułów | MUST |
 | F3.3 | Filtrowanie po źródle | MUST |
-| F3.4 | Wyszukiwanie w artykułach | SHOULD |
+| F3.4 | Wyszukiwanie w tytułach i streszczeniach (PostgreSQL FTS, język polski) | MUST |
 | F3.5 | Tagowanie/kategoryzacja artykułów | COULD |
 
 ### F4: Personalizacja
@@ -64,7 +66,7 @@ Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śled
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
 | F4.1 | Wybór głosu TTS (męski/żeński) | SHOULD |
-| F4.2 | **Dodawanie własnych źródeł RSS/stron** | MUST |
+| F4.2 | **Dodawanie własnych źródeł stron** | MUST |
 | F4.3 | Zarządzanie listą źródeł (CRUD) | MUST |
 | F4.4 | Ukrywanie niechcianych źródeł | SHOULD |
 | F4.5 | Ustawienia per użytkownik | MUST |
@@ -94,10 +96,9 @@ Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śled
 
 | ID | Wymaganie | Priorytet | Źródło |
 |----|-----------|-----------|--------|
-| F7.1 | Czytanie offline (cache artykułów) | COULD | [Zapier](https://zapier.com/blog/best-news-apps/) |
+| F7.1 | Czytanie offline (cache artykułów) | COULD |
 | F7.2 | **AI Voice Chatbot** - rozmowa głosowa o artykule (STT+TTS) | COULD | Best practices |
-| F7.3 | Powiadomienia o nowych artykułach z ulubionych źródeł | SHOULD | [Stfalcon](https://stfalcon.com/en/blog/post/10-best-news-apps) |
-| F7.4 | Zapisywanie artykułów do przeczytania później z przypomnieniem | COULD | Pocket pattern |
+| F7.3 | Zapisywanie artykułów do przeczytania później z przypomnieniem | COULD | Pocket pattern |
 
 ---
 
@@ -117,7 +118,6 @@ Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śled
 | ID | Wymaganie | Specyfikacja |
 |----|-----------|--------------|
 | NF2.1 | Breakpoint mobile | 320px - 767px |
-| NF2.2 | Breakpoint tablet | 768px - 1023px |
 | NF2.3 | Breakpoint desktop | 1024px+ |
 | NF2.4 | Touch-friendly buttons | Min 44x44px |
 | NF2.5 | Bottom navigation na mobile | Zamiast top |
@@ -135,13 +135,12 @@ Agregator treści AI/ML dla profesjonalistów branżowych, umożliwiający śled
 
 | ID | Wymaganie |
 |----|-----------|
-| NF4.1 | HTTPS (SSL) |
-| NF4.2 | Hashowanie haseł (bcrypt) |
-| NF4.3 | Secure session tokens |
-| NF4.4 | CORS policy |
-| NF4.5 | Rate limiting API |
-| NF4.6 | **Szyfrowanie credentials stron zewnętrznych (AES-256)** |
-| NF4.7 | Credential storage w bezpiecznej lokalizacji (env vars) |
+| NF4.1 | Hashowanie haseł (bcrypt) |
+| NF4.2 | Secure session tokens |
+| NF4.3 | CORS policy |
+| NF4.4 | Rate limiting API |
+| NF4.5 | **Szyfrowanie credentials stron zewnętrznych (AES-256)** |
+| NF4.6 | Credential storage w bezpiecznej lokalizacji (env vars) |
 
 ---
 
@@ -201,10 +200,38 @@ ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
 - **Implementacja:** Background job po dodaniu artykułu
 - **Cache:** Zapisywane w bazie, generowane raz
 
-### 5.3 Autentykacja
+### 5.3 Scraping
+- **Decyzja:** Crawl4AI (self-hosted)
+- **Uzasadnienie:** Open source (Apache 2.0), LLM-ready markdown, obsługa JavaScript (Playwright)
+- **Deployment:** Docker na Oracle Cloud
+- **Dokumentacja:** https://docs.crawl4ai.com/
+
+### 5.4 Autentykacja
 - **Opcja 1:** Email/hasło (prostsze)
-- **Opcja 2:** OAuth (Google/GitHub)
-- **Do ustalenia:** Podczas designu
+
+### 5.5 Wyszukiwanie
+- **Decyzja:** PostgreSQL Full-Text Search (FTS)
+- **Język:** Polski (konfiguracja `polish` dla tsvector/tsquery)
+- **Zakres:** Tytuły artykułów + AI-generowane streszczenia
+- **Uzasadnienie:**
+  - Zero dodatkowych kosztów (wbudowane w PostgreSQL)
+  - Szybkie (~5ms) wyszukiwanie
+  - Natywne wsparcie dla języka polskiego (stemming, stop words)
+  - Możliwość rozszerzenia o semantic search w przyszłości
+- **Implementacja:**
+  ```sql
+  -- Kolumna tsvector dla wyszukiwania
+  ALTER TABLE news_items ADD COLUMN search_vector tsvector;
+
+  -- Indeks GIN dla szybkiego wyszukiwania
+  CREATE INDEX idx_news_search ON news_items USING GIN(search_vector);
+
+  -- Trigger do automatycznej aktualizacji
+  CREATE TRIGGER news_search_update
+  BEFORE INSERT OR UPDATE ON news_items
+  FOR EACH ROW EXECUTE FUNCTION
+  tsvector_update_trigger(search_vector, 'pg_catalog.polish', title, intro, summary);
+  ```
 
 ---
 
@@ -214,23 +241,19 @@ ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
 - Lista artykułów z kartami
 - 2-zdaniowe intro od razu
 - Pełne streszczenie po kliknięciu
+- Jednocześnie powinien być link pod którym mogę przejść do źródła artykułu
 - Logowanie/rejestracja
 - Zapisywanie artykułów
-- Dodawanie własnych źródeł RSS
+- Dodawanie własnych stron do scrapowania
+- TTS dla streszczeń
+- **Wyszukiwanie w tytułach i streszczeniach (PostgreSQL FTS, polski)**
 
 ### SHOULD
-- TTS dla streszczeń
-- Gmail integration
-- LinkedIn integration
-- Wyszukiwanie
+- Gmail integration - w kontekście odczytywania newsletterów
+- LinkedIn integration w kontekście odczytywania postów ekspertów
 
 ### COULD
 - Twitter/Nitter
-- Tagowanie artykułów
-- PWA (offline mode)
-- Widgety na pulpit (desktop/mobile)
-- Powiadomienia push o nowych artykułach
-- Udostępnianie kolekcji artykułów
 
 ### WON'T (na razie)
 - Internacjonalizacja (i18n)
@@ -240,7 +263,14 @@ ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
 
 ## 7. Załączniki
 
-### 7.1 Obecne Źródła RSS (domyślne)
+### 7.1 Źródła (konfigurowalne przez użytkownika)
+Użytkownik sam dodaje źródła które chce śledzić. Aplikacja wspiera:
+- Strony z artykułami (scraping)
+- Strony wymagające logowania (z przechowywaniem credentials)
+- Newslettery (Gmail integration)
+- Social media (LinkedIn, Twitter/X)
+
+**Przykładowe źródła:**
 1. Ethan Mollick - One Useful Thing
 2. Benedict Evans
 3. Stratechery
@@ -255,10 +285,13 @@ ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
 12. Sebastian Raschka
 13. Chip Huyen
 14. The Batch (DeepLearning.AI)
+15. strefainwestora.pl (wymaga logowania)
+16. inwestomat.eu
 
 ### 7.2 Infrastruktura
 - **Serwer:** Oracle Cloud Free Tier (Ubuntu 22.04)
 - **Baza:** PostgreSQL (lokalna)
 - **Backend:** Node.js + Express
+- **Scraping:** Crawl4AI (Python, Docker)
 - **AI:** Claude API (Anthropic)
 - **TTS:** Edge TTS

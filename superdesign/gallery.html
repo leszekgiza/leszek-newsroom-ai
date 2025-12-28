@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsroom AI - Design Gallery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            --accent: #e94560;
+            --primary: #1a1a2e;
+        }
+        [data-theme="dark"] {
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-card: #2d3748;
+            --text-primary: #f7fafc;
+            --text-secondary: #a0aec0;
+            --border-color: #4a5568;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .header {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-content h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .header-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 32px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .badge-ui { background: linear-gradient(135deg, #e94560, #ff6b8a); color: white; }
+        .badge-wireframe { background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 20px;
+            max-width: 1600px;
+        }
+        .design-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .design-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+        .design-card.featured {
+            border-color: var(--accent);
+        }
+        .design-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .design-title h3 {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .design-title p {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+        .design-preview {
+            height: 320px;
+            position: relative;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        .design-preview iframe {
+            width: 200%;
+            height: 200%;
+            border: none;
+            transform: scale(0.5);
+            transform-origin: top left;
+        }
+        .design-actions {
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2a2a4e;
+        }
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+        .stats {
+            margin-top: 40px;
+            padding: 24px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+        }
+        .stats h2 {
+            font-size: 1rem;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .stat-item {
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-item strong {
+            display: block;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        .stat-item span {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        @media (max-width: 768px) {
+            .gallery-grid { grid-template-columns: 1fr; }
+            .design-preview { height: 280px; }
+            .header { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Newsroom AI - Design Gallery</h1>
+            <p>UI Designs & Wireframes | Mobile + Desktop | Zgodne z requirements v2.0</p>
+        </div>
+        <div class="header-controls">
+            <button class="btn" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span> Dark Mode
+            </button>
+        </div>
+    </div>
+
+    <!-- UI Designs Section -->
+    <h2 class="section-title">
+        <span class="badge badge-ui">UI</span>
+        Kolorowe UI Designs - Light (10)
+    </h2>
+    <div class="gallery-grid">
+
+        <div class="design-card featured">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Strona główna - Feed</h3>
+                    <p>US1.1, US1.3, US2.1, US2.3</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_home_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_home_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_home_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Logowanie</h3>
+                    <p>US5.2 - Email/hasło</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_login_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_login_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_login_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Rejestracja</h3>
+                    <p>US5.1 - Nowe konto</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_register_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_register_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_register_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Zapisane artykuły</h3>
+                    <p>US3.1, US3.2, US3.3</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_saved_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_saved_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_saved_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Modal AI Summary + TTS</h3>
+                    <p>US2.2, US2.3</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_modal_summary_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_modal_summary_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_modal_summary_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Ustawienia - Źródła</h3>
+                    <p>US4.1, US4.3, US4.5</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_settings_sources_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_settings_sources_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_settings_sources_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Reset hasła</h3>
+                    <p>US5.4 - Odzyskiwanie konta</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_reset_password_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_reset_password_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_reset_password_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Integracja Gmail</h3>
+                    <p>US7.1 - Newslettery</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_settings_gmail_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_settings_gmail_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_settings_gmail_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Integracja LinkedIn</h3>
+                    <p>US7.2 - Posty ekspertów</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_settings_linkedin_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_settings_linkedin_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_settings_linkedin_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Ukryte źródła</h3>
+                    <p>US4.4 - Zarządzanie ukrytymi</p>
+                </div>
+                <span class="badge badge-ui">UI</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_settings_hidden_sources_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_settings_hidden_sources_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_settings_hidden_sources_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UI Designs Dark Section -->
+    <h2 class="section-title">
+        <span class="badge" style="background: linear-gradient(135deg, #8b5cf6, #a855f7); color: white;">DARK</span>
+        Kolorowe UI Designs - Dark (3)
+    </h2>
+    <div class="gallery-grid">
+
+        <div class="design-card featured">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Strona główna - Dark</h3>
+                    <p>US1.1, US1.2, US1.3, US3.3</p>
+                </div>
+                <span class="badge" style="background: #1e293b; color: #94a3b8;">DARK</span>
+            </div>
+            <div class="design-preview" style="background: #0f172a;">
+                <iframe src="./design_iterations/ui_home_dark_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_home_dark_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_home_dark_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Logowanie - Dark</h3>
+                    <p>US5.2 - Email/hasło</p>
+                </div>
+                <span class="badge" style="background: #1e293b; color: #94a3b8;">DARK</span>
+            </div>
+            <div class="design-preview" style="background: #0f172a;">
+                <iframe src="./design_iterations/ui_login_dark_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_login_dark_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_login_dark_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Modal AI Summary - Dark</h3>
+                    <p>US2.2, US2.3, F4.1</p>
+                </div>
+                <span class="badge" style="background: #1e293b; color: #94a3b8;">DARK</span>
+            </div>
+            <div class="design-preview" style="background: #0f172a;">
+                <iframe src="./design_iterations/ui_modal_summary_dark_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_modal_summary_dark_1.html', '_blank')">Otwórz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_modal_summary_dark_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UI Designs Desktop Section -->
+    <h2 class="section-title">
+        <span class="badge" style="background: linear-gradient(135deg, #0ea5e9, #06b6d4); color: white;">DESKTOP</span>
+        UI Designs - Desktop (3)
+    </h2>
+    <div class="gallery-grid">
+
+        <div class="design-card featured">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Desktop: Strona glowna</h3>
+                    <p>Sidebar + Grid layout</p>
+                </div>
+                <span class="badge" style="background: #0ea5e9; color: white;">DESKTOP</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_home_desktop_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_home_desktop_1.html', '_blank')">Otworz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_home_desktop_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Desktop: Ustawienia</h3>
+                    <p>Integracje panel</p>
+                </div>
+                <span class="badge" style="background: #0ea5e9; color: white;">DESKTOP</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_settings_desktop_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_settings_desktop_1.html', '_blank')">Otworz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_settings_desktop_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>Desktop: Modal AI Summary</h3>
+                    <p>TTS + Kluczowe wnioski</p>
+                </div>
+                <span class="badge" style="background: #0ea5e9; color: white;">DESKTOP</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/ui_modal_summary_desktop_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/ui_modal_summary_desktop_1.html', '_blank')">Otworz</button>
+                <button class="btn-sm btn-secondary" onclick="copyPath('ui_modal_summary_desktop_1.html')">Kopiuj</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Wireframes Section -->
+    <h2 class="section-title">
+        <span class="badge badge-wireframe">WF</span>
+        Wireframes (8)
+    </h2>
+    <div class="gallery-grid">
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>WF: Strona główna</h3>
+                    <p>Lista artykułów</p>
+                </div>
+                <span class="badge badge-wireframe">WF</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/home_list_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/home_list_1.html', '_blank')">Otwórz</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>WF: Logowanie</h3>
+                    <p>Email/hasło</p>
+                </div>
+                <span class="badge badge-wireframe">WF</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/auth_login_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/auth_login_1.html', '_blank')">Otwórz</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>WF: Rejestracja</h3>
+                    <p>Nowe konto</p>
+                </div>
+                <span class="badge badge-wireframe">WF</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/auth_register_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/auth_register_1.html', '_blank')">Otwórz</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>WF: Ustawienia źródeł</h3>
+                    <p>Lista źródeł</p>
+                </div>
+                <span class="badge badge-wireframe">WF</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/settings_sources_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/settings_sources_1.html', '_blank')">Otwórz</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>WF: Dodaj źródło</h3>
+                    <p>Formularz</p>
+                </div>
+                <span class="badge badge-wireframe">WF</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/settings_add_source_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/settings_add_source_1.html', '_blank')">Otwórz</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>WF: Zapisane</h3>
+                    <p>/saved</p>
+                </div>
+                <span class="badge badge-wireframe">WF</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/saved_articles_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/saved_articles_1.html', '_blank')">Otwórz</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>WF: Modal Summary</h3>
+                    <p>TTS Player</p>
+                </div>
+                <span class="badge badge-wireframe">WF</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/modal_summary_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/modal_summary_1.html', '_blank')">Otwórz</button>
+            </div>
+        </div>
+
+        <div class="design-card">
+            <div class="design-header">
+                <div class="design-title">
+                    <h3>WF: Ustawienia wyglądu</h3>
+                    <p>Theme toggle</p>
+                </div>
+                <span class="badge badge-wireframe">WF</span>
+            </div>
+            <div class="design-preview">
+                <iframe src="./design_iterations/settings_appearance_1.html" loading="lazy"></iframe>
+            </div>
+            <div class="design-actions">
+                <button class="btn-sm btn-primary" onclick="window.open('./design_iterations/settings_appearance_1.html', '_blank')">Otwórz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+        <h2>Pokrycie User Stories (MVP)</h2>
+        <div class="stats-grid">
+            <div class="stat-item"><strong>24</strong><span>Plikow designu</span></div>
+            <div class="stat-item"><strong>10</strong><span>UI Light (Mobile)</span></div>
+            <div class="stat-item"><strong>3</strong><span>UI Dark (Mobile)</span></div>
+            <div class="stat-item"><strong>3</strong><span>UI Desktop</span></div>
+            <div class="stat-item"><strong>8</strong><span>Wireframes</span></div>
+            <div class="stat-item"><strong>16</strong><span>User Stories</span></div>
+        </div>
+    </div>
+
+    <script>
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeIcon();
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        function copyPath(filename) {
+            navigator.clipboard.writeText(`superdesign/design_iterations/${filename}`);
+            alert('Skopiowano!');
+        }
+    </script>
+</body>
+</html>

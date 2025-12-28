@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe - Strona Główna (Lista Artykułów)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; }
+        .wireframe-box { border: 2px solid #000; background: #fff; }
+        .wireframe-placeholder { background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e0e0e0 10px, #e0e0e0 20px); }
+    </style>
+</head>
+<body class="bg-white min-h-screen">
+    <!-- Mobile Container -->
+    <div class="max-w-md mx-auto bg-gray-50 min-h-screen relative pb-20">
+
+        <!-- Header -->
+        <header class="wireframe-box p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">Logo</div>
+                <span class="font-bold text-sm">Newsroom AI</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 wireframe-box flex items-center justify-center text-xs">🔍</div>
+                <div class="w-8 h-8 wireframe-box rounded-full flex items-center justify-center text-xs">👤</div>
+            </div>
+        </header>
+
+        <!-- Filter Bar -->
+        <div class="p-4 flex gap-2 overflow-x-auto">
+            <div class="wireframe-box px-3 py-1 text-xs whitespace-nowrap bg-black text-white">Wszystkie</div>
+            <div class="wireframe-box px-3 py-1 text-xs whitespace-nowrap">Ethan Mollick</div>
+            <div class="wireframe-box px-3 py-1 text-xs whitespace-nowrap">Simon Willison</div>
+            <div class="wireframe-box px-3 py-1 text-xs whitespace-nowrap">HuggingFace</div>
+        </div>
+
+        <!-- Articles List -->
+        <main class="p-4 space-y-4">
+
+            <!-- Article Card 1 - NEW -->
+            <article class="wireframe-box p-4 space-y-3">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs wireframe-box px-2 py-0.5 bg-black text-white">NEW</span>
+                            <span class="text-xs text-gray-500">Ethan Mollick • 2h</span>
+                        </div>
+                        <h2 class="font-bold text-sm leading-tight">The Future of AI Agents in Enterprise</h2>
+                    </div>
+                    <button class="w-8 h-8 wireframe-box flex items-center justify-center text-xs ml-2">☆</button>
+                </div>
+
+                <!-- 2-sentence Intro -->
+                <p class="text-xs text-gray-700 leading-relaxed">
+                    AI agents are transforming how enterprises operate, enabling autonomous decision-making at scale.
+                    This article explores the key patterns emerging in production deployments.
+                </p>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <div class="flex gap-2">
+                        <button class="wireframe-box px-3 py-1 text-xs">Więcej</button>
+                        <button class="wireframe-box px-3 py-1 text-xs">🔗 Źródło</button>
+                    </div>
+                    <button class="wireframe-box px-3 py-1 text-xs">🔊 TTS</button>
+                </div>
+            </article>
+
+            <!-- Article Card 2 -->
+            <article class="wireframe-box p-4 space-y-3">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs text-gray-500">Simon Willison • 5h</span>
+                        </div>
+                        <h2 class="font-bold text-sm leading-tight">Building LLM-powered CLI tools with Python</h2>
+                    </div>
+                    <button class="w-8 h-8 wireframe-box flex items-center justify-center text-xs ml-2">★</button>
+                </div>
+
+                <p class="text-xs text-gray-700 leading-relaxed">
+                    Step-by-step guide to creating command-line tools that leverage large language models.
+                    Includes practical examples using the Click library and streaming responses.
+                </p>
+
+                <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <div class="flex gap-2">
+                        <button class="wireframe-box px-3 py-1 text-xs">Więcej</button>
+                        <button class="wireframe-box px-3 py-1 text-xs">🔗 Źródło</button>
+                    </div>
+                    <button class="wireframe-box px-3 py-1 text-xs">🔊 TTS</button>
+                </div>
+            </article>
+
+            <!-- Article Card 3 - NEW -->
+            <article class="wireframe-box p-4 space-y-3">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs wireframe-box px-2 py-0.5 bg-black text-white">NEW</span>
+                            <span class="text-xs text-gray-500">HuggingFace • 1d</span>
+                        </div>
+                        <h2 class="font-bold text-sm leading-tight">Introducing SmolLM2: Smaller, Faster, Better</h2>
+                    </div>
+                    <button class="w-8 h-8 wireframe-box flex items-center justify-center text-xs ml-2">☆</button>
+                </div>
+
+                <p class="text-xs text-gray-700 leading-relaxed">
+                    SmolLM2 achieves state-of-the-art performance for its size class with only 1.7B parameters.
+                    Perfect for edge deployment and resource-constrained environments.
+                </p>
+
+                <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <div class="flex gap-2">
+                        <button class="wireframe-box px-3 py-1 text-xs">Więcej</button>
+                        <button class="wireframe-box px-3 py-1 text-xs">🔗 Źródło</button>
+                    </div>
+                    <button class="wireframe-box px-3 py-1 text-xs">🔊 TTS</button>
+                </div>
+            </article>
+
+            <!-- Article Card 4 -->
+            <article class="wireframe-box p-4 space-y-3">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs text-gray-500">strefainwestora.pl • 2d</span>
+                        </div>
+                        <h2 class="font-bold text-sm leading-tight">Analiza spółek AI na GPW - Q4 2025</h2>
+                    </div>
+                    <button class="w-8 h-8 wireframe-box flex items-center justify-center text-xs ml-2">☆</button>
+                </div>
+
+                <p class="text-xs text-gray-700 leading-relaxed">
+                    Przegląd polskich spółek z sektora AI notowanych na Giełdzie Papierów Wartościowych.
+                    Które firmy mają największy potencjał wzrostu w nadchodzącym roku?
+                </p>
+
+                <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <div class="flex gap-2">
+                        <button class="wireframe-box px-3 py-1 text-xs">Więcej</button>
+                        <button class="wireframe-box px-3 py-1 text-xs">🔗 Źródło</button>
+                    </div>
+                    <button class="wireframe-box px-3 py-1 text-xs">🔊 TTS</button>
+                </div>
+            </article>
+
+        </main>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md wireframe-box flex justify-around py-3 bg-white">
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs bg-black text-white">📰</div>
+                <span class="text-xs">Feed</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">🔖</div>
+                <span class="text-xs">Zapisane</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">📊</div>
+                <span class="text-xs">Źródła</span>
+            </button>
+            <button class="flex flex-col items-center gap-1">
+                <div class="w-6 h-6 wireframe-box flex items-center justify-center text-xs">⚙️</div>
+                <span class="text-xs">Ustawienia</span>
+            </button>
+        </nav>
+
+    </div>
+</body>
+</html>

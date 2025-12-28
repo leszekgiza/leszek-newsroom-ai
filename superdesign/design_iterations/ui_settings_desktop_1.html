@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsroom AI - Ustawienia Desktop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a2e',
+                        secondary: '#16213e',
+                        accent: '#0f3460',
+                        highlight: '#e94560',
+                        surface: '#f8fafc',
+                        muted: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <div class="flex min-h-screen">
+
+        <!-- Main Sidebar Navigation -->
+        <aside class="w-64 bg-white border-r border-slate-200 fixed h-full flex flex-col">
+            <div class="p-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-primary text-xl">Newsroom AI</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                    </svg>
+                    Feed
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                    </svg>
+                    Zapisane
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    Źródła
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 bg-primary/5 text-primary rounded-xl font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Ustawienia
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-slate-100">
+                <div class="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                        LK
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium text-primary text-sm truncate">Leszek K.</p>
+                        <p class="text-xs text-muted truncate">leszek@example.com</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Settings Content -->
+        <main class="flex-1 ml-64">
+            <div class="flex min-h-screen">
+
+                <!-- Settings Sidebar -->
+                <div class="w-72 bg-white border-r border-slate-100 p-6">
+                    <h1 class="text-xl font-bold text-primary mb-6">Ustawienia</h1>
+
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Profil
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                            Źródła
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 bg-primary/5 text-primary rounded-xl font-medium">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            Integracje
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                            </svg>
+                            Ukryte źródła
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                            </svg>
+                            Wygląd
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414"/>
+                            </svg>
+                            Głos TTS
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="flex-1 p-8 bg-slate-50">
+                    <div class="max-w-4xl">
+                        <h2 class="text-2xl font-bold text-primary mb-2">Integracje</h2>
+                        <p class="text-muted mb-8">Połącz zewnętrzne usługi aby importować treści do swojego feedu.</p>
+
+                        <!-- Integration Cards Grid -->
+                        <div class="grid grid-cols-2 gap-6">
+
+                            <!-- Gmail Integration -->
+                            <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 bg-gradient-to-br from-red-500 via-yellow-500 to-green-500 rounded-xl flex items-center justify-center">
+                                            <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-primary text-lg">Gmail</h3>
+                                            <p class="text-sm text-muted">Importuj newslettery</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">Połączono</span>
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-4 py-4 border-t border-b border-slate-100">
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-primary">12</p>
+                                        <p class="text-xs text-muted">Newsletterów</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-primary">47</p>
+                                        <p class="text-xs text-muted">Artykułów</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-primary">5m</p>
+                                        <p class="text-xs text-muted">Ostatnia sync</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-3">
+                                    <button class="flex-1 py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-secondary transition-colors">
+                                        Konfiguruj
+                                    </button>
+                                    <button class="px-4 py-2.5 text-slate-600 text-sm font-medium rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">
+                                        Odłącz
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- LinkedIn Integration -->
+                            <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center">
+                                            <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-primary text-lg">LinkedIn</h3>
+                                            <p class="text-sm text-muted">Śledź posty ekspertów</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">Połączono</span>
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-4 py-4 border-t border-b border-slate-100">
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-primary">5</p>
+                                        <p class="text-xs text-muted">Hashtagów</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-primary">3</p>
+                                        <p class="text-xs text-muted">Osób</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-primary">23</p>
+                                        <p class="text-xs text-muted">Postów dziś</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-3">
+                                    <button class="flex-1 py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-secondary transition-colors">
+                                        Konfiguruj
+                                    </button>
+                                    <button class="px-4 py-2.5 text-slate-600 text-sm font-medium rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">
+                                        Odłącz
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Twitter/X Integration -->
+                            <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 bg-black rounded-xl flex items-center justify-center">
+                                            <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-primary text-lg">Twitter / X</h3>
+                                            <p class="text-sm text-muted">Przez Nitter</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-sm font-medium rounded-full">Wkrótce</span>
+                                </div>
+
+                                <p class="text-sm text-muted py-4 border-t border-b border-slate-100">
+                                    Integracja z Twitter/X przez Nitter pozwoli śledzić tweety ekspertów AI bez konieczności posiadania konta.
+                                </p>
+
+                                <button class="w-full py-2.5 text-slate-400 text-sm font-medium rounded-xl border border-slate-200 cursor-not-allowed" disabled>
+                                    Niedostępne
+                                </button>
+                            </div>
+
+                            <!-- RSS Integration -->
+                            <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center">
+                                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-primary text-lg">RSS Feeds</h3>
+                                            <p class="text-sm text-muted">Klasyczne kanały RSS</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-slate-100 text-slate-600 text-sm font-medium rounded-full">Niepołączono</span>
+                                </div>
+
+                                <p class="text-sm text-muted py-4 border-t border-b border-slate-100">
+                                    Dodaj kanały RSS z dowolnych stron. Alternatywa dla scrapowania gdy strona oferuje feed.
+                                </p>
+
+                                <button class="w-full py-2.5 bg-orange-500 text-white text-sm font-medium rounded-xl hover:bg-orange-600 transition-colors">
+                                    Dodaj kanał RSS
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+</body>
+</html>

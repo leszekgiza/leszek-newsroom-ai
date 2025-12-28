@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsroom AI - Ukryte Źródła</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a2e',
+                        secondary: '#16213e',
+                        accent: '#0f3460',
+                        highlight: '#e94560',
+                        surface: '#f8fafc',
+                        muted: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <!-- Mobile Container -->
+    <div class="max-w-md mx-auto bg-white min-h-screen relative pb-24">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
+            <div class="px-4 py-3 flex items-center gap-3">
+                <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h1 class="font-bold text-primary text-lg">Ukryte źródła</h1>
+            </div>
+        </header>
+
+        <main class="p-4 space-y-6">
+
+            <!-- Info Banner -->
+            <div class="bg-slate-100 rounded-2xl p-4 flex items-start gap-3">
+                <div class="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-700">Ukryte źródła nie będą wyświetlane w Twoim feedzie. Możesz je przywrócić w dowolnym momencie.</p>
+                </div>
+            </div>
+
+            <!-- Hidden Sources Count -->
+            <div class="flex items-center justify-between">
+                <h2 class="font-semibold text-primary">Ukryte źródła</h2>
+                <span class="text-sm bg-slate-100 text-muted px-3 py-1 rounded-full">3 ukryte</span>
+            </div>
+
+            <!-- Hidden Sources List -->
+            <div class="space-y-3">
+
+                <!-- Hidden Source 1 -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-4 opacity-70">
+                    <div class="flex items-start gap-3">
+                        <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-semibold text-slate-500 truncate">TechCrunch</h3>
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-400 text-xs rounded-full">Ukryty</span>
+                            </div>
+                            <p class="text-sm text-slate-400 mt-1 truncate">techcrunch.com</p>
+                            <p class="text-xs text-slate-400 mt-2">Ukryto: 3 dni temu</p>
+                        </div>
+                        <button class="px-3 py-2 bg-emerald-50 text-emerald-600 text-sm font-medium rounded-xl hover:bg-emerald-100 transition-colors flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Pokaż
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hidden Source 2 -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-4 opacity-70">
+                    <div class="flex items-start gap-3">
+                        <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <span class="text-orange-500 font-bold">HN</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-semibold text-slate-500 truncate">Hacker News</h3>
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-400 text-xs rounded-full">Ukryty</span>
+                            </div>
+                            <p class="text-sm text-slate-400 mt-1 truncate">news.ycombinator.com</p>
+                            <p class="text-xs text-slate-400 mt-2">Ukryto: 1 tydzień temu</p>
+                        </div>
+                        <button class="px-3 py-2 bg-emerald-50 text-emerald-600 text-sm font-medium rounded-xl hover:bg-emerald-100 transition-colors flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Pokaż
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hidden Source 3 -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-4 opacity-70">
+                    <div class="flex items-start gap-3">
+                        <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-semibold text-slate-500 truncate">Reddit r/MachineLearning</h3>
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-400 text-xs rounded-full">Ukryty</span>
+                            </div>
+                            <p class="text-sm text-slate-400 mt-1 truncate">reddit.com/r/MachineLearning</p>
+                            <p class="text-xs text-slate-400 mt-2">Ukryto: 2 tygodnie temu</p>
+                        </div>
+                        <button class="px-3 py-2 bg-emerald-50 text-emerald-600 text-sm font-medium rounded-xl hover:bg-emerald-100 transition-colors flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Pokaż
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-4 py-2">
+                <div class="flex-1 h-px bg-slate-200"></div>
+                <span class="text-xs text-muted">Jak ukryć źródło?</span>
+                <div class="flex-1 h-px bg-slate-200"></div>
+            </div>
+
+            <!-- How to Hide Instructions -->
+            <div class="bg-blue-50 rounded-2xl p-4 space-y-3">
+                <h3 class="font-semibold text-blue-800 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Instrukcja
+                </h3>
+                <ol class="text-sm text-blue-700 space-y-2">
+                    <li class="flex items-start gap-2">
+                        <span class="w-5 h-5 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-800 flex-shrink-0">1</span>
+                        <span>Przejdź do <strong>Ustawienia > Źródła</strong></span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-5 h-5 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-800 flex-shrink-0">2</span>
+                        <span>Znajdź źródło które chcesz ukryć</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-5 h-5 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-800 flex-shrink-0">3</span>
+                        <span>Kliknij przełącznik <strong>"Widoczne"</strong> aby ukryć</span>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Restore All Button -->
+            <button class="w-full py-3 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Przywróć wszystkie źródła
+            </button>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200 px-6 py-2 z-50">
+            <div class="flex justify-around">
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Feed</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Zapisane</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Źródła</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-semibold text-primary">Ustawienia</span>
+                </button>
+            </div>
+        </nav>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe - Rejestracja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; }
+        .wireframe-box { border: 2px solid #000; background: #fff; }
+    </style>
+</head>
+<body class="bg-white min-h-screen flex items-center justify-center p-4">
+
+    <!-- Mobile Container -->
+    <div class="w-full max-w-md space-y-8">
+
+        <!-- Logo & Title -->
+        <div class="text-center space-y-4">
+            <div class="w-16 h-16 wireframe-box mx-auto flex items-center justify-center">
+                <span class="text-2xl">📰</span>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold">Newsroom AI</h1>
+                <p class="text-sm text-gray-500">Stwórz konto</p>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div class="wireframe-box p-6 space-y-6">
+            <h2 class="text-lg font-bold text-center">Rejestracja</h2>
+
+            <div class="space-y-4">
+                <!-- Name -->
+                <div class="space-y-2">
+                    <label class="text-xs font-medium">Imię (opcjonalne)</label>
+                    <div class="wireframe-box p-3">
+                        <span class="text-gray-400 text-sm">Jan Kowalski</span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="space-y-2">
+                    <label class="text-xs font-medium">Email *</label>
+                    <div class="wireframe-box p-3">
+                        <span class="text-gray-400 text-sm">jan@example.com</span>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="space-y-2">
+                    <label class="text-xs font-medium">Hasło *</label>
+                    <div class="wireframe-box p-3 flex items-center justify-between">
+                        <span class="text-gray-400 text-sm">••••••••</span>
+                        <span class="text-xs">👁</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Min. 8 znaków</p>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="space-y-2">
+                    <label class="text-xs font-medium">Powtórz hasło *</label>
+                    <div class="wireframe-box p-3 flex items-center justify-between">
+                        <span class="text-gray-400 text-sm">••••••••</span>
+                        <span class="text-xs">👁</span>
+                    </div>
+                </div>
+
+                <!-- Terms -->
+                <label class="flex items-start gap-2 text-xs">
+                    <div class="w-4 h-4 wireframe-box flex-shrink-0 mt-0.5"></div>
+                    <span>Akceptuję <a href="#" class="underline">regulamin</a> i <a href="#" class="underline">politykę prywatności</a></span>
+                </label>
+            </div>
+
+            <!-- Register Button -->
+            <button class="w-full wireframe-box p-3 bg-black text-white font-bold text-sm">
+                Zarejestruj się
+            </button>
+        </div>
+
+        <!-- Login Link -->
+        <p class="text-center text-sm">
+            Masz już konto?
+            <a href="#" class="font-bold underline">Zaloguj się</a>
+        </p>
+
+    </div>
+</body>
+</html>
