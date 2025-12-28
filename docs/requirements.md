@@ -1,8 +1,8 @@
 # Leszek Newsroom AI - Dokument Wymagań
 
-**Wersja:** 2.0
-**Data:** 2025-12-27
-**Status:** Draft do Figma Design
+**Wersja:** 2.1
+**Data:** 2025-12-28
+**Status:** Draft
 
 ---
 
@@ -24,6 +24,30 @@ Uniwersalny agregator treści z dowolnych źródeł internetowych, umożliwiają
 2. **Deep dive** - szczegółowe czytanie wybranych artykułów na desktopie
 3. **Mobile check** - szybkie sprawdzenie nowości w komunikacji/transporcie
 4. **Sprawdzanie nowości z użyciem TTS, a kiedyś również rozmowa z STT**
+
+### 1.4 Architektura Źródeł
+
+System rozróżnia dwa typy źródeł:
+
+| Typ | Opis | Scraping | Widoczność |
+|-----|------|----------|------------|
+| **Catalog (shared)** | Publiczne blogi/portale | Raz dla wszystkich | Subskrybenci |
+| **Private (per-user)** | Auth sites, Gmail, LinkedIn | Per-user | Tylko owner |
+
+**Catalog Sources:**
+- Współdzielone przez wszystkich użytkowników
+- User SUBSKRYBUJE źródła z katalogu
+- Efektywność: 1 scrape = 1000 userów
+
+**Private Sources:**
+- Strony wymagające logowania (user podaje credentials)
+- Gmail (OAuth) - newslettery
+- LinkedIn (li_at cookie) - posty ekspertów
+- Prywatność: widoczne TYLKO dla właściciela
+
+**Future (v3.0):**
+- Topic-based discovery (user definiuje tematy, AI szuka w internecie)
+- Dzienny podcast z podsumowaniem
 
 ---
 

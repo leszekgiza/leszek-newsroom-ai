@@ -1,6 +1,6 @@
 # Leszek Newsroom AI - Low-Level Design (LLD)
 
-**Wersja:** 1.0
+**Wersja:** 1.1
 **Data:** 2025-12-28
 **Status:** Draft
 
@@ -8,55 +8,113 @@
 
 ## 1. Schemat Bazy Danych
 
+### 1.0 Architektura Źródeł (Catalog vs Private)
+
+System rozróżnia dwa typy źródeł:
+
+| Typ | Opis | Scraping | Widoczność |
+|-----|------|----------|------------|
+| **CatalogSource** | Publiczne blogi/portale (shared) | Raz dla wszystkich | Subskrybenci |
+| **PrivateSource** | Auth sites, Gmail, LinkedIn | Per-user | Tylko owner |
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CATALOG (shared)                              │
+│  Ethan Mollick, Simon Willison, Eugene Yan...                   │
+│  → Scrapowane RAZ, widoczne dla wszystkich subskrybentów        │
+└─────────────────────────────────────────────────────────────────┘
+                              +
+┌─────────────────────────────────────────────────────────────────┐
+│                    PRIVATE (per-user)                            │
+│  strefainwestora.pl (auth), Gmail, LinkedIn                     │
+│  → Scrapowane PER-USER, widoczne tylko dla ownera               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 ### 1.1 Diagram ERD
 
 ```
-┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
-│      users      │       │     sources     │       │    articles     │
-├─────────────────┤       ├─────────────────┤       ├─────────────────┤
-│ id (PK)         │──┐    │ id (PK)         │──┐    │ id (PK)         │
-│ email           │  │    │ user_id (FK)    │◄─┘    │ source_id (FK)  │◄─┐
-│ password_hash   │  │    │ name            │       │ url (UNIQUE)    │  │
-│ name            │  │    │ url             │       │ title           │  │
-│ avatar_url      │  │    │ type            │       │ intro           │  │
-│ theme           │  │    │ config          │       │ summary         │  │
-│ created_at      │  │    │ is_active       │       │ image_url       │  │
-│ updated_at      │  │    │ last_scraped_at │       │ author          │  │
-└─────────────────┘  │    │ created_at      │       │ published_at    │  │
-         │           │    └─────────────────┘       │ scraped_at      │  │
-         │           │                              │ search_vector   │  │
-         │           │                              │ created_at      │  │
-         │           │                              └─────────────────┘  │
-         │           │                                       │           │
-         │           │    ┌─────────────────┐                │           │
-         │           │    │  saved_articles │                │           │
-         │           │    ├─────────────────┤                │           │
-         │           └───▶│ user_id (FK)    │                │           │
-         │                │ article_id (FK) │◄───────────────┘           │
-         │                │ saved_at        │                            │
-         │                └─────────────────┘                            │
-         │                                                               │
-         │           ┌─────────────────┐       ┌─────────────────┐      │
-         │           │  read_articles  │       │  integrations   │      │
-         │           ├─────────────────┤       ├─────────────────┤      │
-         └──────────▶│ user_id (FK)    │       │ id (PK)         │      │
-                     │ article_id (FK) │◄──────│ user_id (FK)    │◄─────┘
-                     │ read_at         │       │ type            │
-                     └─────────────────┘       │ config          │
-                                               │ credentials     │
-                                               │ last_synced_at  │
-                                               │ created_at      │
-                                               └─────────────────┘
+┌─────────────────┐
+│      users      │
+├─────────────────┤
+│ id (PK)         │─────────────────────────────────────────┐
+│ email           │                                         │
+│ password_hash   │                                         │
+│ name            │                                         │
+│ theme           │                                         │
+│ created_at      │                                         │
+└─────────────────┘                                         │
+         │                                                  │
+         │         ┌─────────────────────┐                  │
+         │         │ user_subscriptions  │                  │
+         │         ├─────────────────────┤                  │
+         └────────▶│ user_id (FK)        │                  │
+                   │ catalog_source_id   │◄──┐              │
+                   │ subscribed_at       │   │              │
+                   └─────────────────────┘   │              │
+                                             │              │
+┌─────────────────────┐                      │              │
+│   catalog_sources   │  (SHARED)            │              │
+├─────────────────────┤                      │              │
+│ id (PK)             │──────────────────────┘              │
+│ name                │                                     │
+│ url (UNIQUE)        │──────────────────────┐              │
+│ description         │                      │              │
+│ category            │                      │              │
+│ logo_url            │                      │              │
+│ is_active           │                      │              │
+│ last_scraped_at     │                      │              │
+│ article_count       │                      │              │
+└─────────────────────┘                      │              │
+                                             │              │
+┌─────────────────────┐                      │              │
+│   private_sources   │  (PER-USER)          │              │
+├─────────────────────┤                      │              │
+│ id (PK)             │──────────────────────┼───┐          │
+│ user_id (FK)        │◄─────────────────────┼───┼──────────┘
+│ name                │                      │   │
+│ url                 │                      │   │
+│ type                │                      │   │
+│ config (JSON)       │                      │   │
+│ credentials (enc)   │                      │   │
+│ is_active           │                      │   │
+│ last_scraped_at     │                      │   │
+└─────────────────────┘                      │   │
+                                             │   │
+┌─────────────────────┐                      │   │
+│      articles       │                      │   │
+├─────────────────────┤                      │   │
+│ id (PK)             │                      │   │
+│ url (UNIQUE)        │                      │   │
+│ title               │                      │   │
+│ intro               │                      │   │
+│ summary             │                      │   │
+│ image_url           │                      │   │
+│ author              │                      │   │
+│ published_at        │                      │   │
+│ search_vector       │                      │   │
+│ catalog_source_id   │◄─────────────────────┘   │  (nullable)
+│ private_source_id   │◄─────────────────────────┘  (nullable)
+└─────────────────────┘
+         │
+         │    ┌─────────────────┐    ┌─────────────────┐
+         │    │  saved_articles │    │  read_articles  │
+         │    ├─────────────────┤    ├─────────────────┤
+         └───▶│ article_id (FK) │    │ article_id (FK) │◄───┘
+              │ user_id (FK)    │    │ user_id (FK)    │
+              │ saved_at        │    │ read_at         │
+              └─────────────────┘    └─────────────────┘
 
-┌─────────────────┐       ┌─────────────────┐
-│ hidden_sources  │       │    sessions     │
-├─────────────────┤       ├─────────────────┤
-│ user_id (FK)    │       │ id (PK)         │
-│ source_id (FK)  │       │ user_id (FK)    │
-│ hidden_at       │       │ token           │
-└─────────────────┘       │ expires_at      │
-                          │ created_at      │
-                          └─────────────────┘
+┌─────────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  hidden_catalog_src │    │    sessions     │    │  user_topics    │
+├─────────────────────┤    ├─────────────────┤    ├─────────────────┤
+│ user_id (FK)        │    │ id (PK)         │    │ id (PK)         │
+│ catalog_source_id   │    │ user_id (FK)    │    │ user_id (FK)    │
+│ hidden_at           │    │ token           │    │ name            │
+└─────────────────────┘    │ expires_at      │    │ keywords[]      │
+                           └─────────────────┘    │ is_active       │
+                                                  └─────────────────┘
+                                                  (FUTURE: topic-based)
 ```
 
 ### 1.2 Prisma Schema
@@ -89,12 +147,13 @@ model User {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   // Relations
-  sources        Source[]
-  savedArticles  SavedArticle[]
-  readArticles   ReadArticle[]
-  integrations   Integration[]
-  hiddenSources  HiddenSource[]
-  sessions       Session[]
+  subscriptions       UserSubscription[]
+  privateSources      PrivateSource[]
+  savedArticles       SavedArticle[]
+  readArticles        ReadArticle[]
+  hiddenCatalogSources HiddenCatalogSource[]
+  sessions            Session[]
+  topics              UserTopic[]  // FUTURE: topic-based discovery
 
   @@map("users")
 }
@@ -118,75 +177,116 @@ enum Theme {
 }
 
 // ============================================
-// SOURCES
+// CATALOG SOURCES (SHARED)
 // ============================================
 
-model Source {
-  id            String      @id @default(cuid())
-  userId        String      @map("user_id")
+model CatalogSource {
+  id            String    @id @default(cuid())
   name          String
-  url           String
-  type          SourceType  @default(WEBSITE)
-  config        Json?       // CSS selectors, auth config, etc.
-  isActive      Boolean     @default(true) @map("is_active")
-  lastScrapedAt DateTime?   @map("last_scraped_at")
-  createdAt     DateTime    @default(now()) @map("created_at")
+  url           String    @unique
+  description   String?
+  category      String?   // "AI/ML", "Tech", "Finance", "Startups"
+  logoUrl       String?   @map("logo_url")
+  isActive      Boolean   @default(true) @map("is_active")
+  lastScrapedAt DateTime? @map("last_scraped_at")
+  articleCount  Int       @default(0) @map("article_count")
+  createdAt     DateTime  @default(now()) @map("created_at")
 
   // Relations
-  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  articles Article[]
-  hiddenBy HiddenSource[]
+  articles      Article[]
+  subscriptions UserSubscription[]
+  hiddenBy      HiddenCatalogSource[]
 
-  @@unique([userId, url])
-  @@map("sources")
+  @@map("catalog_sources")
 }
 
-model HiddenSource {
-  userId   String   @map("user_id")
-  sourceId String   @map("source_id")
-  hiddenAt DateTime @default(now()) @map("hidden_at")
+model UserSubscription {
+  userId          String   @map("user_id")
+  catalogSourceId String   @map("catalog_source_id")
+  subscribedAt    DateTime @default(now()) @map("subscribed_at")
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  catalogSource CatalogSource @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)
 
-  @@id([userId, sourceId])
-  @@map("hidden_sources")
+  @@id([userId, catalogSourceId])
+  @@map("user_subscriptions")
 }
 
-enum SourceType {
-  WEBSITE
-  GMAIL
-  LINKEDIN
-  TWITTER
-  RSS
+model HiddenCatalogSource {
+  userId          String   @map("user_id")
+  catalogSourceId String   @map("catalog_source_id")
+  hiddenAt        DateTime @default(now()) @map("hidden_at")
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  catalogSource CatalogSource @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, catalogSourceId])
+  @@map("hidden_catalog_sources")
 }
 
 // ============================================
-// ARTICLES
+// PRIVATE SOURCES (PER-USER)
+// ============================================
+
+model PrivateSource {
+  id            String            @id @default(cuid())
+  userId        String            @map("user_id")
+  name          String
+  url           String
+  type          PrivateSourceType @default(WEBSITE)
+  config        Json?             // CSS selectors, hashtags, senders, etc.
+  credentials   String?           // Encrypted (AES-256) - passwords, tokens
+  isActive      Boolean           @default(true) @map("is_active")
+  lastScrapedAt DateTime?         @map("last_scraped_at")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articles Article[]
+
+  @@unique([userId, url])
+  @@map("private_sources")
+}
+
+enum PrivateSourceType {
+  WEBSITE   // Auth-required websites (strefainwestora.pl)
+  GMAIL     // User's Gmail newsletters
+  LINKEDIN  // User's LinkedIn feed
+  TWITTER   // User's Twitter/X
+  RSS       // Private RSS feeds
+}
+
+// ============================================
+// ARTICLES (POLYMORPHIC SOURCE)
 // ============================================
 
 model Article {
-  id           String                  @id @default(cuid())
-  sourceId     String                  @map("source_id")
-  url          String                  @unique
-  title        String
-  intro        String?                 // 2-sentence AI intro
-  summary      String?                 // Full AI summary
-  imageUrl     String?                 @map("image_url")
-  author       String?
-  publishedAt  DateTime?               @map("published_at")
-  scrapedAt    DateTime                @default(now()) @map("scraped_at")
-  createdAt    DateTime                @default(now()) @map("created_at")
+  id              String    @id @default(cuid())
+  url             String    @unique
+  title           String
+  intro           String?   // 2-sentence AI intro
+  summary         String?   // Full AI summary
+  imageUrl        String?   @map("image_url")
+  author          String?
+  publishedAt     DateTime? @map("published_at")
+  scrapedAt       DateTime  @default(now()) @map("scraped_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
 
-  // Full-text search vector (auto-updated by trigger)
+  // Polymorphic source relation (one or the other, not both)
+  catalogSourceId String?        @map("catalog_source_id")
+  privateSourceId String?        @map("private_source_id")
+
+  // Full-text search vector (managed by trigger)
   // searchVector Unsupported("tsvector")? @map("search_vector")
 
   // Relations
-  source  Source         @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  savedBy SavedArticle[]
-  readBy  ReadArticle[]
+  catalogSource CatalogSource? @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)
+  privateSource PrivateSource? @relation(fields: [privateSourceId], references: [id], onDelete: Cascade)
+  savedBy       SavedArticle[]
+  readBy        ReadArticle[]
 
-  @@index([sourceId])
+  @@index([catalogSourceId])
+  @@index([privateSourceId])
   @@index([publishedAt(sort: Desc)])
   @@map("articles")
 }
@@ -216,32 +316,50 @@ model ReadArticle {
 }
 
 // ============================================
-// INTEGRATIONS
+// USER TOPICS (FUTURE: topic-based discovery)
 // ============================================
 
-model Integration {
-  id           String          @id @default(cuid())
-  userId       String          @map("user_id")
-  type         IntegrationType
-  config       Json?           // Hashtags, senders, etc.
-  credentials  String?         // Encrypted (OAuth tokens, li_at cookie)
-  lastSyncedAt DateTime?       @map("last_synced_at")
-  createdAt    DateTime        @default(now()) @map("created_at")
+model UserTopic {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String   // "AI Agents", "MLOps", "Polish Startups"
+  keywords  String[] // ["LLM", "RAG", "fine-tuning"]
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, type])
-  @@map("integrations")
-}
-
-enum IntegrationType {
-  GMAIL
-  LINKEDIN
-  TWITTER
+  @@map("user_topics")
 }
 ```
 
-### 1.3 Migracja Full-Text Search (SQL)
+### 1.3 Query: User's Feed (Catalog + Private)
+
+```sql
+-- Artykuły z subskrybowanych źródeł katalogowych
+SELECT a.*, cs.name as source_name, cs.logo_url, 'catalog' as source_type
+FROM articles a
+JOIN catalog_sources cs ON a.catalog_source_id = cs.id
+JOIN user_subscriptions us ON cs.id = us.catalog_source_id
+WHERE us.user_id = :userId
+  AND cs.id NOT IN (
+    SELECT catalog_source_id FROM hidden_catalog_sources WHERE user_id = :userId
+  )
+
+UNION ALL
+
+-- Artykuły z prywatnych źródeł użytkownika
+SELECT a.*, ps.name as source_name, NULL as logo_url, 'private' as source_type
+FROM articles a
+JOIN private_sources ps ON a.private_source_id = ps.id
+WHERE ps.user_id = :userId
+  AND ps.is_active = true
+
+ORDER BY published_at DESC
+LIMIT :limit OFFSET :offset;
+```
+
+### 1.4 Migracja Full-Text Search (SQL)
 
 ```sql
 -- migrations/add_fts.sql
@@ -283,28 +401,37 @@ UPDATE articles SET search_vector =
 
 | Method | Endpoint | Opis | Auth |
 |--------|----------|------|------|
+| **Auth** |
 | POST | `/api/auth/register` | Rejestracja | - |
 | POST | `/api/auth/login` | Logowanie | - |
 | POST | `/api/auth/logout` | Wylogowanie | ✓ |
 | POST | `/api/auth/reset-password` | Reset hasła | - |
-| GET | `/api/articles` | Lista artykułów | ✓ |
+| **Articles** |
+| GET | `/api/articles` | User's feed (catalog + private) | ✓ |
 | GET | `/api/articles/:id` | Szczegóły artykułu | ✓ |
 | POST | `/api/articles/:id/read` | Oznacz jako przeczytany | ✓ |
 | GET | `/api/articles/search` | Wyszukiwanie FTS | ✓ |
+| **Saved** |
 | GET | `/api/saved` | Zapisane artykuły | ✓ |
 | POST | `/api/saved/:articleId` | Zapisz artykuł | ✓ |
 | DELETE | `/api/saved/:articleId` | Usuń z zapisanych | ✓ |
-| GET | `/api/sources` | Lista źródeł | ✓ |
-| POST | `/api/sources` | Dodaj źródło | ✓ |
-| PUT | `/api/sources/:id` | Edytuj źródło | ✓ |
-| DELETE | `/api/sources/:id` | Usuń źródło | ✓ |
-| POST | `/api/sources/:id/hide` | Ukryj źródło | ✓ |
-| POST | `/api/sources/:id/unhide` | Pokaż źródło | ✓ |
-| GET | `/api/integrations` | Lista integracji | ✓ |
-| POST | `/api/integrations/gmail` | Połącz Gmail | ✓ |
-| POST | `/api/integrations/linkedin` | Połącz LinkedIn | ✓ |
-| DELETE | `/api/integrations/:type` | Rozłącz integrację | ✓ |
-| POST | `/api/tts` | Generuj audio TTS | ✓ |
+| **Catalog Sources (shared)** |
+| GET | `/api/catalog` | Lista źródeł w katalogu | ✓ |
+| GET | `/api/catalog/:id` | Szczegóły źródła | ✓ |
+| POST | `/api/catalog/:id/subscribe` | Subskrybuj źródło | ✓ |
+| DELETE | `/api/catalog/:id/subscribe` | Anuluj subskrypcję | ✓ |
+| POST | `/api/catalog/:id/hide` | Ukryj źródło | ✓ |
+| DELETE | `/api/catalog/:id/hide` | Pokaż ukryte | ✓ |
+| **Private Sources (per-user)** |
+| GET | `/api/private-sources` | Prywatne źródła usera | ✓ |
+| POST | `/api/private-sources` | Dodaj prywatne źródło | ✓ |
+| PUT | `/api/private-sources/:id` | Edytuj źródło | ✓ |
+| DELETE | `/api/private-sources/:id` | Usuń źródło | ✓ |
+| POST | `/api/private-sources/gmail` | Połącz Gmail (OAuth) | ✓ |
+| POST | `/api/private-sources/linkedin` | Połącz LinkedIn (li_at) | ✓ |
+| **TTS** |
+| POST | `/api/tts` | Generuj audio | ✓ |
+| **User** |
 | GET | `/api/user/settings` | Pobierz ustawienia | ✓ |
 | PUT | `/api/user/settings` | Zapisz ustawienia | ✓ |
 

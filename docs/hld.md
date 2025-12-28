@@ -1,6 +1,6 @@
 # Leszek Newsroom AI - High-Level Design (HLD)
 
-**Wersja:** 1.0
+**Wersja:** 1.1
 **Data:** 2025-12-28
 **Status:** Draft
 
@@ -18,6 +18,42 @@ System agregacji treści z wielu źródeł internetowych z automatycznym generow
 - Wyszukiwanie full-text w języku polskim (PostgreSQL FTS)
 - Integracje: Gmail (newslettery), LinkedIn (posty)
 - Autentykacja użytkowników
+
+### 1.3 Architektura Źródeł (Catalog vs Private)
+
+System rozróżnia dwa typy źródeł dla efektywności i prywatności:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CATALOG SOURCES (shared)                      │
+│  • Publiczne blogi: Ethan Mollick, Simon Willison, Eugene Yan   │
+│  • Scrapowane RAZ dla wszystkich użytkowników                   │
+│  • Users SUBSKRYBUJĄ źródła z katalogu                          │
+│  • Artykuły widoczne dla wszystkich subskrybentów               │
+└─────────────────────────────────────────────────────────────────┘
+                              +
+┌─────────────────────────────────────────────────────────────────┐
+│                    PRIVATE SOURCES (per-user)                    │
+│  • Strony z auth: strefainwestora.pl (user podaje credentials)  │
+│  • Gmail: OAuth, newslettery z wybranych nadawców               │
+│  • LinkedIn: li_at cookie, hashtagi, obserwowani eksperci       │
+│  • Scrapowane PER-USER, widoczne TYLKO dla właściciela          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+| Typ źródła | Scraping | Widoczność | Przykłady |
+|------------|----------|------------|-----------|
+| **CatalogSource** | Raz dla wszystkich | Subskrybenci | Mollick, Willison, HuggingFace |
+| **PrivateSource** | Per-user | Tylko owner | Gmail, LinkedIn, strefainwestora |
+
+**Korzyści:**
+- 1000 userów = 1 scrape per public source (efektywność)
+- Prywatne dane izolowane per-user (bezpieczeństwo)
+- "Odkryj źródła" - katalog do przeglądania
+
+**Future (v3.0):**
+- Topic-based discovery (user definiuje tematy, AI szuka)
+- Dzienny podcast z podsumowaniem
 
 ---
 
