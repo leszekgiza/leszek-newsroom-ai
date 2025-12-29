@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.1.0] - 2025-12-29 (Responsive Layout)
+
+### Added - Responsive Desktop Layout
+- **Sidebar** (`Sidebar.tsx`) - nawigacja, integracje (Gmail/LinkedIn), profil uzytkownika
+- **DesktopHeader** (`DesktopHeader.tsx`) - wyszukiwarka, przycisk "Dodaj zrodlo"
+- **Grid layout** dla artykulow - 2 kolumny (lg:), 3 kolumny (xl:)
+- **TTS button** (fioletowy) na kartach artykulow
+- **Badge NEW** dla nieprzeczytanych artykulow
+
+### Added - Playwright Testing
+- Konfiguracja Playwright (`playwright.config.ts`)
+- Testy e2e dla logowania (`e2e/auth/login.spec.ts`)
+- Testy e2e dla rejestracji (`e2e/auth/register.spec.ts`)
+- Visual regression tests z baseline screenshots
+- MCP integration (`.mcp.json`)
+
+### Fixed - Tailwind 4 CSS
+- Naprawiono cykliczne referencje CSS w `@theme` (`--spacing-md: var(--spacing-md)`)
+- Usunieto konflikt z domyslna skala spacing Tailwind
+- `max-w-md` teraz poprawnie daje 448px zamiast 16px
+
+### Changed - ArticleCard
+- Redesign karty dla desktop z bookmark button w prawym gornym rogu
+- Przycisk "Zrodlo" widoczny tylko na desktop
+- Responsywne przyciski akcji (mobile vs desktop layout)
+
+### Breakpoints
+- `lg:` (1024px+) - Sidebar + grid 2-3 kolumn
+- `md:` (768px) - Mobile navbar, single column
+- Mobile - Bottom nav, single column
+
+---
+
 ## [2.0.0] - 2025-12-28 (Design Phase)
 
 ### Redesign
