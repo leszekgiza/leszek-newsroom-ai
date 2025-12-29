@@ -1,3 +1,6 @@
+import { Navbar } from "@/components/layout/Navbar";
+import { BottomNav } from "@/components/layout/BottomNav";
+
 export default function MainLayout({
   children,
 }: {
@@ -5,8 +8,11 @@ export default function MainLayout({
 }) {
   return (
     <div className="min-h-screen bg-surface">
-      {/* TODO: Add Navbar and BottomNav */}
-      <main>{children}</main>
+      <div className="max-w-md mx-auto bg-card min-h-screen relative pb-20 md:pb-0">
+        <Navbar />
+        <main>{children}</main>
+        <BottomNav />
+      </div>
     </div>
   );
 }
