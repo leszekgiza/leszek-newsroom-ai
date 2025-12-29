@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.1.1] - 2025-12-29 (Bug Fixes)
+
+### Fixed
+- **TTS playback** - replaced `edge-tts` with `edge-tts-universal` to fix 403 error from Microsoft's Edge TTS service
+- **Source link** - added `noopener,noreferrer` to external link window.open()
+
+### Changed
+- Updated TTS API route (`src/app/api/tts/route.ts`) to use new `edge-tts-universal` package
+
+---
+
 ## [2.1.0] - 2025-12-29 (Responsive Layout)
 
 ### Added - Responsive Desktop Layout

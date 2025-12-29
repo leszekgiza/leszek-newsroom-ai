@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
+import { usePlayerStore } from "@/stores/playerStore";
 
 export interface Article {
   id: string;
@@ -36,6 +37,13 @@ export function ArticleCard({
   onMarkAsRead,
 }: ArticleCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isLoadingTTS, setIsLoadingTTS] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const { isPlaying, currentArticleId, voice, play, pause, stop } = usePlayerStore();
+  const isCurrentArticle = currentArticleId === article.id;
+  const isActivelyPlaying = isPlaying && isCurrentArticle;
 
   const handleClick = () => {
     if (!article.isRead) {
@@ -54,13 +62,72 @@ export function ArticleCard({
     if (!article.isRead) {
       onMarkAsRead(article.id);
     }
-    window.open(article.url, "_blank");
+    window.open(article.url, "_blank", "noopener,noreferrer");
   };
 
-  const handleTTS = (e: React.MouseEvent) => {
+  const handleTTS = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TTS functionality - to be implemented
-    console.log("TTS for article:", article.id);
+
+    // If already playing this article, pause it
+    if (isActivelyPlaying) {
+      pause();
+      audioRef.current?.pause();
+      return;
+    }
+
+    // If we have audio for this article, resume it
+    if (isCurrentArticle && audioUrl) {
+      play(article.id);
+      audioRef.current?.play();
+      return;
+    }
+
+    // Stop any other playing audio
+    stop();
+
+    // Get text to read - prefer intro, fallback to title
+    const textToRead = article.intro || article.title;
+    if (!textToRead) return;
+
+    setIsLoadingTTS(true);
+
+    try {
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textToRead, voice }),
+      });
+
+      if (!response.ok) {
+        throw new Error("TTS failed");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      // Cleanup old URL
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+
+      setAudioUrl(url);
+      play(article.id);
+    } catch (error) {
+      console.error("TTS error:", error);
+    } finally {
+      setIsLoadingTTS(false);
+    }
+  };
+
+  // Auto-play when audio URL is set
+  const handleAudioCanPlay = () => {
+    if (audioRef.current && isCurrentArticle && isPlaying) {
+      audioRef.current.play().catch(console.error);
+    }
+  };
+
+  const handleAudioEnded = () => {
+    stop();
   };
 
   const formatDate = (dateString: string | null) => {
@@ -247,25 +314,64 @@ export function ArticleCard({
           {/* TTS Button */}
           <button
             onClick={handleTTS}
-            className="w-10 h-10 rounded-full bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
-            title="Odczytaj glosowo"
+            disabled={isLoadingTTS}
+            className={cn(
+              "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+              isActivelyPlaying
+                ? "bg-violet-600 text-white"
+                : "bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40",
+              isLoadingTTS && "opacity-50 cursor-wait"
+            )}
+            title={isActivelyPlaying ? "Zatrzymaj" : "Odczytaj glosowo"}
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0"
-              />
-            </svg>
+            {isLoadingTTS ? (
+              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+            ) : isActivelyPlaying ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+            ) : (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0"
+                />
+              </svg>
+            )}
           </button>
         </div>
       </div>
+
+      {/* Hidden audio element for TTS */}
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onCanPlay={handleAudioCanPlay}
+          onEnded={handleAudioEnded}
+        />
+      )}
     </article>
   );
 }

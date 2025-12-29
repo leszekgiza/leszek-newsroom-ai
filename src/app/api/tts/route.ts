@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { EdgeTTS } from "edge-tts-universal";
 
 // Edge TTS voices
 const VOICES = {
@@ -36,17 +37,17 @@ export async function POST(request: NextRequest) {
 
     const selectedVoice = VOICES[voice as VoiceKey] || VOICES["pl-PL-MarekNeural"];
 
-    // Import edge-tts dynamically
-    const edgeTts = await import("edge-tts");
-    const audioBuffer = await edgeTts.tts(text, { voice: selectedVoice });
+    // Use edge-tts-universal
+    const tts = new EdgeTTS(text, selectedVoice);
+    const result = await tts.synthesize();
 
-    // Convert Buffer to Uint8Array for Response
-    const uint8Array = new Uint8Array(audioBuffer);
+    // Convert Blob to ArrayBuffer
+    const arrayBuffer = await result.audio.arrayBuffer();
 
-    return new NextResponse(uint8Array, {
+    return new NextResponse(arrayBuffer, {
       headers: {
         "Content-Type": "audio/mpeg",
-        "Content-Length": uint8Array.length.toString(),
+        "Content-Length": arrayBuffer.byteLength.toString(),
         "Cache-Control": "public, max-age=86400",
       },
     });
