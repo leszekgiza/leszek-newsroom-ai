@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { useAuthStore } from "@/stores/authStore";
 
 export function LoginForm() {
@@ -12,6 +11,7 @@ export function LoginForm() {
   const { setUser } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,12 +45,13 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center mx-auto mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        {/* Logo & Title */}
+        <div className="text-center space-y-4">
+          <div className="w-20 h-20 bg-gradient-to-br from-[#1a1a2e] to-[#0f3460] rounded-3xl mx-auto flex items-center justify-center shadow-lg shadow-[#1a1a2e]/20">
             <svg
-              className="w-7 h-7 text-white"
+              className="w-10 h-10 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -63,52 +64,162 @@ export function LoginForm() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-primary">Newsroom AI</h1>
-          <p className="text-muted mt-2">Zaloguj się do swojego konta</p>
+          <div>
+            <h1 className="text-2xl font-bold text-[#1a1a2e] dark:text-white">
+              Newsroom AI
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">
+              Twój agregator newsów z AI
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 bg-highlight/10 border border-highlight/20 rounded-xl text-sm text-highlight">
-              {error}
-            </div>
-          )}
-
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="twoj@email.pl"
-            required
-          />
-
-          <Input
-            label="Hasło"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
-
-          <div className="flex justify-end">
-            <Link
-              href="/reset-password"
-              className="text-sm text-accent hover:underline"
-            >
-              Zapomniałeś hasła?
-            </Link>
-          </div>
-
-          <Button type="submit" className="w-full" isLoading={isLoading}>
+        {/* Login Form Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20 p-8 space-y-6">
+          <h2 className="text-xl font-bold text-center text-[#1a1a2e] dark:text-white">
             Zaloguj się
-          </Button>
-        </form>
+          </h2>
 
-        <p className="text-center text-muted mt-6">
-          Nie masz konta?{" "}
-          <Link href="/register" className="text-accent hover:underline">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-600 dark:text-red-400">
+                {error}
+              </div>
+            )}
+
+            {/* Email */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Email
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg
+                    className="w-5 h-5 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="jan@example.com"
+                  required
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-[#1a1a2e] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a2e]/20 dark:focus:ring-white/20 focus:border-[#1a1a2e] dark:focus:border-white transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Hasło
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg
+                    className="w-5 h-5 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full pl-12 pr-12 py-3.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-[#1a1a2e] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a2e]/20 dark:focus:ring-white/20 focus:border-[#1a1a2e] dark:focus:border-white transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  {showPassword ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Forgot Password */}
+            <div className="flex justify-end">
+              <Link
+                href="/reset-password"
+                className="text-sm text-[#1a1a2e] dark:text-white font-medium hover:text-[#0f3460] dark:hover:text-slate-300 transition-colors"
+              >
+                Zapomniałem hasła
+              </Link>
+            </div>
+
+            {/* Login Button */}
+            <Button
+              type="submit"
+              className="w-full py-4 bg-gradient-to-r from-[#1a1a2e] to-[#0f3460] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#1a1a2e]/30 transition-all duration-200 active:scale-[0.98]"
+              isLoading={isLoading}
+            >
+              Zaloguj się
+            </Button>
+          </form>
+        </div>
+
+        {/* Register Link */}
+        <p className="text-center text-slate-600 dark:text-slate-400">
+          Nie masz konta?
+          <Link
+            href="/register"
+            className="font-semibold text-[#1a1a2e] dark:text-white hover:text-[#0f3460] dark:hover:text-slate-300 transition-colors ml-1"
+          >
             Zarejestruj się
           </Link>
         </p>

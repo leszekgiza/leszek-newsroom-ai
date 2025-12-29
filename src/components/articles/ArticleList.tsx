@@ -20,10 +20,13 @@ export function ArticleList({
 }: ArticleListProps) {
   if (isLoading) {
     return (
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
         <ArticleCardSkeleton />
         <ArticleCardSkeleton />
         <ArticleCardSkeleton />
+        <div className="hidden lg:block"><ArticleCardSkeleton /></div>
+        <div className="hidden lg:block"><ArticleCardSkeleton /></div>
+        <div className="hidden xl:block"><ArticleCardSkeleton /></div>
       </div>
     );
   }
@@ -57,7 +60,7 @@ export function ArticleList({
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-4 lg:space-y-0 lg:p-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
       {articles.map((article) => (
         <ArticleCard
           key={article.id}

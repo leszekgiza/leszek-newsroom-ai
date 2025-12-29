@@ -57,6 +57,12 @@ export function ArticleCard({
     window.open(article.url, "_blank");
   };
 
+  const handleTTS = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // TTS functionality - to be implemented
+    console.log("TTS for article:", article.id);
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -65,7 +71,7 @@ export function ArticleCard({
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffHours < 1) return "przed chwilą";
+    if (diffHours < 1) return "przed chwila";
     if (diffHours < 24) return `${diffHours}h temu`;
     if (diffDays < 7) return `${diffDays}d temu`;
     return date.toLocaleDateString("pl-PL", { day: "numeric", month: "short" });
@@ -77,73 +83,62 @@ export function ArticleCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "bg-card rounded-xl border border-border p-4 cursor-pointer transition-all",
+        "bg-card rounded-2xl border border-border p-4 lg:p-5 cursor-pointer transition-all duration-200",
         "card-shadow",
-        isHovered && "border-accent/30"
+        isHovered && "border-accent/30 lg:border-primary/20"
       )}
     >
-      {/* Header: Source + Date + NEW badge */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-6 h-6 rounded-full bg-surface flex items-center justify-center overflow-hidden">
-          {article.source.logoUrl ? (
-            <img
-              src={article.source.logoUrl}
-              alt={article.source.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-xs font-medium text-muted">
-              {article.source.name.charAt(0)}
+      {/* Header: Source + Date + Badge + Save Button */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          {/* Meta info */}
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            {!article.isRead && (
+              <Badge variant="new">NEW</Badge>
+            )}
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded-full bg-surface flex items-center justify-center overflow-hidden flex-shrink-0">
+                {article.source.logoUrl ? (
+                  <img
+                    src={article.source.logoUrl}
+                    alt={article.source.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[10px] font-medium text-muted">
+                    {article.source.name.charAt(0)}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs text-muted">{article.source.name}</span>
+            </div>
+            <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
+            <span className="text-xs text-muted">
+              {formatDate(article.publishedAt)}
             </span>
-          )}
+          </div>
+
+          {/* Title */}
+          <h3
+            className={cn(
+              "font-semibold text-primary leading-snug lg:text-lg",
+              article.isRead && "text-muted"
+            )}
+          >
+            {article.title}
+          </h3>
         </div>
-        <span className="text-sm text-muted font-medium">
-          {article.source.name}
-        </span>
-        <span className="text-sm text-muted/60">•</span>
-        <span className="text-sm text-muted/60">
-          {formatDate(article.publishedAt)}
-        </span>
-        {!article.isRead && (
-          <Badge variant="new" className="ml-auto">
-            NEW
-          </Badge>
-        )}
-      </div>
 
-      {/* Title */}
-      <h3
-        className={cn(
-          "font-semibold text-primary mb-2 line-clamp-2",
-          article.isRead && "text-muted"
-        )}
-      >
-        {article.title}
-      </h3>
-
-      {/* Intro (2-sentence AI summary) */}
-      {article.intro && (
-        <p className="text-sm text-muted line-clamp-2 mb-3">{article.intro}</p>
-      )}
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 pt-2">
-        <button
-          onClick={handleClick}
-          className="px-4 py-2 bg-accent/10 text-accent text-sm font-medium rounded-full hover:bg-accent/20 transition-colors"
-        >
-          Więcej
-        </button>
-
+        {/* Save Button - Desktop: top right */}
         <button
           onClick={handleSaveClick}
           className={cn(
-            "p-2 rounded-full transition-colors",
+            "w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0",
             article.isSaved
               ? "bg-highlight/10 text-highlight"
-              : "bg-surface text-muted hover:text-primary"
+              : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-highlight hover:bg-red-50 dark:hover:bg-red-950/20"
           )}
-          title={article.isSaved ? "Usuń z zapisanych" : "Zapisz na później"}
+          title={article.isSaved ? "Usun z zapisanych" : "Zapisz na pozniej"}
         >
           <svg
             className="w-5 h-5"
@@ -159,26 +154,117 @@ export function ArticleCard({
             />
           </svg>
         </button>
+      </div>
 
-        <button
-          onClick={handleOpenOriginal}
-          className="p-2 rounded-full bg-surface text-muted hover:text-primary transition-colors ml-auto"
-          title="Otwórz oryginał"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+      {/* Intro (2-sentence AI summary) */}
+      {article.intro && (
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-3 lg:mt-4 line-clamp-2 lg:line-clamp-3">
+          {article.intro}
+        </p>
+      )}
+
+      {/* Actions */}
+      <div className="flex items-center justify-between pt-3 lg:pt-4 mt-3 lg:mt-4 border-t border-border/50">
+        <div className="flex gap-2">
+          {/* More Button */}
+          <button
+            onClick={handleClick}
+            className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-secondary transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-            />
-          </svg>
-        </button>
+            Wiecej
+          </button>
+
+          {/* Source Button - Desktop only */}
+          <button
+            onClick={handleOpenOriginal}
+            className="hidden lg:flex px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors items-center gap-1.5"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+            Zrodlo
+          </button>
+
+          {/* Mobile: Save button in actions row */}
+          <button
+            onClick={handleSaveClick}
+            className={cn(
+              "lg:hidden p-2 rounded-lg transition-colors",
+              article.isSaved
+                ? "bg-highlight/10 text-highlight"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-highlight"
+            )}
+            title={article.isSaved ? "Usun z zapisanych" : "Zapisz"}
+          >
+            <svg
+              className="w-5 h-5"
+              fill={article.isSaved ? "currentColor" : "none"}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Mobile: External link */}
+          <button
+            onClick={handleOpenOriginal}
+            className="lg:hidden p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-primary transition-colors"
+            title="Otworz oryginal"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+          </button>
+
+          {/* TTS Button */}
+          <button
+            onClick={handleTTS}
+            className="w-10 h-10 rounded-full bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
+            title="Odczytaj glosowo"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
     </article>
   );
