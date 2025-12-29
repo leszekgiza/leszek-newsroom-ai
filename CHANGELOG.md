@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.4.0] - 2025-12-29 (Source Management)
+
+### Added - Source Management (F4.2, F4.3, US4.1, US4.3)
+- **Sources settings page** (`/settings/sources`) with full UI
+- **Add private sources** - form to add custom websites to track
+- **Toggle sources** - enable/disable sources without deleting
+- **Delete sources** - remove private sources with confirmation
+- **Catalog subscriptions** - subscribe/unsubscribe to shared sources
+
+### Technical
+- Full CRUD for private sources via existing API endpoints:
+  - `GET /api/sources/private` - list user's private sources
+  - `POST /api/sources/private` - create new private source
+  - `PATCH /api/sources/private/[id]` - update source (toggle active)
+  - `DELETE /api/sources/private/[id]` - delete source
+- Catalog source subscription:
+  - `GET /api/sources/catalog` - list available catalog sources
+  - `POST /api/sources/catalog/subscribe` - subscribe/unsubscribe
+
+---
+
 ## [2.3.0] - 2025-12-29 (Trash & Bug Fixes)
 
 ### Added - Trash/Dismiss Feature (F3.6, F3.7, US3.4)

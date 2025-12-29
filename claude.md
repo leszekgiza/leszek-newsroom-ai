@@ -71,7 +71,7 @@ git push origin master
 
 ## Stan Implementacji (2025-12-29)
 
-### Zaimplementowane (v2.3.0)
+### Zaimplementowane (v2.4.0)
 - [x] Lista artykułów z kartami
 - [x] 2-zdaniowe intro (AI)
 - [x] Pełne streszczenie AI (Claude, 200-300 słów, 1-2 min TTS)
@@ -87,13 +87,18 @@ git push origin master
   - Przycisk X przy artykule (dismiss)
   - Strona `/trash` z odrzuconymi artykułami
   - Przywracanie artykułów z kosza
+- [x] **Zarządzanie źródłami** (F4.2, F4.3, US4.1, US4.3)
+  - Strona `/settings/sources` z pełnym UI
+  - Dodawanie własnych źródeł (prywatnych)
+  - Włączanie/wyłączanie źródeł
+  - Usuwanie źródeł
+  - Subskrypcje źródeł z katalogu
 
 ### Do Zaimplementowania (Następne)
 - [ ] **Scraping (Crawl4AI)** - automatyczne pobieranie artykułów ze źródeł
 - [ ] **Wydania (Editions)** - codzienne grupowanie artykułów (F8, Epic 9)
 - [ ] Gmail integration
 - [ ] LinkedIn integration
-- [ ] Dodawanie własnych źródeł
 - [ ] PostgreSQL FTS (polski)
 
 ---
