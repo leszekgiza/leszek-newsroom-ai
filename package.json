@@ -1,23 +1,29 @@
 {
   "name": "leszek-newsroom-ai",
-  "version": "1.0.0",
-  "description": "AI/ML Newsroom - daily digest presentation with AI summaries and TTS",
-  "main": "server.js",
+  "version": "2.0.0",
+  "private": true,
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.52.0",
-    "cheerio": "^1.1.2",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.0",
-    "node-edge-tts": "^1.2.8",
-    "node-fetch": "^2.7.0",
-    "pg": "^8.11.0",
-    "rss-parser": "^3.13.0"
+    "dotenv": "^17.2.3",
+    "next": "16.1.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
-  "engines": {
-    "node": ">=18.0.0"
+  "devDependencies": {
+    "@prisma/client": "^7.2.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1",
+    "prisma": "^7.2.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

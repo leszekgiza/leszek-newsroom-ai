@@ -1,0 +1,210 @@
+// prisma/schema.prisma
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// USERS & AUTH
+// ============================================
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String?
+  avatarUrl    String?  @map("avatar_url")
+  theme        Theme    @default(SYSTEM)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subscriptions        UserSubscription[]
+  privateSources       PrivateSource[]
+  savedArticles        SavedArticle[]
+  readArticles         ReadArticle[]
+  hiddenCatalogSources HiddenCatalogSource[]
+  sessions             Session[]
+  topics               UserTopic[] // FUTURE: topic-based discovery
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+// ============================================
+// CATALOG SOURCES (SHARED)
+// ============================================
+
+model CatalogSource {
+  id            String    @id @default(cuid())
+  name          String
+  url           String    @unique
+  description   String?
+  category      String? // "AI/ML", "Tech", "Finance", "Startups"
+  logoUrl       String?   @map("logo_url")
+  isActive      Boolean   @default(true) @map("is_active")
+  lastScrapedAt DateTime? @map("last_scraped_at")
+  articleCount  Int       @default(0) @map("article_count")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  articles      Article[]
+  subscriptions UserSubscription[]
+  hiddenBy      HiddenCatalogSource[]
+
+  @@map("catalog_sources")
+}
+
+model UserSubscription {
+  userId          String   @map("user_id")
+  catalogSourceId String   @map("catalog_source_id")
+  subscribedAt    DateTime @default(now()) @map("subscribed_at")
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  catalogSource CatalogSource @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, catalogSourceId])
+  @@map("user_subscriptions")
+}
+
+model HiddenCatalogSource {
+  userId          String   @map("user_id")
+  catalogSourceId String   @map("catalog_source_id")
+  hiddenAt        DateTime @default(now()) @map("hidden_at")
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  catalogSource CatalogSource @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, catalogSourceId])
+  @@map("hidden_catalog_sources")
+}
+
+// ============================================
+// PRIVATE SOURCES (PER-USER)
+// ============================================
+
+model PrivateSource {
+  id            String            @id @default(cuid())
+  userId        String            @map("user_id")
+  name          String
+  url           String
+  type          PrivateSourceType @default(WEBSITE)
+  config        Json? // CSS selectors, hashtags, senders, etc.
+  credentials   String? // Encrypted (AES-256) - passwords, tokens
+  isActive      Boolean           @default(true) @map("is_active")
+  lastScrapedAt DateTime?         @map("last_scraped_at")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articles Article[]
+
+  @@unique([userId, url])
+  @@map("private_sources")
+}
+
+enum PrivateSourceType {
+  WEBSITE // Auth-required websites (strefainwestora.pl)
+  GMAIL // User's Gmail newsletters
+  LINKEDIN // User's LinkedIn feed
+  TWITTER // User's Twitter/X
+  RSS // Private RSS feeds
+}
+
+// ============================================
+// ARTICLES (POLYMORPHIC SOURCE)
+// ============================================
+
+model Article {
+  id          String    @id @default(cuid())
+  url         String    @unique
+  title       String
+  intro       String? // 2-sentence AI intro
+  summary     String? // Full AI summary
+  imageUrl    String?   @map("image_url")
+  author      String?
+  publishedAt DateTime? @map("published_at")
+  scrapedAt   DateTime  @default(now()) @map("scraped_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Polymorphic source relation (one or the other, not both)
+  catalogSourceId String? @map("catalog_source_id")
+  privateSourceId String? @map("private_source_id")
+
+  // Full-text search vector (managed by trigger)
+  // searchVector Unsupported("tsvector")? @map("search_vector")
+
+  // Relations
+  catalogSource CatalogSource? @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)
+  privateSource PrivateSource? @relation(fields: [privateSourceId], references: [id], onDelete: Cascade)
+  savedBy       SavedArticle[]
+  readBy        ReadArticle[]
+
+  @@index([catalogSourceId])
+  @@index([privateSourceId])
+  @@index([publishedAt(sort: Desc)])
+  @@map("articles")
+}
+
+model SavedArticle {
+  userId    String   @map("user_id")
+  articleId String   @map("article_id")
+  savedAt   DateTime @default(now()) @map("saved_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@map("saved_articles")
+}
+
+model ReadArticle {
+  userId    String   @map("user_id")
+  articleId String   @map("article_id")
+  readAt    DateTime @default(now()) @map("read_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@map("read_articles")
+}
+
+// ============================================
+// USER TOPICS (FUTURE: topic-based discovery)
+// ============================================
+
+model UserTopic {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String // "AI Agents", "MLOps", "Polish Startups"
+  keywords  String[] // ["LLM", "RAG", "fine-tuning"]
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_topics")
+}
