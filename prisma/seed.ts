@@ -33,6 +33,20 @@ async function main() {
   });
   console.log("Created user:", user.email);
 
+  // Create main user (leszek.giza@gmail.com)
+  const leszekPasswordHash = await bcrypt.hash("Maja1234!", 10);
+  const leszekUser = await prisma.user.upsert({
+    where: { email: "leszek.giza@gmail.com" },
+    update: {},
+    create: {
+      email: "leszek.giza@gmail.com",
+      passwordHash: leszekPasswordHash,
+      name: "Leszek Giza",
+      theme: Theme.SYSTEM,
+    },
+  });
+  console.log("Created user:", leszekUser.email);
+
   // Create catalog sources (public blogs)
   const catalogSources = [
     {
@@ -90,8 +104,9 @@ async function main() {
     console.log("Created catalog source:", created.name);
   }
 
-  // Subscribe user to all catalog sources
+  // Subscribe users to all catalog sources
   for (const source of createdSources) {
+    // Subscribe test user
     await prisma.userSubscription.upsert({
       where: {
         userId_catalogSourceId: {
@@ -105,8 +120,22 @@ async function main() {
         catalogSourceId: source.id,
       },
     });
+    // Subscribe leszek user
+    await prisma.userSubscription.upsert({
+      where: {
+        userId_catalogSourceId: {
+          userId: leszekUser.id,
+          catalogSourceId: source.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: leszekUser.id,
+        catalogSourceId: source.id,
+      },
+    });
   }
-  console.log("Subscribed user to all catalog sources");
+  console.log("Subscribed users to all catalog sources");
 
   // Create sample articles
   const sampleArticles = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Modal, ModalHeader, ModalContent, ModalFooter } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -15,6 +15,13 @@ interface SummaryModalProps {
   onToggleSave: (articleId: string) => void;
 }
 
+// Minimum word count for a "good" summary (1-2 min TTS = ~150-300 words)
+const MIN_SUMMARY_WORDS = 100;
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
 export function SummaryModal({
   articleId,
   isOpen,
@@ -23,6 +30,24 @@ export function SummaryModal({
 }: SummaryModalProps) {
   const [article, setArticle] = useState<Article | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generateSummary = useCallback(async (id: string) => {
+    setIsGenerating(true);
+    try {
+      const res = await fetch(`/api/articles/${id}/summarize`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setArticle((prev) => prev ? { ...prev, summary: data.summary } : null);
+      }
+    } catch (error) {
+      console.error("Failed to generate summary:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (articleId && isOpen) {
@@ -31,11 +56,16 @@ export function SummaryModal({
         .then((res) => res.json())
         .then((data) => {
           setArticle(data.article);
+          // Auto-generate if summary is missing or too short
+          const summary = data.article?.summary || "";
+          if (!summary || countWords(summary) < MIN_SUMMARY_WORDS) {
+            generateSummary(articleId);
+          }
         })
         .catch(console.error)
         .finally(() => setIsLoading(false));
     }
-  }, [articleId, isOpen]);
+  }, [articleId, isOpen, generateSummary]);
 
   const handleOpenOriginal = () => {
     if (article) {
@@ -92,7 +122,42 @@ export function SummaryModal({
 
           <ModalContent className="max-h-[50vh]">
             {/* Key Insights / Summary */}
-            {article.summary ? (
+            {isGenerating ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg
+                    className="w-5 h-5 text-accent animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+                  <span className="text-sm font-medium text-accent">
+                    Generuję szczegółowe streszczenie...
+                  </span>
+                </div>
+                <p className="text-sm text-muted">
+                  Pobieram treść artykułu i tworzę wartościowe podsumowanie z faktami i insightami. To może potrwać kilka sekund.
+                </p>
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/5" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            ) : article.summary ? (
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-primary mb-2 flex items-center gap-2">
@@ -121,6 +186,17 @@ export function SummaryModal({
                   text={article.summary}
                   articleId={article.id}
                 />
+
+                {/* Regenerate button */}
+                <button
+                  onClick={() => generateSummary(article.id)}
+                  className="text-xs text-accent hover:underline flex items-center gap-1"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Wygeneruj ponownie
+                </button>
               </div>
             ) : article.intro ? (
               <div>

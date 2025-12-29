@@ -1,10 +1,30 @@
 # Changelog
 
+## [2.2.0] - 2025-12-29 (AI Summaries)
+
+### Added
+- **AI Summary Generation** - Claude API generates detailed summaries with facts and insights
+- **Auto-regenerate** - summaries are automatically generated when too short (<100 words)
+- **Regenerate button** - "Wygeneruj ponownie" allows manual regeneration
+- **New user** - leszek.giza@gmail.com account in seed data
+
+### Changed
+- Summary length increased to 1-2 minutes TTS (~200-300 words)
+- Summaries now include specific facts, examples, and practical insights
+
+### Technical
+- New API endpoint: `POST /api/articles/[id]/summarize`
+- Added `@anthropic-ai/sdk` dependency
+- Updated `SummaryModal.tsx` with generation UI and loading states
+
+---
+
 ## [2.1.1] - 2025-12-29 (Bug Fixes)
 
 ### Fixed
 - **TTS playback** - replaced `edge-tts` with `edge-tts-universal` to fix 403 error from Microsoft's Edge TTS service
 - **Source link** - added `noopener,noreferrer` to external link window.open()
+- **Sources nav link** - fixed sidebar link from `/sources` to `/settings/sources`
 
 ### Changed
 - Updated TTS API route (`src/app/api/tts/route.ts`) to use new `edge-tts-universal` package
