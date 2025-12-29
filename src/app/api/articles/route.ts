@@ -62,6 +62,20 @@ export async function GET(request: NextRequest) {
       ];
     }
 
+    // Filter by search term
+    if (search && search.trim()) {
+      const searchTerm = search.trim().toLowerCase();
+      whereClause.AND = [
+        {
+          OR: [
+            { title: { contains: searchTerm, mode: "insensitive" } },
+            { intro: { contains: searchTerm, mode: "insensitive" } },
+            { summary: { contains: searchTerm, mode: "insensitive" } },
+          ],
+        },
+      ];
+    }
+
     // Get read articles
     const readArticles = await prisma.readArticle.findMany({
       where: { userId: session.userId },

@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - User Stories
 
-**Wersja:** 2.1
-**Data:** 2025-12-27
+**Wersja:** 2.2
+**Data:** 2025-12-29
 **Format:** Jako [rola] chcę [funkcja] aby [korzyść]
 
 ---
@@ -78,10 +78,19 @@
 **Aby** zrozumieć kluczowe punkty bez czytania całego artykułu
 
 **Kryteria akceptacji:**
-- [ ] Modal lub side panel ze streszczeniem
-- [ ] Struktura: podsumowanie, kluczowe insighty, implikacje
-- [ ] Loading indicator podczas generowania
-- [ ] Cache - nie generuj ponownie
+- [x] Modal lub side panel ze streszczeniem
+- [x] Struktura: podsumowanie, kluczowe insighty, implikacje
+- [x] Loading indicator podczas generowania
+- [x] Cache - nie generuj ponownie
+- [x] **Długość: 200-300 słów (1-2 minuty TTS)**
+- [x] **Fakty i insighty z artykułu (liczby, przykłady, wnioski)**
+- [x] **Automatyczna regeneracja gdy streszczenie za krótkie (<100 słów)**
+- [x] **Przycisk "Wygeneruj ponownie" do manualnej regeneracji**
+
+**Szczegóły techniczne:**
+- Claude API (claude-sonnet-4-20250514)
+- Endpoint: `POST /api/articles/[id]/summarize`
+- Automatyczne generowanie przy otwieraniu modala
 
 ---
 
@@ -91,10 +100,15 @@
 **Aby** konsumować treści w drodze/transporcie/podczas innych czynności
 
 **Kryteria akceptacji:**
-- [ ] Play/Pause/Stop controls
-- [ ] Wybór głosu (męski/żeński)
-- [ ] Postęp odtwarzania widoczny
+- [x] Play/Pause/Stop controls
+- [ ] Wybór głosu (męski/żeński) - w ustawieniach
+- [x] Postęp odtwarzania widoczny
 - [ ] Działanie na mobile (w tle)
+
+**Szczegóły techniczne:**
+- edge-tts-universal (Microsoft Edge TTS)
+- Endpoint: `POST /api/tts`
+- Głosy: pl-PL-MarekNeural, pl-PL-ZofiaNeural, en-US-GuyNeural, en-US-JennyNeural
 
 ---
 
@@ -133,6 +147,26 @@
 - [ ] Lista zapisanych artykułów
 - [ ] Przycisk "Usuń" przy każdym
 - [ ] Potwierdzenie usunięcia
+
+---
+
+### US3.4 - Oznaczanie "nie interesuje mnie" (Kosz)
+**Jako** użytkownik
+**Chcę** oznaczyć artykuł jako "nie interesuje mnie"
+**Aby** usunąć go z głównego feedu bez trwałego usuwania
+
+**Kryteria akceptacji:**
+- [ ] Przycisk "Nie interesuje" przy każdym artykule (ikona X lub kosz)
+- [ ] Artykuł znika z głównego feedu
+- [ ] Artykuł trafia do folderu "Kosz"
+- [ ] Możliwość przywrócenia artykułu z Kosza
+- [ ] Opcja trwałego usunięcia z Kosza
+
+**Szczegóły techniczne:**
+- Nowa tabela `dismissed_articles` (userId, articleId, dismissedAt)
+- Endpoint: `POST /api/articles/[id]/dismiss`
+- Endpoint: `DELETE /api/articles/[id]/dismiss` (przywrócenie)
+- Strona `/trash` z listą odrzuconych artykułów
 
 ---
 
