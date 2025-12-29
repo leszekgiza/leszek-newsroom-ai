@@ -9,6 +9,8 @@ interface ArticleListProps {
   onOpenSummary: (articleId: string) => void;
   onToggleSave: (articleId: string) => void;
   onMarkAsRead: (articleId: string) => void;
+  onDismiss?: (articleId: string) => void;
+  showRestoreButton?: boolean;
 }
 
 export function ArticleList({
@@ -17,6 +19,8 @@ export function ArticleList({
   onOpenSummary,
   onToggleSave,
   onMarkAsRead,
+  onDismiss,
+  showRestoreButton = false,
 }: ArticleListProps) {
   if (isLoading) {
     return (
@@ -68,6 +72,8 @@ export function ArticleList({
           onOpenSummary={onOpenSummary}
           onToggleSave={onToggleSave}
           onMarkAsRead={onMarkAsRead}
+          onDismiss={onDismiss}
+          showRestoreButton={showRestoreButton}
         />
       ))}
     </div>

@@ -90,6 +90,18 @@ export async function GET(request: NextRequest) {
     });
     const savedArticleIds = new Set(savedArticles.map((s) => s.articleId));
 
+    // Get dismissed articles (to filter out from main feed)
+    const dismissedArticles = await prisma.dismissedArticle.findMany({
+      where: { userId: session.userId },
+      select: { articleId: true },
+    });
+    const dismissedArticleIds = dismissedArticles.map((d) => d.articleId);
+
+    // Filter out dismissed articles
+    if (dismissedArticleIds.length > 0) {
+      whereClause.NOT = { id: { in: dismissedArticleIds } };
+    }
+
     // Fetch articles
     const articles = await prisma.article.findMany({
       where: whereClause,

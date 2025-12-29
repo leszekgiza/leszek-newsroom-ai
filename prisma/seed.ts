@@ -140,7 +140,7 @@ async function main() {
   // Create sample articles
   const sampleArticles = [
     {
-      url: "https://www.oneusefulthing.org/p/how-to-use-ai-to-do-stuff",
+      url: "https://www.oneusefulthing.org/p/how-to-use-ai-to-do-stuff-an-opinionated",
       title: "How to Use AI to Do Stuff: An Opinionated Guide",
       intro:
         "Praktyczny przewodnik po zastosowaniach AI w codziennej pracy. Autor przedstawia konkretne narzedzia i techniki wykorzystania sztucznej inteligencji.",
@@ -152,15 +152,15 @@ async function main() {
       catalogSourceId: createdSources[0].id,
     },
     {
-      url: "https://simonwillison.net/2024/Dec/19/llm-and-sqlite/",
-      title: "LLM and SQLite: A Powerful Combination",
+      url: "https://simonwillison.net/2024/Nov/25/ask-questions-of-sqlite/",
+      title: "Ask questions of SQLite databases in your terminal",
       intro:
-        "Simon Willison pokazuje jak laczyc modele jezykowe z baza SQLite. Prezentuje praktyczne przyklady i narzedzia do pracy z danymi.",
+        "Simon Willison prezentuje sqlite-utils-ask - plugin do zadawania pytan bazom SQLite w naturalnym jezyku za pomoca LLM.",
       summary:
-        "Artykul demonstruje mozliwosci integracji LLM z SQLite. Autor przedstawia swoje narzedzia CLI do pracy z modelami jezykowymi. Omawia przypadki uzycia od analizy danych po generowanie zapytan SQL. Pokazuje jak budowac efektywne pipeline'y danych.",
+        "Artykul przedstawia nowy plugin sqlite-utils-ask do narzedzia CLI sqlite-utils. Pozwala zadawac pytania w naturalnym jezyku bazom SQLite i plikom CSV/JSON. LLM analizuje schemat bazy i generuje odpowiednie zapytania SQL. Praktyczne narzedzie do szybkiej analizy danych.",
       imageUrl: null,
       author: "Simon Willison",
-      publishedAt: new Date("2024-12-19"),
+      publishedAt: new Date("2024-11-25"),
       catalogSourceId: createdSources[1].id,
     },
     {
@@ -188,27 +188,27 @@ async function main() {
       catalogSourceId: createdSources[3].id,
     },
     {
-      url: "https://huggingface.co/blog/smollm2",
-      title: "SmolLM2: Smaller, Faster, Better",
+      url: "https://huggingface.co/blog/smollm",
+      title: "SmolLM - blazingly fast and remarkably powerful",
       intro:
-        "Hugging Face prezentuje SmolLM2 - nowa rodzine malych, ale wydajnych modeli jezykowych. Idealne do wdrozen na edge.",
+        "Hugging Face prezentuje SmolLM - rodzine malych, ale wydajnych modeli jezykowych w rozmiarach 135M, 360M i 1.7B parametrow.",
       summary:
-        "Artykul przedstawia SmolLM2, nowa generacje kompaktowych modeli LLM. Modele oferuja doskonaly stosunek jakosci do rozmiaru. Zoptymalizowane pod katem wdrozen mobilnych i edge. Dostepne na licencji open source.",
+        "Artykul przedstawia SmolLM, rodzine kompaktowych modeli LLM. Modele zostaly wytrenowane na starannie dobranym zbiorze SmolLM-Corpus. Oferuja doskonaly stosunek jakosci do rozmiaru. Zoptymalizowane pod katem wdrozen mobilnych i edge. Dostepne na licencji open source.",
       imageUrl: null,
       author: "Hugging Face Team",
-      publishedAt: new Date("2024-12-10"),
+      publishedAt: new Date("2024-07-16"),
       catalogSourceId: createdSources[4].id,
     },
     {
-      url: "https://huyenchip.com/2024/12/05/mlops-best-practices.html",
-      title: "MLOps Best Practices in 2024",
+      url: "https://huyenchip.com/2023/04/11/llm-engineering.html",
+      title: "Building LLM applications for production",
       intro:
-        "Chip Huyen podsumowuje najlepsze praktyki MLOps na podstawie doswiadczen z wielu firm. Praktyczne wskazowki dla zespolow ML.",
+        "Chip Huyen omawia wyzwania budowania aplikacji opartych na LLM w produkcji. Praktyczne wskazowki z doswiadczen w Netflix, NVIDIA i Snorkel AI.",
       summary:
-        "Przeglad aktualnych praktyk MLOps. Autorka omawia monitoring modeli, CI/CD dla ML, i zarzadzanie danymi. Przedstawia sprawdzone narzedzia i architektury. Bazuje na konsultacjach z wieloma organizacjami.",
+        "Artykul przedstawia wyzwania wdrazania LLM w produkcji. Autorka omawia problemy z halucynacjami, kosztami i latencja. Przedstawia strategie prompt engineeringu i fine-tuningu. Bazuje na doswiadczeniach z najwiekszych firm technologicznych.",
       imageUrl: null,
       author: "Chip Huyen",
-      publishedAt: new Date("2024-12-05"),
+      publishedAt: new Date("2023-04-11"),
       catalogSourceId: createdSources[5].id,
     },
   ];

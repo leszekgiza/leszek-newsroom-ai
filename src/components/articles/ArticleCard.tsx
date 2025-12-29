@@ -28,6 +28,8 @@ interface ArticleCardProps {
   onOpenSummary: (articleId: string) => void;
   onToggleSave: (articleId: string) => void;
   onMarkAsRead: (articleId: string) => void;
+  onDismiss?: (articleId: string) => void;
+  showRestoreButton?: boolean;
 }
 
 export function ArticleCard({
@@ -35,6 +37,8 @@ export function ArticleCard({
   onOpenSummary,
   onToggleSave,
   onMarkAsRead,
+  onDismiss,
+  showRestoreButton = false,
 }: ArticleCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLoadingTTS, setIsLoadingTTS] = useState(false);
@@ -55,6 +59,11 @@ export function ArticleCard({
   const handleSaveClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleSave(article.id);
+  };
+
+  const handleDismissClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDismiss?.(article.id);
   };
 
   const handleOpenOriginal = (e: React.MouseEvent) => {
@@ -149,6 +158,8 @@ export function ArticleCard({
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      data-testid="article-card"
+      data-article-url={article.url}
       className={cn(
         "bg-card rounded-2xl border border-border p-4 lg:p-5 cursor-pointer transition-all duration-200",
         "card-shadow",
@@ -187,6 +198,7 @@ export function ArticleCard({
 
           {/* Title */}
           <h3
+            data-testid="article-title"
             className={cn(
               "font-semibold text-primary leading-snug lg:text-lg",
               article.isRead && "text-muted"
@@ -196,31 +208,78 @@ export function ArticleCard({
           </h3>
         </div>
 
-        {/* Save Button - Desktop: top right */}
-        <button
-          onClick={handleSaveClick}
-          className={cn(
-            "w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0",
-            article.isSaved
-              ? "bg-highlight/10 text-highlight"
-              : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-highlight hover:bg-red-50 dark:hover:bg-red-950/20"
+        {/* Action Buttons - Desktop: top right */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {/* Dismiss/Restore Button */}
+          {onDismiss && (
+            <button
+              onClick={handleDismissClick}
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                showRestoreButton
+                  ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
+                  : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700"
+              )}
+              title={showRestoreButton ? "Przywroc artykul" : "Nie interesuje mnie"}
+            >
+              {showRestoreButton ? (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+            </button>
           )}
-          title={article.isSaved ? "Usun z zapisanych" : "Zapisz na pozniej"}
-        >
-          <svg
-            className="w-5 h-5"
-            fill={article.isSaved ? "currentColor" : "none"}
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+
+          {/* Save Button */}
+          <button
+            onClick={handleSaveClick}
+            className={cn(
+              "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+              article.isSaved
+                ? "bg-highlight/10 text-highlight"
+                : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-highlight hover:bg-red-50 dark:hover:bg-red-950/20"
+            )}
+            title={article.isSaved ? "Usun z zapisanych" : "Zapisz na pozniej"}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-            />
-          </svg>
-        </button>
+            <svg
+              className="w-5 h-5"
+              fill={article.isSaved ? "currentColor" : "none"}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Intro (2-sentence AI summary) */}

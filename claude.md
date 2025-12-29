@@ -26,11 +26,52 @@ Format: `type: description`
 - `docs:` - dokumentacja
 - `refactor:` - refaktoryzacja
 
+### 4. Jedna Funkcjonalność Na Raz
+**ZAWSZE** robimy jedną funkcjonalność, sprawdzamy czy działa, i dopiero potem idziemy dalej.
+1. Zaimplementuj pojedynczą funkcję/feature
+2. Przetestuj ręcznie lub automatycznie
+3. Potwierdź że działa
+4. Dopiero wtedy przechodź do następnej
+
+### 5. Workflow Po Implementacji Funkcjonalności
+Po zakończeniu implementacji funkcjonalności, **ZAWSZE** wykonaj poniższe kroki:
+
+#### Krok 1: Lokalne testowanie
+- Przetestuj funkcjonalność ręcznie w przeglądarce
+- Użyj Claude (browser automation) do testów interaktywnych
+- Sprawdź na mobile i desktop
+
+#### Krok 2: Testy automatyczne
+```bash
+npx tsc --noEmit           # Sprawdź TypeScript
+npx playwright test        # Uruchom testy E2E
+```
+
+#### Krok 3: Rozszerzenie testów regresji
+- Dodaj nowe testy dla zaimplementowanej funkcjonalności do `e2e/`
+- Uruchom pełną suitę testów regresji
+- Upewnij się że wszystkie testy przechodzą
+
+#### Krok 4: Commit i dokumentacja (tylko jeśli testy przechodzą!)
+```bash
+git add .
+git commit -m "feat: opis funkcjonalności"
+```
+- Zaktualizuj `CHANGELOG.md` z opisem zmian
+- Zaktualizuj wersję jeśli to istotna funkcjonalność
+
+#### Krok 5: Push do GitHub
+```bash
+git push origin master
+```
+
+**WAŻNE:** Nie przechodź do następnej funkcjonalności dopóki cały workflow nie jest zakończony!
+
 ---
 
 ## Stan Implementacji (2025-12-29)
 
-### Zaimplementowane (v2.2.0)
+### Zaimplementowane (v2.3.0)
 - [x] Lista artykułów z kartami
 - [x] 2-zdaniowe intro (AI)
 - [x] Pełne streszczenie AI (Claude, 200-300 słów, 1-2 min TTS)
@@ -42,13 +83,14 @@ Format: `type: description`
 - [x] Responsive layout (mobile + desktop)
 - [x] Badge NEW
 - [x] Wyszukiwanie (basic)
+- [x] **Kosz / "Nie interesuje mnie"** (F3.6, F3.7, US3.4)
+  - Przycisk X przy artykule (dismiss)
+  - Strona `/trash` z odrzuconymi artykułami
+  - Przywracanie artykułów z kosza
 
 ### Do Zaimplementowania (Następne)
-- [ ] **Oznaczanie "nie interesuje mnie" + Kosz** (F3.6, F3.7, US3.4)
-  - Przycisk X/kosz przy artykule
-  - Tabela `dismissed_articles`
-  - Strona `/trash`
-  - Przywracanie artykułów
+- [ ] **Scraping (Crawl4AI)** - automatyczne pobieranie artykułów ze źródeł
+- [ ] **Wydania (Editions)** - codzienne grupowanie artykułów (F8, Epic 9)
 - [ ] Gmail integration
 - [ ] LinkedIn integration
 - [ ] Dodawanie własnych źródeł
@@ -87,6 +129,9 @@ src/
 - `GET /api/articles/[id]` - szczegóły artykułu
 - `POST /api/articles/[id]/summarize` - generowanie streszczenia (Claude)
 - `POST /api/articles/[id]/read` - oznacz jako przeczytane
+- `POST /api/articles/[id]/dismiss` - odrzuć artykuł (do kosza)
+- `DELETE /api/articles/[id]/dismiss` - przywróć z kosza
+- `GET /api/trash` - lista odrzuconych artykułów
 - `POST /api/tts` - generowanie audio (Edge TTS)
 - `POST /api/saved` - zapisz/usuń z zapisanych
 

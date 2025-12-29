@@ -403,6 +403,54 @@
 
 ---
 
+## Epic 9: Wydania (Editions)
+
+### US9.1 - Codzienne wydania
+**Jako** użytkownik
+**Chcę** widzieć artykuły pogrupowane w codzienne "wydania" (jak gazeta)
+**Aby** przeglądać newsy z konkretnego dnia i mieć poczucie porządku
+
+**Kryteria akceptacji:**
+- [ ] Artykuły grupowane automatycznie po dacie publikacji/pobrania
+- [ ] Zakładka "Wydania" w nawigacji
+- [ ] Lista wydań z datami (np. "29 grudnia 2025", "28 grudnia 2025")
+- [ ] Badge z liczbą nieprzeczytanych artykułów w każdym wydaniu
+- [ ] Kliknięcie wydania otwiera listę artykułów z tego dnia
+
+---
+
+### US9.2 - Przeglądanie historycznych wydań
+**Jako** użytkownik
+**Chcę** przeglądać wydania z poprzednich dni
+**Aby** wrócić do artykułów które przegapiłem
+
+**Kryteria akceptacji:**
+- [ ] Widok kalendarza lub listy dat
+- [ ] Możliwość przewijania w przeszłość
+- [ ] Wizualne oznaczenie dni z nieprzeczytanymi artykułami
+- [ ] Szybki skok do konkretnej daty
+
+---
+
+### US9.3 - Dzisiejsze wydanie jako domyślny widok
+**Jako** użytkownik
+**Chcę** widzieć dzisiejsze wydanie jako domyślny widok
+**Aby** od razu zobaczyć najnowsze artykuły z dzisiejszego dnia
+
+**Kryteria akceptacji:**
+- [ ] Opcja w ustawieniach: "Domyślny widok: Feed / Dzisiejsze wydanie"
+- [ ] Automatyczne przełączenie na nowe wydanie o północy
+- [ ] Powiadomienie o nowym wydaniu (opcjonalnie)
+
+**Szczegóły techniczne:**
+- Nowa tabela `editions` (id, date, createdAt)
+- Relacja article -> edition (opcjonalna, może być NULL dla starych artykułów)
+- Endpoint: `GET /api/editions` - lista wydań
+- Endpoint: `GET /api/editions/[date]` - artykuły z danego dnia
+- Cron job o północy do tworzenia nowego wydania
+
+---
+
 ## Źródła
 
 Wymagania oparte na analizie:

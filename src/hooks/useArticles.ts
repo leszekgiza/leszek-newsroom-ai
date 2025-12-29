@@ -17,6 +17,7 @@ interface UseArticlesResult {
   refetch: () => void;
   toggleSave: (articleId: string) => Promise<void>;
   markAsRead: (articleId: string) => Promise<void>;
+  dismissArticle: (articleId: string) => Promise<void>;
 }
 
 export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult {
@@ -119,6 +120,43 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
     }
   };
 
+  const dismissArticle = async (articleId: string) => {
+    try {
+      const response = await fetch(`/api/articles/${articleId}/dismiss`, {
+        method: "POST",
+      });
+
+      if (!response.ok) throw new Error("Błąd");
+
+      // Remove article from local state and update sources count
+      setArticles((prev) => {
+        const dismissed = prev.find((a) => a.id === articleId);
+        const newArticles = prev.filter((article) => article.id !== articleId);
+
+        // Update sources count
+        if (dismissed) {
+          setSources((prevSources) =>
+            prevSources.map((source) => {
+              if (source.id === null) {
+                // "Wszystkie" - decrease total count
+                return { ...source, count: source.count - 1 };
+              }
+              if (source.id === dismissed.source.id) {
+                // Specific source - decrease its count
+                return { ...source, count: source.count - 1 };
+              }
+              return source;
+            }).filter((source) => source.id === null || source.count > 0)
+          );
+        }
+
+        return newArticles;
+      });
+    } catch (err) {
+      console.error("Dismiss article error:", err);
+    }
+  };
+
   return {
     articles,
     sources,
@@ -127,5 +165,6 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
     refetch: fetchArticles,
     toggleSave,
     markAsRead,
+    dismissArticle,
   };
 }

@@ -17,7 +17,7 @@ export default function HomePage() {
     closeSummaryModal,
   } = useUIStore();
 
-  const { articles, sources, isLoading, toggleSave, markAsRead } = useArticles({
+  const { articles, sources, isLoading, toggleSave, markAsRead, dismissArticle } = useArticles({
     sourceId: activeSourceFilter,
     search: searchQuery,
   });
@@ -49,6 +49,7 @@ export default function HomePage() {
           onOpenSummary={openSummaryModal}
           onToggleSave={toggleSave}
           onMarkAsRead={markAsRead}
+          onDismiss={dismissArticle}
         />
       </div>
 

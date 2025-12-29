@@ -128,6 +128,16 @@ System rozróżnia dwa typy źródeł:
 | F7.2 | **AI Voice Chatbot** - rozmowa głosowa o artykule (STT+TTS) | COULD | Best practices |
 | F7.3 | Zapisywanie artykułów do przeczytania później z przypomnieniem | COULD | Pocket pattern |
 
+### F8: Wydania (Editions)
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F8.1 | Codzienne grupowanie artykułów w "wydania" z datą | SHOULD |
+| F8.2 | Widok kalendarza/listy wydań | SHOULD |
+| F8.3 | Przeglądanie historycznych wydań | SHOULD |
+| F8.4 | Badge z liczbą nieprzeczytanych artykułów w wydaniu | SHOULD |
+| F8.5 | Automatyczne tworzenie nowego wydania o północy | SHOULD |
+
 ---
 
 ## 3. Wymagania Niefunkcjonalne

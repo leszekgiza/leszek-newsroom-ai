@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.3.0] - 2025-12-29 (Trash & Bug Fixes)
+
+### Added - Trash/Dismiss Feature (F3.6, F3.7, US3.4)
+- **Dismiss button** (X) on article cards to hide articles
+- **Trash page** (`/trash`) to view dismissed articles
+- **Restore functionality** to bring back dismissed articles
+- **E2E tests** for article URL validation (`e2e/articles/article-links.spec.ts`)
+
+### Fixed
+- **Broken article URLs** in seed data (4 URLs returned 404)
+  - oneusefulthing.org - missing `-an-opinionated` suffix
+  - simonwillison.net - wrong article URL
+  - huggingface.co/blog/smollm2 → smollm (smollm2 doesn't exist)
+  - huyenchip.com - wrong article URL
+- **Source filter count** - filters now update correctly after dismissing articles
+
+### Added - Documentation
+- **Editions feature** (F8) added to requirements.md
+- **Epic 9: Wydania** added to user-stories.md
+- **Scraping** added to backlog in requirements
+
+### Technical
+- New API endpoints:
+  - `POST /api/articles/[id]/dismiss` - dismiss article
+  - `DELETE /api/articles/[id]/dismiss` - restore article
+  - `GET /api/trash` - list dismissed articles
+- New Prisma model: `DismissedArticle`
+- Added `data-testid` attributes to `ArticleCard` for E2E testing
+
+---
+
 ## [2.2.0] - 2025-12-29 (AI Summaries)
 
 ### Added
