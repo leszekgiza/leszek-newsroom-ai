@@ -271,6 +271,16 @@ ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
   tsvector_update_trigger(search_vector, 'pg_catalog.polish', title, intro, summary);
   ```
 
+### 5.6 API-First Architecture
+- **Decyzja:** Cała funkcjonalność dostępna przez REST API (`/api/*`)
+- **Uzasadnienie:**
+  - Separacja logiki biznesowej od UI
+  - Łatwe testowanie API niezależnie od interfejsu
+  - Możliwość budowy aplikacji mobilnej w przyszłości
+  - Możliwość integracji z zewnętrznymi narzędziami (CLI, automatyzacje)
+  - Jasny kontrakt między frontendem a backendem
+- **Implementacja:** Next.js API Routes, UI jako konsument API
+
 ---
 
 ## 6. Priorytety MoSCoW

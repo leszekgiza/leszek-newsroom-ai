@@ -385,6 +385,16 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 **Decyzja:** Microsoft Edge TTS (darmowe)
 **Konsekwencje:** Dobra jakość polskiego głosu, zero kosztów
 
+### ADR-005: API-First Architecture
+**Status:** Accepted
+**Kontekst:** Potrzeba separacji logiki biznesowej od UI, możliwość przyszłej integracji z aplikacją mobilną lub innymi klientami
+**Decyzja:** Cała funkcjonalność dostępna przez REST API (`/api/*`), UI jest konsumentem API
+**Konsekwencje:**
+- Łatwe testowanie API niezależnie od UI
+- Możliwość budowy aplikacji mobilnej w przyszłości
+- Możliwość integracji z zewnętrznymi narzędziami (CLI, automatyzacje)
+- Jasny kontrakt między frontendem a backendem
+
 ---
 
 ## 10. Ryzyka
