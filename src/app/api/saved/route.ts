@@ -35,6 +35,7 @@ export async function GET() {
       imageUrl: saved.article.imageUrl,
       author: saved.article.author,
       publishedAt: saved.article.publishedAt?.toISOString() || null,
+      createdAt: saved.article.createdAt.toISOString(),
       savedAt: saved.savedAt.toISOString(),
       source: saved.article.catalogSource
         ? {

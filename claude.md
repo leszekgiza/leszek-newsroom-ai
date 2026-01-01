@@ -69,9 +69,9 @@ git push origin master
 
 ---
 
-## Stan Implementacji (2025-12-29)
+## Stan Implementacji (2025-12-30)
 
-### Zaimplementowane (v2.4.0)
+### Zaimplementowane (v2.5.0)
 - [x] Lista artykułów z kartami
 - [x] 2-zdaniowe intro (AI)
 - [x] Pełne streszczenie AI (Claude, 200-300 słów, 1-2 min TTS)
@@ -93,9 +93,13 @@ git push origin master
   - Włączanie/wyłączanie źródeł
   - Usuwanie źródeł
   - Subskrypcje źródeł z katalogu
+- [x] **Scraping (Crawl4AI)** (F1.1)
+  - Python FastAPI microservice (`scraper/`)
+  - Przycisk "Pobierz artykuły" przy źródłach
+  - Automatyczne wykrywanie linków do artykułów
+  - Ekstrakcja markdown i intro
 
 ### Do Zaimplementowania (Następne)
-- [ ] **Scraping (Crawl4AI)** - automatyczne pobieranie artykułów ze źródeł
 - [ ] **Wydania (Editions)** - codzienne grupowanie artykułów (F8, Epic 9)
 - [ ] Gmail integration
 - [ ] LinkedIn integration
@@ -111,6 +115,7 @@ git push origin master
 - **Database:** PostgreSQL (Prisma 7)
 - **AI:** Claude API (@anthropic-ai/sdk)
 - **TTS:** edge-tts-universal
+- **Scraping:** Python FastAPI + Crawl4AI (microservice)
 
 ### Struktura Katalogów
 ```
@@ -126,7 +131,13 @@ src/
 │   └── ui/              # Button, Input, Modal, Badge
 ├── hooks/
 ├── lib/
+│   └── scrapeService.ts # HTTP client for Python scraper
 └── stores/              # Zustand stores
+
+scraper/                 # Python Crawl4AI microservice
+├── main.py              # FastAPI endpoints
+├── requirements.txt
+└── Dockerfile
 ```
 
 ### Kluczowe Endpointy API
@@ -139,6 +150,12 @@ src/
 - `GET /api/trash` - lista odrzuconych artykułów
 - `POST /api/tts` - generowanie audio (Edge TTS)
 - `POST /api/saved` - zapisz/usuń z zapisanych
+- `POST /api/scrape/trigger` - trigger scraping dla źródła
+
+### Scraper API (Python, port 8000)
+- `GET /health` - healthcheck
+- `POST /scrape` - scrape single URL → markdown
+- `POST /scrape/articles` - extract article list from blog page
 
 ---
 
@@ -166,4 +183,15 @@ npm run dev          # Development server
 npm run db:seed      # Seed database
 npx tsc --noEmit     # Check TypeScript
 npx playwright test  # E2E tests
+
+# Docker
+docker-compose up -d          # Start all services
+docker-compose up scraper     # Start only scraper
+docker-compose logs -f        # View logs
+docker-compose down           # Stop all services
+
+# Scraper (development)
+cd scraper && pip install -r requirements.txt
+crawl4ai-setup               # Install Playwright browsers
+uvicorn main:app --reload    # Start scraper on port 8000
 ```

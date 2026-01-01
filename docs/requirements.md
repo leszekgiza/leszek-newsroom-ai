@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - Dokument Wymagań
 
-**Wersja:** 2.2
-**Data:** 2025-12-29
+**Wersja:** 2.3
+**Data:** 2026-01-01
 **Status:** Draft
 
 ---
@@ -63,6 +63,8 @@ System rozróżnia dwa typy źródeł:
 | F1.4 | Integracja z Twitter/X przez Nitter | COULD |
 | F1.5 | Automatyczne odświeżanie co X minut | MUST |
 | F1.6 | Deduplikacja artykułów (ten sam URL) | MUST |
+| F1.7 | Ekstrakcja daty publikacji z URL artykułu (wzorce: `/YYYY-MM-DD/`, `/YYYYMMDD/`, `/posts/YYYY-MM-DD-slug/`) | MUST |
+| F1.8 | Wyświetlanie rzeczywistej daty publikacji (nie daty pobrania) | MUST |
 
 ### F2: Czytanie i Konsumpcja
 
@@ -88,6 +90,7 @@ System rozróżnia dwa typy źródeł:
 | F3.5 | Tagowanie/kategoryzacja artykułów | COULD |
 | F3.6 | Oznaczanie artykułów jako "nie interesuje mnie" (przeniesienie do Kosza) | SHOULD |
 | F3.7 | Przeglądanie i przywracanie artykułów z Kosza | SHOULD |
+| F3.8 | **Sortowanie artykułów od najnowszych do najstarszych** (wg daty publikacji, artykuły bez daty na końcu) | MUST |
 
 ### F4: Personalizacja
 

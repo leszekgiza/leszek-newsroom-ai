@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - User Stories
 
-**Wersja:** 2.2
-**Data:** 2025-12-29
+**Wersja:** 2.3
+**Data:** 2026-01-01
 **Format:** Jako [rola] chcę [funkcja] aby [korzyść]
 
 ---
@@ -14,10 +14,12 @@
 **Aby** szybko przejrzeć co nowego
 
 **Kryteria akceptacji:**
-- [ ] Artykuły wyświetlane jako karty z tytułem, źródłem, datą
-- [ ] 2-zdaniowe intro widoczne od razu (bez klikania)
-- [ ] Badge "NEW" przy nieprzeczytanych
-- [ ] Sortowanie od najnowszych
+- [x] Artykuły wyświetlane jako karty z tytułem, źródłem, datą
+- [x] **Data publikacji wyświetlana jako rzeczywista data** (nie data pobrania)
+- [x] **Data wyciągana z URL artykułu** (wzorce: `/YYYY-MM-DD/`, `/YYYYMMDD/`, `/posts/YYYY-MM-DD-slug/`)
+- [x] 2-zdaniowe intro widoczne od razu (bez klikania)
+- [x] Badge "NEW" przy nieprzeczytanych
+- [x] **Sortowanie od najnowszych do najstarszych (wg publishedAt DESC, artykuły bez daty na końcu)**
 - [ ] Infinite scroll lub paginacja
 
 ---

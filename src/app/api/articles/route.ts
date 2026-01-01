@@ -113,7 +113,10 @@ export async function GET(request: NextRequest) {
           select: { id: true, name: true },
         },
       },
-      orderBy: { publishedAt: "desc" },
+      orderBy: [
+        { publishedAt: { sort: "desc", nulls: "last" } },
+        { createdAt: "desc" },
+      ],
       take: limit,
       skip: offset,
     });
@@ -128,6 +131,7 @@ export async function GET(request: NextRequest) {
       imageUrl: article.imageUrl,
       author: article.author,
       publishedAt: article.publishedAt?.toISOString() || null,
+      createdAt: article.createdAt.toISOString(),
       source: article.catalogSource
         ? {
             id: article.catalogSource.id,

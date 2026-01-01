@@ -1,17 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { Article } from "@/components/articles/ArticleCard";
 import type { SourceFilterItem } from "@/components/articles/SourceFilter";
+import type { EditionTab } from "@/components/articles/EditionTabs";
+import { getArticleDate, formatEditionLabel } from "@/components/articles/EditionTabs";
 
 interface UseArticlesOptions {
   sourceId?: string | null;
   search?: string;
+  editionDate?: string | null; // YYYY-MM-DD
 }
 
 interface UseArticlesResult {
   articles: Article[];
+  filteredArticles: Article[]; // Po filtrze editionDate
   sources: SourceFilterItem[];
+  editions: EditionTab[];
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
@@ -157,9 +162,47 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
     }
   };
 
+  // Oblicz editions z artykułów
+  const editions = useMemo<EditionTab[]>(() => {
+    const editionMap = new Map<string, { count: number; unreadCount: number }>();
+
+    for (const article of articles) {
+      const date = getArticleDate(article);
+      const existing = editionMap.get(date);
+
+      if (existing) {
+        existing.count++;
+        if (!article.isRead) existing.unreadCount++;
+      } else {
+        editionMap.set(date, {
+          count: 1,
+          unreadCount: article.isRead ? 0 : 1,
+        });
+      }
+    }
+
+    // Konwertuj do tablicy i sortuj od najnowszych
+    return Array.from(editionMap.entries())
+      .map(([date, { count, unreadCount }]) => ({
+        date,
+        label: formatEditionLabel(date),
+        count,
+        unreadCount,
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [articles]);
+
+  // Filtruj artykuły po dacie edycji
+  const filteredArticles = useMemo(() => {
+    if (!options.editionDate) return articles;
+    return articles.filter((article) => getArticleDate(article) === options.editionDate);
+  }, [articles, options.editionDate]);
+
   return {
     articles,
+    filteredArticles,
     sources,
+    editions,
     isLoading,
     error,
     refetch: fetchArticles,

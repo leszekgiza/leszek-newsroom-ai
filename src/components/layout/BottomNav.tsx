@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
 
 const navItems = [
   {
@@ -71,11 +72,33 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuthStore();
+
+  // Jeśli użytkownik nie jest zalogowany, pokazujemy przycisk logowania zamiast ostatniego itemu
+  const displayItems = isAuthenticated
+    ? navItems
+    : [
+        ...navItems.slice(0, 3),
+        {
+          href: "/login",
+          label: "Zaloguj",
+          icon: (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+              />
+            </svg>
+          ),
+        },
+      ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border z-50 md:hidden">
       <div className="max-w-md mx-auto flex justify-around items-center h-16">
-        {navItems.map((item) => {
+        {displayItems.map((item) => {
           const isActive =
             item.href === "/"
               ? pathname === "/"

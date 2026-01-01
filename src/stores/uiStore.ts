@@ -8,12 +8,14 @@ interface UIState {
   selectedArticleId: string | null;
   searchQuery: string;
   activeSourceFilter: string | null;
+  activeEditionDate: string | null; // YYYY-MM-DD lub null (wszystkie)
 
   setTheme: (theme: Theme) => void;
   openSummaryModal: (articleId: string) => void;
   closeSummaryModal: () => void;
   setSearchQuery: (query: string) => void;
   setActiveSourceFilter: (sourceId: string | null) => void;
+  setActiveEditionDate: (date: string | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -22,6 +24,7 @@ export const useUIStore = create<UIState>((set) => ({
   selectedArticleId: null,
   searchQuery: "",
   activeSourceFilter: null,
+  activeEditionDate: null,
 
   setTheme: (theme) => set({ theme }),
   openSummaryModal: (articleId) =>
@@ -30,4 +33,5 @@ export const useUIStore = create<UIState>((set) => ({
     set({ isSummaryModalOpen: false, selectedArticleId: null }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setActiveSourceFilter: (sourceId) => set({ activeSourceFilter: sourceId }),
+  setActiveEditionDate: (date) => set({ activeEditionDate: date }),
 }));

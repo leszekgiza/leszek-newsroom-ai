@@ -14,6 +14,7 @@ export interface Article {
   imageUrl: string | null;
   author: string | null;
   publishedAt: string | null;
+  createdAt: string;
   source: {
     id: string;
     name: string;
@@ -139,19 +140,21 @@ export function ArticleCard({
     stop();
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "";
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffHours < 1) return "przed chwila";
+    if (diffHours < 1) return "przed chwilą";
     if (diffHours < 24) return `${diffHours}h temu`;
     if (diffDays < 7) return `${diffDays}d temu`;
     return date.toLocaleDateString("pl-PL", { day: "numeric", month: "short" });
   };
+
+  // Use publishedAt if available, fallback to createdAt
+  const displayDate = article.publishedAt || article.createdAt;
 
   return (
     <article
@@ -192,7 +195,7 @@ export function ArticleCard({
             </div>
             <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
             <span className="text-xs text-muted">
-              {formatDate(article.publishedAt)}
+              {formatDate(displayDate)}
             </span>
           </div>
 

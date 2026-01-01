@@ -72,6 +72,11 @@ export async function POST(
       );
     }
 
+    // If article already has a summary, return it without regenerating
+    if (article.summary) {
+      return NextResponse.json({ summary: article.summary });
+    }
+
     // Fetch article content
     let articleContent: string;
     try {

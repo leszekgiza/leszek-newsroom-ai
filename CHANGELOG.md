@@ -1,5 +1,46 @@
 # Changelog
 
+## [2.5.1] - 2026-01-01 (Date Display & Sorting)
+
+### Added - Article Dates (F3.8)
+- **Date display on every article** - shows relative time (e.g., "3h temu", "2d temu")
+- **Fallback to createdAt** - articles without publishedAt show creation date
+- **Sorting by publication date** - newest articles first, nulls at bottom
+
+### Technical
+- Added `createdAt` to article API responses (`/api/articles`, `/api/saved`, `/api/trash`)
+- Updated `ArticleCard` to use `publishedAt || createdAt` for date display
+- Prisma orderBy with `nulls: "last"` for proper sorting
+
+---
+
+## [2.5.0] - 2025-12-30 (Article Scraping)
+
+### Added - Scraping with Crawl4AI (F1.1)
+- **Python scraper microservice** - FastAPI + Crawl4AI for web scraping
+- **Scrape button** - "Pobierz artykuły" button on Sources page
+- **Article extraction** - automatically finds article links from blog pages
+- **Markdown conversion** - extracts article content as markdown
+- **Intro generation** - extracts first 2 sentences as article intro
+
+### Technical - Scraper Architecture
+- New `scraper/` directory with Python FastAPI service:
+  - `POST /scrape` - scrape single URL to markdown
+  - `POST /scrape/articles` - extract article list from blog page
+  - `GET /health` - health check endpoint
+- Next.js integration:
+  - `src/lib/scrapeService.ts` - HTTP client for scraper
+  - `POST /api/scrape/trigger` - trigger scraping for a source
+- Docker deployment:
+  - `scraper/Dockerfile` - containerized Crawl4AI service
+  - `docker-compose.yml` - full stack orchestration
+
+### Dependencies
+- Python: `crawl4ai>=0.4.24`, `fastapi>=0.109.0`, `uvicorn`
+- Uses Playwright/Chromium for JavaScript rendering
+
+---
+
 ## [2.4.0] - 2025-12-29 (Source Management)
 
 ### Added - Source Management (F4.2, F4.3, US4.1, US4.3)
