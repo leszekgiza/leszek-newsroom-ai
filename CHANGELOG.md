@@ -9,6 +9,17 @@ Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Polskie intro artykułów generowane przez AI** (F2.1, US2.1)
+  - Nowy serwis `src/lib/aiService.ts` z funkcją `generatePolishIntro()`
+  - Intro generowane przez Claude API podczas scrapowania artykułów
+  - 2 zdania, max 50 słów, w języku polskim
+  - Tłumaczenie/streszczenie treści nawet dla artykułów anglojęzycznych
+
+- **Ekstrakcja daty publikacji z treści artykułu** (F1.7)
+  - Nowa funkcja `extract_date_from_content()` w scraperze Python
+  - Obsługa formatów: "Dec 20, 2025", "20 December 2025", "2025-12-20"
+  - Fallback gdy data nie jest dostępna w URL
+
 - **PostgreSQL Full-Text Search (FTS)** z obsługą języka polskiego
   - Nowa migracja `20260106120000_add_fts_polish` dodająca:
     - Rozszerzenie `unaccent` dla normalizacji polskich znaków diakrytycznych

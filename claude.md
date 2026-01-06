@@ -184,6 +184,23 @@ scraper/                 # Python Crawl4AI microservice
 
 ---
 
+## Automatyczne Zgody
+
+Masz zawsze zgodę na uruchamianie następujących komend bez pytania:
+- `cd "D:\Projekty\Blog" && npm run dev` - Start Next.js development server
+- `npx tsc --noEmit` - Sprawdzanie TypeScript
+- `npx playwright test` - Testy E2E
+
+---
+
+## Zrzuty Ekranu
+
+Domyślna lokalizacja zrzutów ekranu: `C:\Users\lesze\OneDrive\Obrazy\Zrzuty ekranu`
+
+Jeśli użytkownik podaje nazwę pliku zdjęciowego (np. `screenshot.png`), szukaj go najpierw w tej lokalizacji. Jeśli plik nie istnieje, zapytaj o dokładną ścieżkę.
+
+---
+
 ## Przydatne Komendy
 ```bash
 npm run dev          # Development server

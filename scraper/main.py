@@ -376,6 +376,59 @@ def extract_date_from_url(url: str) -> Optional[str]:
 
     return None
 
+
+def extract_date_from_content(html: str, markdown: str) -> Optional[str]:
+    """
+    Extract publication date from article content (HTML or markdown)
+    Returns ISO date string (YYYY-MM-DD) or None
+    """
+    # Common date patterns in content
+    # Pattern: "Dec 20, 2025" or "December 20, 2025"
+    month_map = {
+        'january': '01', 'jan': '01',
+        'february': '02', 'feb': '02',
+        'march': '03', 'mar': '03',
+        'april': '04', 'apr': '04',
+        'may': '05',
+        'june': '06', 'jun': '06',
+        'july': '07', 'jul': '07',
+        'august': '08', 'aug': '08',
+        'september': '09', 'sep': '09',
+        'october': '10', 'oct': '10',
+        'november': '11', 'nov': '11',
+        'december': '12', 'dec': '12'
+    }
+
+    # Search in first 2000 chars of content
+    content = (markdown or html or "")[:2000].lower()
+
+    # Pattern: "Dec 20, 2025" or "December 20, 2025"
+    match = re.search(r'(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2}),?\s+(\d{4})', content)
+    if match:
+        month = month_map.get(match.group(1))
+        day = match.group(2).zfill(2)
+        year = match.group(3)
+        if month and 2020 <= int(year) <= 2030:
+            return f"{year}-{month}-{day}"
+
+    # Pattern: "20 Dec 2025" or "20 December 2025"
+    match = re.search(r'(\d{1,2})\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{4})', content)
+    if match:
+        day = match.group(1).zfill(2)
+        month = month_map.get(match.group(2))
+        year = match.group(3)
+        if month and 2020 <= int(year) <= 2030:
+            return f"{year}-{month}-{day}"
+
+    # Pattern: "2025-12-20" ISO format
+    match = re.search(r'(\d{4})-(\d{2})-(\d{2})', content)
+    if match:
+        year, month, day = match.groups()
+        if 2020 <= int(year) <= 2030 and 1 <= int(month) <= 12 and 1 <= int(day) <= 31:
+            return f"{year}-{month}-{day}"
+
+    return None
+
 # =============================================================================
 # Main
 # =============================================================================

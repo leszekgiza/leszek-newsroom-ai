@@ -70,7 +70,7 @@ System rozróżnia dwa typy źródeł:
 
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
-| F2.1 | **2-zdaniowe intro widoczne od razu** (generowane przez AI) | MUST |
+| F2.1 | **2-zdaniowe intro widoczne od razu** (generowane przez AI w języku polskim podczas scrapowania) | MUST |
 | F2.2 | Pełne AI streszczenie po kliknięciu "Więcej" (200-300 słów, fakty i insighty) | MUST |
 | F2.2.1 | Automatyczne generowanie streszczenia gdy brak lub za krótkie (<100 słów) | MUST |
 | F2.2.2 | Możliwość regeneracji streszczenia przez użytkownika | SHOULD |

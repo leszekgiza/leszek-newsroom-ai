@@ -95,8 +95,8 @@ export function ArticleCard({
     // Stop any other playing audio
     stop();
 
-    // Get text to read - prefer intro, fallback to title
-    const textToRead = article.intro || article.title;
+    // Get text to read - prefer Polish summary, fallback to intro, then title
+    const textToRead = article.summary || article.intro || article.title;
     if (!textToRead) return;
 
     setIsLoadingTTS(true);

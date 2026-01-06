@@ -4,10 +4,10 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   scrapeArticlesList,
   scrapeUrl,
-  extractIntro,
   checkScraperHealth,
   SourceConfig,
 } from "@/lib/scrapeService";
+import { generatePolishIntro } from "@/lib/aiService";
 
 interface ScrapeResult {
   sourceId: string;
@@ -138,9 +138,12 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Generate intro from markdown
-        const intro = extractIntro(articleContent.markdown || "");
-        console.log(`[SCRAPE] Intro generated: ${intro?.slice(0, 50) || 'none'}...`);
+        // Generate Polish intro using AI
+        const intro = await generatePolishIntro(
+          articleContent.title || articleInfo.title,
+          articleContent.markdown || ""
+        );
+        console.log(`[SCRAPE] Polish intro generated: ${intro?.slice(0, 50) || 'none'}...`);
 
         // Create article in database
         const articleData: {

@@ -68,9 +68,14 @@
 **Aby** szybko ocenić czy artykuł jest wart przeczytania
 
 **Kryteria akceptacji:**
-- [ ] Intro generowane automatycznie przez AI
-- [ ] Widoczne bez klikania
-- [ ] Jakość: zwięzłe, informacyjne, po polsku
+- [x] Intro generowane automatycznie przez AI podczas scrapowania
+- [x] Widoczne bez klikania
+- [x] Jakość: zwięzłe, informacyjne, po polsku (nawet dla artykułów anglojęzycznych)
+
+**Szczegóły techniczne:**
+- Claude API (claude-sonnet-4-20250514) w `scrape/trigger` endpoint
+- Generowane podczas scrapowania, nie on-demand
+- Max 50 słów, dokładnie 2 zdania
 
 ---
 
