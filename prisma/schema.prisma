@@ -155,7 +155,7 @@ model Article {
   privateSourceId String? @map("private_source_id")
 
   // Full-text search vector (managed by trigger)
-  // searchVector Unsupported("tsvector")? @map("search_vector")
+  searchVector Unsupported("tsvector")? @map("search_vector")
 
   // Relations
   catalogSource CatalogSource? @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)

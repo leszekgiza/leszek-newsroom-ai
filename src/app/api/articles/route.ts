@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, pool } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { searchArticles } from "@/lib/searchService";
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,43 +40,6 @@ export async function GET(request: NextRequest) {
 
     const privateSourceIds = privateSources.map((p) => p.id);
 
-    // Build where clause
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const whereClause: any = {
-      OR: [
-        {
-          catalogSourceId: {
-            in: subscribedSourceIds.filter((id) => !hiddenSourceIds.includes(id)),
-          },
-        },
-        {
-          privateSourceId: { in: privateSourceIds },
-        },
-      ],
-    };
-
-    // Filter by specific source if provided
-    if (sourceId) {
-      whereClause.OR = [
-        { catalogSourceId: sourceId },
-        { privateSourceId: sourceId },
-      ];
-    }
-
-    // Filter by search term
-    if (search && search.trim()) {
-      const searchTerm = search.trim().toLowerCase();
-      whereClause.AND = [
-        {
-          OR: [
-            { title: { contains: searchTerm, mode: "insensitive" } },
-            { intro: { contains: searchTerm, mode: "insensitive" } },
-            { summary: { contains: searchTerm, mode: "insensitive" } },
-          ],
-        },
-      ];
-    }
-
     // Get read articles
     const readArticles = await prisma.readArticle.findMany({
       where: { userId: session.userId },
@@ -96,6 +60,150 @@ export async function GET(request: NextRequest) {
       select: { articleId: true },
     });
     const dismissedArticleIds = dismissedArticles.map((d) => d.articleId);
+
+    // Filter subscribed sources (exclude hidden)
+    const activeSubscribedIds = subscribedSourceIds.filter(
+      (id) => !hiddenSourceIds.includes(id)
+    );
+
+    // ========== FTS Search Branch ==========
+    // Use PostgreSQL Full-Text Search for queries >= 2 characters
+    if (search && search.trim().length >= 2) {
+      const { articles: searchResults, total } = await searchArticles(pool, {
+        query: search,
+        subscribedSourceIds: activeSubscribedIds,
+        privateSourceIds: privateSourceIds,
+        dismissedArticleIds,
+        sourceFilter: sourceId,
+        limit,
+        offset,
+      });
+
+      // If no results, return early
+      if (searchResults.length === 0) {
+        return NextResponse.json({
+          articles: [],
+          pagination: {
+            total: 0,
+            limit,
+            offset,
+            hasMore: false,
+          },
+          searchQuery: search,
+        });
+      }
+
+      // Fetch source details for results
+      const catalogSourceIds = [
+        ...new Set(
+          searchResults
+            .map((a) => a.catalogSourceId)
+            .filter((id): id is string => id !== null)
+        ),
+      ];
+      const privateSourceIdsFromResults = [
+        ...new Set(
+          searchResults
+            .map((a) => a.privateSourceId)
+            .filter((id): id is string => id !== null)
+        ),
+      ];
+
+      const [catalogSourcesData, privateSourcesData] = await Promise.all([
+        catalogSourceIds.length > 0
+          ? prisma.catalogSource.findMany({
+              where: { id: { in: catalogSourceIds } },
+              select: { id: true, name: true, logoUrl: true },
+            })
+          : [],
+        privateSourceIdsFromResults.length > 0
+          ? prisma.privateSource.findMany({
+              where: { id: { in: privateSourceIdsFromResults } },
+              select: { id: true, name: true },
+            })
+          : [],
+      ]);
+
+      const catalogSourceMap = new Map(
+        catalogSourcesData.map((s) => [s.id, s])
+      );
+      const privateSourceMap = new Map(
+        privateSourcesData.map((s) => [s.id, s])
+      );
+
+      const transformedArticles = searchResults.map((article) => {
+        const catalogSource = article.catalogSourceId
+          ? catalogSourceMap.get(article.catalogSourceId)
+          : null;
+        const privateSource = article.privateSourceId
+          ? privateSourceMap.get(article.privateSourceId)
+          : null;
+
+        return {
+          id: article.id,
+          url: article.url,
+          title: article.title,
+          intro: article.intro,
+          summary: article.summary,
+          imageUrl: article.imageUrl,
+          author: article.author,
+          publishedAt: article.publishedAt?.toISOString() || null,
+          createdAt: article.createdAt.toISOString(),
+          source: catalogSource
+            ? {
+                id: catalogSource.id,
+                name: catalogSource.name,
+                logoUrl: catalogSource.logoUrl,
+              }
+            : {
+                id: privateSource!.id,
+                name: privateSource!.name,
+                logoUrl: null,
+              },
+          isRead: readArticleIds.has(article.id),
+          isSaved: savedArticleIds.has(article.id),
+          // FTS-specific fields
+          relevance: article.rank,
+          highlight: article.headline,
+        };
+      });
+
+      return NextResponse.json({
+        articles: transformedArticles,
+        pagination: {
+          total,
+          limit,
+          offset,
+          hasMore: offset + searchResults.length < total,
+        },
+        searchQuery: search,
+      });
+    }
+    // ========== End FTS Search Branch ==========
+
+    // Regular Prisma query (no search or search < 2 chars)
+    // Build where clause
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = {
+      OR: [
+        {
+          catalogSourceId: {
+            in: activeSubscribedIds,
+          },
+        },
+        {
+          privateSourceId: { in: privateSourceIds },
+        },
+      ],
+    };
+
+    // Filter by specific source if provided
+    if (sourceId) {
+      whereClause.OR = [
+        { catalogSourceId: sourceId },
+        { privateSourceId: sourceId },
+      ];
+    }
 
     // Filter out dismissed articles
     if (dismissedArticleIds.length > 0) {
@@ -162,7 +270,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Get articles error:", error);
     return NextResponse.json(
-      { error: "Wystąpił błąd podczas pobierania artykułów" },
+      { error: "Wystapil blad podczas pobierania artykulow" },
       { status: 500 }
     );
   }

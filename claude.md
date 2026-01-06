@@ -69,9 +69,9 @@ git push origin master
 
 ---
 
-## Stan Implementacji (2025-12-30)
+## Stan Implementacji (2026-01-06)
 
-### Zaimplementowane (v2.5.0)
+### Zaimplementowane (v2.6.0)
 - [x] Lista artykułów z kartami
 - [x] 2-zdaniowe intro (AI)
 - [x] Pełne streszczenie AI (Claude, 200-300 słów, 1-2 min TTS)
@@ -98,12 +98,19 @@ git push origin master
   - Przycisk "Pobierz artykuły" przy źródłach
   - Automatyczne wykrywanie linków do artykułów
   - Ekstrakcja markdown i intro
+- [x] **PostgreSQL Full-Text Search (FTS)** (F3.4)
+  - Konfiguracja `polish_simple` z unaccent dla polskich znakow
+  - Wagi pol: A=tytul, B=intro, C=summary
+  - Prefix matching (`agent` -> `agents`, `agentic`)
+  - Ranking wynikow po relevance
+  - Highlights z tagami `<mark>`
 
 ### Do Zaimplementowania (Następne)
 - [ ] **Wydania (Editions)** - codzienne grupowanie artykułów (F8, Epic 9)
 - [ ] Gmail integration
 - [ ] LinkedIn integration
-- [ ] PostgreSQL FTS (polski)
+- [ ] **Infinite scroll / paginacja** - ladowanie kolejnych artykulow
+- [ ] **Automatyczne odswiezanie** - cron job do scrapowania
 
 ---
 
