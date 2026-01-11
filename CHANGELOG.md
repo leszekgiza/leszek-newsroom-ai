@@ -8,6 +8,14 @@ Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Ujednolicony UI sekcji "Katalog źródeł" z "Moje źródła"** (F4.3)
+  - Zamiana przycisku "Subskrybuj/Subskrybujesz" na toggle switch (włącz/wyłącz)
+  - Dodanie badge "Wyłączone" dla nieaktywnych źródeł z katalogu
+  - Przycisk pobierania artykułów zawsze widoczny (disabled gdy źródło wyłączone)
+  - Zmiana opisu sekcji na "Włącz źródła z katalogu..."
+  - Spójny wygląd i zachowanie obu sekcji zarządzania źródłami
+
 ### Added
 - **Polskie intro artykułów generowane przez AI** (F2.1, US2.1)
   - Nowy serwis `src/lib/aiService.ts` z funkcją `generatePolishIntro()`

@@ -425,7 +425,7 @@ export default function SourcesSettingsPage() {
             <section>
               <h2 className="text-lg font-semibold text-primary mb-4">Katalog źródeł</h2>
               <p className="text-sm text-muted mb-4">
-                Subskrybuj źródła z katalogu. Artykuły ze subskrybowanych źródeł pojawią się w Twoim feedzie.
+                Włącz źródła z katalogu aby ich artykuły pojawiały się w Twoim feedzie.
               </p>
 
               {catalogSources.length === 0 ? (
@@ -445,6 +445,11 @@ export default function SourcesSettingsPage() {
                                 {source.category}
                               </span>
                             )}
+                            {!source.isSubscribed && (
+                              <span className="text-xs px-2 py-0.5 bg-border rounded-full text-muted">
+                                Wyłączone
+                              </span>
+                            )}
                           </div>
                           {source.description && (
                             <p className="text-sm text-muted line-clamp-1">{source.description}</p>
@@ -454,11 +459,10 @@ export default function SourcesSettingsPage() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2 ml-4">
-                          {/* Scrape Button - only for subscribed sources */}
-                          {source.isSubscribed && (
-                            <button
-                              onClick={() => handleScrape(source.id, "catalog")}
-                              disabled={scrapeStatus?.sourceId === source.id}
+                          {/* Scrape Button */}
+                          <button
+                            onClick={() => handleScrape(source.id, "catalog")}
+                            disabled={!source.isSubscribed || scrapeStatus?.sourceId === source.id}
                               className={`p-2 rounded-lg transition-colors ${
                                 scrapeStatus?.sourceId === source.id && scrapeStatus.isLoading
                                   ? "bg-accent/20 text-accent"
@@ -477,17 +481,19 @@ export default function SourcesSettingsPage() {
                                 </svg>
                               )}
                             </button>
-                          )}
-                          {/* Subscribe Button */}
+                          {/* Toggle Active */}
                           <button
                             onClick={() => handleToggleCatalogSubscription(source.id, source.isSubscribed)}
-                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                              source.isSubscribed
-                                ? "bg-accent text-white"
-                                : "bg-border text-primary hover:bg-border/80"
+                            className={`relative w-11 h-6 rounded-full transition-colors ${
+                              source.isSubscribed ? "bg-accent" : "bg-border"
                             }`}
+                            title={source.isSubscribed ? "Wyłącz" : "Włącz"}
                           >
-                            {source.isSubscribed ? "Subskrybujesz" : "Subskrybuj"}
+                            <span
+                              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                                source.isSubscribed ? "left-6" : "left-1"
+                              }`}
+                            />
                           </button>
                         </div>
                       </div>
