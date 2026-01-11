@@ -17,6 +17,16 @@ Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/).
   - Spójny wygląd i zachowanie obu sekcji zarządzania źródłami
 
 ### Added
+- **Wydania (Editions)** - codzienne grupowanie artykułów (F8.1, US9.1)
+  - Nowa tabela `editions` z relacją do artykułów
+  - Serwis `src/lib/editionService.ts` do zarządzania wydaniami
+  - API endpoints: `GET /api/editions`, `GET /api/editions/[id]`
+  - Strona `/editions` z listą wydań i szczegółami
+  - AI-generowane podsumowania wydań
+  - Link "Wydania" w nawigacji (Sidebar + BottomNav)
+  - CRON endpoint `/api/cron/editions` dla automatycznego tworzenia
+  - Konfiguracja Vercel Cron w `vercel.json`
+
 - **Polskie intro artykułów generowane przez AI** (F2.1, US2.1)
   - Nowy serwis `src/lib/aiService.ts` z funkcją `generatePolishIntro()`
   - Intro generowane przez Claude API podczas scrapowania artykułów

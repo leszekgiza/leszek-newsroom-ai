@@ -1,8 +1,8 @@
 # Leszek Newsroom AI - Backlog
 
 **Wersja:** 1.0
-**Data:** 2026-01-05
-**Aktualna wersja aplikacji:** 2.5.1
+**Data:** 2026-01-11
+**Aktualna wersja aplikacji:** 2.6.0
 
 ---
 
@@ -19,32 +19,32 @@
 
 ## Sprint Backlog (Priorytet: MUST/SHOULD)
 
-### 1. Wydania (Editions) - Epic 9 [SHOULD]
+### 1. Wydania (Editions) - Epic 9 [SHOULD] ✅ DONE
 **Cel:** Codzienne grupowanie artykułów jak w gazecie
 
 | ID | Zadanie | Story | Status | Estimate |
 |----|---------|-------|--------|----------|
-| E9.1 | Tabela `editions` w Prisma | US9.1 | 📋 TODO | S |
-| E9.2 | API `GET /api/editions` - lista wydań | US9.1 | 📋 TODO | S |
-| E9.3 | API `GET /api/editions/[date]` - artykuły z dnia | US9.1 | 📋 TODO | S |
-| E9.4 | Strona `/editions` - lista wydań | US9.1 | 📋 TODO | M |
-| E9.5 | Badge z liczbą nieprzeczytanych w wydaniu | US9.1 | 📋 TODO | S |
+| E9.1 | Tabela `editions` w Prisma | US9.1 | ✅ DONE | S |
+| E9.2 | API `GET /api/editions` - lista wydań | US9.1 | ✅ DONE | S |
+| E9.3 | API `GET /api/editions/[id]` - artykuły wydania | US9.1 | ✅ DONE | S |
+| E9.4 | Strona `/editions` - lista wydań | US9.1 | ✅ DONE | M |
+| E9.5 | Badge z liczbą nieprzeczytanych w wydaniu | US9.1 | ✅ DONE | S |
 | E9.6 | Widok kalendarza/lista dat | US9.2 | 📋 TODO | M |
-| E9.7 | Cron job - tworzenie wydania o północy | US9.3 | 📋 TODO | M |
+| E9.7 | Cron job - tworzenie wydania o północy | US9.3 | ✅ DONE | M |
 | E9.8 | Ustawienie: domyślny widok (Feed/Wydanie) | US9.3 | 📋 TODO | S |
 
-### 2. Wyszukiwanie PostgreSQL FTS [MUST]
+### 2. Wyszukiwanie PostgreSQL FTS [MUST] ✅ DONE
 **Cel:** Pełnotekstowe wyszukiwanie z obsługą języka polskiego
 
 | ID | Zadanie | Story | Status | Estimate |
 |----|---------|-------|--------|----------|
-| S1.1 | Migracja: kolumna `search_vector` tsvector | US3.3 | 📋 TODO | S |
-| S1.2 | Indeks GIN dla wyszukiwania | US3.3 | 📋 TODO | S |
-| S1.3 | Trigger do aktualizacji search_vector | US3.3 | 📋 TODO | M |
-| S1.4 | API `GET /api/search?q=...` | US3.3 | 📋 TODO | M |
-| S1.5 | UI: pole wyszukiwania (mobile + desktop) | US3.3 | 📋 TODO | M |
-| S1.6 | Live search z debounce 300ms | US3.3 | 📋 TODO | S |
-| S1.7 | Podświetlanie dopasowanych fragmentów | US3.3 | 📋 TODO | M |
+| S1.1 | Migracja: kolumna `search_vector` tsvector | US3.3 | ✅ DONE | S |
+| S1.2 | Indeks GIN dla wyszukiwania | US3.3 | ✅ DONE | S |
+| S1.3 | Trigger do aktualizacji search_vector | US3.3 | ✅ DONE | M |
+| S1.4 | API `GET /api/articles?search=...` | US3.3 | ✅ DONE | M |
+| S1.5 | UI: pole wyszukiwania (mobile + desktop) | US3.3 | ✅ DONE | M |
+| S1.6 | Live search z debounce 300ms | US3.3 | ✅ DONE | S |
+| S1.7 | Podświetlanie dopasowanych fragmentów | US3.3 | ✅ DONE | M |
 
 ### 3. Infinite Scroll / Paginacja [MUST]
 **Cel:** Obsługa dużej liczby artykułów
@@ -162,6 +162,23 @@
 
 ## Completed (✅ DONE)
 
+### Editions
+| Feature | Version | Requirements |
+|---------|---------|--------------|
+| Tabela editions z relacją do artykułów | v2.6.0 | F8.1, US9.1 |
+| API endpoints dla wydań | v2.6.0 | F8.2 |
+| Strona /editions z listą i szczegółami | v2.6.0 | F8.3 |
+| AI-generowane podsumowania wydań | v2.6.0 | F8.1 |
+| CRON dla automatycznego tworzenia wydań | v2.6.0 | F8.5 |
+
+### Search
+| Feature | Version | Requirements |
+|---------|---------|--------------|
+| PostgreSQL Full-Text Search (FTS) | v2.6.0 | F3.4, US3.3 |
+| Wyszukiwanie z obsługą j. polskiego | v2.6.0 | F3.4 |
+| Prefix matching i ranking | v2.6.0 | F3.4 |
+| Podświetlanie wyników (highlights) | v2.6.0 | F3.4 |
+
 ### Core Features
 | Feature | Version | Requirements |
 |---------|---------|--------------|
@@ -189,6 +206,7 @@
 | Dodawanie własnych źródeł | v2.4.0 | US4.1, F4.2 |
 | Włączanie/wyłączanie źródeł | v2.4.0 | US4.3 |
 | Subskrypcje źródeł z katalogu | v2.4.0 | - |
+| Ujednolicony UI (toggle switch) | v2.6.0 | F4.3 |
 | Scraping (Crawl4AI) | v2.5.0 | F1.1 |
 
 ### Auth & UX
@@ -218,12 +236,12 @@
 ## Prioritization (MoSCoW)
 
 ### MUST (MVP) - Brakujące
-1. ~~Wyszukiwanie PostgreSQL FTS~~ (S1.*)
+1. ~~Wyszukiwanie PostgreSQL FTS~~ (S1.*) ✅ DONE
 2. ~~Infinite scroll / paginacja~~ (P1.*)
 3. ~~Automatyczne odświeżanie~~ (R1.*)
 
 ### SHOULD - Następne
-1. Wydania (Editions) (E9.*)
+1. ~~Wydania (Editions)~~ (E9.*) ✅ DONE
 2. Gmail integration (G1.*)
 3. LinkedIn integration (L1.*)
 4. Reset hasła (RP1.*)

@@ -32,6 +32,7 @@ model User {
   hiddenCatalogSources HiddenCatalogSource[]
   sessions             Session[]
   topics               UserTopic[] // FUTURE: topic-based discovery
+  editions             Edition[]
 
   @@map("users")
 }
@@ -154,12 +155,16 @@ model Article {
   catalogSourceId String? @map("catalog_source_id")
   privateSourceId String? @map("private_source_id")
 
+  // Edition relation (optional)
+  editionId String? @map("edition_id")
+
   // Full-text search vector (managed by trigger)
   searchVector Unsupported("tsvector")? @map("search_vector")
 
   // Relations
   catalogSource CatalogSource? @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)
   privateSource PrivateSource? @relation(fields: [privateSourceId], references: [id], onDelete: Cascade)
+  edition       Edition?       @relation(fields: [editionId], references: [id], onDelete: SetNull)
   savedBy       SavedArticle[]
   readBy        ReadArticle[]
   dismissedBy   DismissedArticle[]
@@ -167,6 +172,7 @@ model Article {
   @@index([catalogSourceId])
   @@index([privateSourceId])
   @@index([publishedAt(sort: Desc)])
+  @@index([editionId])
   @@map("articles")
 }
 
@@ -204,6 +210,30 @@ model DismissedArticle {
 
   @@id([userId, articleId])
   @@map("dismissed_articles")
+}
+
+// ============================================
+// EDITIONS (Daily article groupings)
+// ============================================
+
+model Edition {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  date         DateTime @db.Date
+  title        String?  // Optional title like "Wydanie poranne"
+  summary      String?  // AI-generated summary of the edition
+  articleCount Int      @default(0) @map("article_count")
+  unreadCount  Int      @default(0) @map("unread_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articles Article[]
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date(sort: Desc)])
+  @@map("editions")
 }
 
 // ============================================
