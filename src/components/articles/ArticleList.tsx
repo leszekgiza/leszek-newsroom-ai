@@ -2,6 +2,7 @@
 
 import { ArticleCard, type Article } from "./ArticleCard";
 import { ArticleCardSkeleton } from "@/components/ui/Skeleton";
+import { InfiniteScroll } from "./InfiniteScroll";
 
 interface ArticleListProps {
   articles: Article[];
@@ -11,6 +12,11 @@ interface ArticleListProps {
   onMarkAsRead: (articleId: string) => void;
   onDismiss?: (articleId: string) => void;
   showRestoreButton?: boolean;
+  // Infinite scroll props
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
+  totalCount?: number;
 }
 
 export function ArticleList({
@@ -21,6 +27,10 @@ export function ArticleList({
   onMarkAsRead,
   onDismiss,
   showRestoreButton = false,
+  hasMore = false,
+  isLoadingMore = false,
+  onLoadMore,
+  totalCount,
 }: ArticleListProps) {
   if (isLoading) {
     return (
@@ -64,18 +74,37 @@ export function ArticleList({
   }
 
   return (
-    <div className="p-4 space-y-4 lg:space-y-0 lg:p-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
-      {articles.map((article) => (
-        <ArticleCard
-          key={article.id}
-          article={article}
-          onOpenSummary={onOpenSummary}
-          onToggleSave={onToggleSave}
-          onMarkAsRead={onMarkAsRead}
-          onDismiss={onDismiss}
-          showRestoreButton={showRestoreButton}
+    <div className="p-4 lg:p-0">
+      {/* Article count indicator */}
+      {totalCount !== undefined && totalCount > 0 && (
+        <div className="mb-4 text-sm text-muted">
+          Wyświetlono {articles.length} z {totalCount} artykułów
+        </div>
+      )}
+
+      {/* Articles grid */}
+      <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
+        {articles.map((article) => (
+          <ArticleCard
+            key={article.id}
+            article={article}
+            onOpenSummary={onOpenSummary}
+            onToggleSave={onToggleSave}
+            onMarkAsRead={onMarkAsRead}
+            onDismiss={onDismiss}
+            showRestoreButton={showRestoreButton}
+          />
+        ))}
+      </div>
+
+      {/* Infinite scroll trigger */}
+      {onLoadMore && (
+        <InfiniteScroll
+          onLoadMore={onLoadMore}
+          hasMore={hasMore}
+          isLoading={isLoadingMore}
         />
-      ))}
+      )}
     </div>
   );
 }

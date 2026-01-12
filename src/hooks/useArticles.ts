@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { Article } from "@/components/articles/ArticleCard";
 import type { SourceFilterItem } from "@/components/articles/SourceFilter";
 import type { EditionTab } from "@/components/articles/EditionTabs";
 import { getArticleDate, formatEditionLabel } from "@/components/articles/EditionTabs";
+
+const PAGE_SIZE = 20;
 
 interface UseArticlesOptions {
   sourceId?: string | null;
@@ -18,8 +20,12 @@ interface UseArticlesResult {
   sources: SourceFilterItem[];
   editions: EditionTab[];
   isLoading: boolean;
+  isLoadingMore: boolean;
   error: string | null;
+  hasMore: boolean;
+  totalCount: number;
   refetch: () => void;
+  loadMore: () => void;
   toggleSave: (articleId: string) => Promise<void>;
   markAsRead: (articleId: string) => Promise<void>;
   dismissArticle: (articleId: string) => Promise<void>;
@@ -29,16 +35,27 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
   const [articles, setArticles] = useState<Article[]>([]);
   const [sources, setSources] = useState<SourceFilterItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const offsetRef = useRef(0);
 
-  const fetchArticles = useCallback(async () => {
-    setIsLoading(true);
+  const fetchArticles = useCallback(async (loadMore = false) => {
+    if (loadMore) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+      offsetRef.current = 0;
+    }
     setError(null);
 
     try {
       const params = new URLSearchParams();
       if (options.sourceId) params.set("sourceId", options.sourceId);
       if (options.search) params.set("search", options.search);
+      params.set("limit", PAGE_SIZE.toString());
+      params.set("offset", offsetRef.current.toString());
 
       const response = await fetch(`/api/articles?${params}`);
 
@@ -52,42 +69,65 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
       }
 
       const data = await response.json();
-      setArticles(data.articles || []);
+      const newArticles = data.articles || [];
 
-      // Calculate source filters
-      const sourceMap = new Map<string, SourceFilterItem>();
+      if (loadMore) {
+        setArticles((prev) => [...prev, ...newArticles]);
+      } else {
+        setArticles(newArticles);
 
-      for (const article of data.articles || []) {
-        const sourceId = article.source.id;
-        const existing = sourceMap.get(sourceId);
+        // Calculate source filters only on initial load
+        const sourceMap = new Map<string, SourceFilterItem>();
 
-        if (existing) {
-          existing.count++;
-        } else {
-          sourceMap.set(sourceId, {
-            id: sourceId,
-            name: article.source.name,
-            count: 1,
-          });
+        for (const article of newArticles) {
+          const sourceId = article.source.id;
+          const existing = sourceMap.get(sourceId);
+
+          if (existing) {
+            existing.count++;
+          } else {
+            sourceMap.set(sourceId, {
+              id: sourceId,
+              name: article.source.name,
+              count: 1,
+            });
+          }
         }
+
+        const allSources: SourceFilterItem[] = [
+          { id: null, name: "Wszystkie", count: data.pagination?.total || newArticles.length },
+          ...Array.from(sourceMap.values()).sort((a, b) => b.count - a.count),
+        ];
+
+        setSources(allSources);
       }
 
-      const allSources: SourceFilterItem[] = [
-        { id: null, name: "Wszystkie", count: data.articles?.length || 0 },
-        ...Array.from(sourceMap.values()).sort((a, b) => b.count - a.count),
-      ];
-
-      setSources(allSources);
+      // Update pagination state
+      if (data.pagination) {
+        setHasMore(data.pagination.hasMore);
+        setTotalCount(data.pagination.total);
+        offsetRef.current += newArticles.length;
+      } else {
+        setHasMore(false);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Wystąpił błąd");
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   }, [options.sourceId, options.search]);
 
+  // Reset and fetch when filters change
   useEffect(() => {
-    fetchArticles();
+    fetchArticles(false);
   }, [fetchArticles]);
+
+  const loadMore = useCallback(() => {
+    if (!isLoadingMore && hasMore) {
+      fetchArticles(true);
+    }
+  }, [fetchArticles, isLoadingMore, hasMore]);
 
   const toggleSave = async (articleId: string) => {
     try {
@@ -157,6 +197,9 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
 
         return newArticles;
       });
+
+      // Update total count
+      setTotalCount((prev) => Math.max(0, prev - 1));
     } catch (err) {
       console.error("Dismiss article error:", err);
     }
@@ -204,8 +247,12 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
     sources,
     editions,
     isLoading,
+    isLoadingMore,
     error,
-    refetch: fetchArticles,
+    hasMore,
+    totalCount,
+    refetch: () => fetchArticles(false),
+    loadMore,
     toggleSave,
     markAsRead,
     dismissArticle,

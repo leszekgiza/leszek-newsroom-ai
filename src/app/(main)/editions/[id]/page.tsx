@@ -5,6 +5,7 @@ import Link from "next/link";
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { SummaryModal } from "@/components/summary/SummaryModal";
+import { EditionTTSPlayer } from "@/components/editions/EditionTTSPlayer";
 import { useUIStore } from "@/stores/uiStore";
 
 interface EditionArticle {
@@ -204,6 +205,14 @@ export default function EditionDetailPage({
                     </span>
                   )}
                 </p>
+
+                {/* TTS Player for entire edition */}
+                <div className="mt-4">
+                  <EditionTTSPlayer
+                    editionId={edition.id}
+                    articleCount={edition.articleCount}
+                  />
+                </div>
 
                 {edition.summary && (
                   <div className="mt-4 p-4 bg-card border border-border rounded-xl">

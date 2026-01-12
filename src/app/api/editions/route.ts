@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { getUserEditions, createDailyEditions } from "@/lib/editionService";
+import { getUserEditions, createDailyEditions, backfillEditions } from "@/lib/editionService";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +13,16 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "30");
 
-    const editions = await getUserEditions(session.userId, limit);
+    // First, check if user has any editions
+    let editions = await getUserEditions(session.userId, limit);
+
+    // If no editions, try to backfill from existing articles
+    if (editions.length === 0) {
+      const created = await backfillEditions(session.userId);
+      if (created > 0) {
+        editions = await getUserEditions(session.userId, limit);
+      }
+    }
 
     return NextResponse.json({
       editions: editions.map((e) => ({

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { ArticleList } from "@/components/articles/ArticleList";
@@ -10,6 +12,9 @@ import { useArticles } from "@/hooks/useArticles";
 import { useUIStore } from "@/stores/uiStore";
 
 export default function HomePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const {
     searchQuery,
     activeSourceFilter,
@@ -24,11 +29,58 @@ export default function HomePage() {
     closeSummaryModal,
   } = useUIStore();
 
+  // Sync URL params to store on mount
+  useEffect(() => {
+    const sourceId = searchParams.get("source");
+    const date = searchParams.get("date");
+    
+    if (sourceId !== activeSourceFilter) {
+      setActiveSourceFilter(sourceId);
+    }
+    if (date !== activeEditionDate) {
+      setActiveEditionDate(date);
+    }
+  }, [searchParams, setActiveSourceFilter, setActiveEditionDate, activeSourceFilter, activeEditionDate]);
+
+  // Update URL when filter changes
+  const handleSourceFilterChange = useCallback((sourceId: string | null) => {
+    setActiveSourceFilter(sourceId);
+    
+    const params = new URLSearchParams(searchParams.toString());
+    if (sourceId) {
+      params.set("source", sourceId);
+    } else {
+      params.delete("source");
+    }
+    
+    const newUrl = params.toString() ? "?" + params.toString() : "/";
+    router.push(newUrl, { scroll: false });
+  }, [searchParams, router, setActiveSourceFilter]);
+
+  // Update URL when edition date changes
+  const handleEditionDateChange = useCallback((date: string | null) => {
+    setActiveEditionDate(date);
+    
+    const params = new URLSearchParams(searchParams.toString());
+    if (date) {
+      params.set("date", date);
+    } else {
+      params.delete("date");
+    }
+    
+    const newUrl = params.toString() ? "?" + params.toString() : "/";
+    router.push(newUrl, { scroll: false });
+  }, [searchParams, router, setActiveEditionDate]);
+
   const {
     filteredArticles,
     sources,
     editions,
     isLoading,
+    isLoadingMore,
+    hasMore,
+    totalCount,
+    loadMore,
     toggleSave,
     markAsRead,
     dismissArticle,
@@ -48,12 +100,12 @@ export default function HomePage() {
         <SearchBar />
       </div>
 
-      {/* Edition Tabs - zakładki z datami */}
+      {/* Edition Tabs - zakladki z datami */}
       <div className="lg:px-8 lg:py-2 lg:border-b lg:border-border/50 lg:bg-card/95 lg:backdrop-blur-sm lg:sticky lg:top-[73px] lg:z-30">
         <EditionTabs
           editions={editions}
           activeDate={activeEditionDate}
-          onDateChange={setActiveEditionDate}
+          onDateChange={handleEditionDateChange}
         />
       </div>
 
@@ -62,7 +114,7 @@ export default function HomePage() {
         <SourceFilter
           sources={sources}
           activeSourceId={activeSourceFilter}
-          onFilterChange={setActiveSourceFilter}
+          onFilterChange={handleSourceFilterChange}
         />
       </div>
 
@@ -71,6 +123,10 @@ export default function HomePage() {
         <ArticleList
           articles={filteredArticles}
           isLoading={isLoading}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+          totalCount={totalCount}
+          onLoadMore={loadMore}
           onOpenSummary={openSummaryModal}
           onToggleSave={toggleSave}
           onMarkAsRead={markAsRead}

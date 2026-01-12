@@ -358,3 +358,118 @@ export async function createDailyEditions(): Promise<number> {
 
   return created;
 }
+
+/**
+ * Backfill editions from existing articles
+ * Groups articles by date and creates editions for each day
+ */
+export async function backfillEditions(userId: string): Promise<number> {
+  // Get user's subscribed sources
+  const subscriptions = await prisma.userSubscription.findMany({
+    where: { userId },
+    select: { catalogSourceId: true },
+  });
+  const subscribedSourceIds = subscriptions.map((s) => s.catalogSourceId);
+
+  // Get user's private sources
+  const privateSources = await prisma.privateSource.findMany({
+    where: { userId, isActive: true },
+    select: { id: true },
+  });
+  const privateSourceIds = privateSources.map((p) => p.id);
+
+  if (subscribedSourceIds.length === 0 && privateSourceIds.length === 0) {
+    return 0;
+  }
+
+  // Get all articles for user's sources without edition
+  const articles = await prisma.article.findMany({
+    where: {
+      editionId: null,
+      OR: [
+        { catalogSourceId: { in: subscribedSourceIds } },
+        { privateSourceId: { in: privateSourceIds } },
+      ],
+    },
+    select: {
+      id: true,
+      createdAt: true,
+      readBy: { where: { userId }, select: { userId: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (articles.length === 0) {
+    return 0;
+  }
+
+  // Group articles by date
+  const articlesByDate = new Map<string, typeof articles>();
+  for (const article of articles) {
+    const dateKey = article.createdAt.toISOString().split("T")[0];
+    if (!articlesByDate.has(dateKey)) {
+      articlesByDate.set(dateKey, []);
+    }
+    articlesByDate.get(dateKey)!.push(article);
+  }
+
+  let created = 0;
+
+  // Create edition for each date
+  for (const [dateStr, dateArticles] of articlesByDate) {
+    const date = new Date(dateStr);
+
+    // Check if edition already exists
+    const existing = await prisma.edition.findUnique({
+      where: {
+        userId_date: {
+          userId,
+          date,
+        },
+      },
+    });
+
+    if (existing) {
+      // Link articles to existing edition
+      await prisma.article.updateMany({
+        where: { id: { in: dateArticles.map((a) => a.id) } },
+        data: { editionId: existing.id },
+      });
+
+      // Update counts
+      await prisma.edition.update({
+        where: { id: existing.id },
+        data: {
+          articleCount: { increment: dateArticles.length },
+          unreadCount: {
+            increment: dateArticles.filter((a) => a.readBy.length === 0).length,
+          },
+        },
+      });
+      continue;
+    }
+
+    // Create new edition
+    const unreadCount = dateArticles.filter((a) => a.readBy.length === 0).length;
+
+    const edition = await prisma.edition.create({
+      data: {
+        userId,
+        date,
+        title: formatEditionTitle(date),
+        articleCount: dateArticles.length,
+        unreadCount,
+      },
+    });
+
+    // Link articles to edition
+    await prisma.article.updateMany({
+      where: { id: { in: dateArticles.map((a) => a.id) } },
+      data: { editionId: edition.id },
+    });
+
+    created++;
+  }
+
+  return created;
+}
