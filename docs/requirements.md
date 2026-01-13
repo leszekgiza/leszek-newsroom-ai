@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - Dokument Wymagań
 
-**Wersja:** 2.3
-**Data:** 2026-01-01
+**Wersja:** 2.4
+**Data:** 2026-01-13
 **Status:** Draft
 
 ---
@@ -65,6 +65,7 @@ System rozróżnia dwa typy źródeł:
 | F1.6 | Deduplikacja artykułów (ten sam URL) | MUST |
 | F1.7 | Ekstrakcja daty publikacji z URL artykułu (wzorce: `/YYYY-MM-DD/`, `/YYYYMMDD/`, `/posts/YYYY-MM-DD-slug/`) | MUST |
 | F1.8 | Wyświetlanie rzeczywistej daty publikacji (nie daty pobrania) | MUST |
+| F1.9 | **Pobieranie ze wszystkich źródeł z postępem na żywo (SSE)** | SHOULD |
 
 ### F2: Czytanie i Konsumpcja
 
@@ -104,6 +105,8 @@ System rozróżnia dwa typy źródeł:
 | F4.6 | **Konfiguracja stron do scrapowania** (w ustawieniach) | MUST |
 | F4.7 | **Przełączanie dark/light theme** | MUST |
 | F4.8 | **Przechowywanie login/hasło do stron** (encrypted) | SHOULD |
+| F4.9 | **Wybór głosu TTS w ustawieniach** (pl/en, męski/żeński) | SHOULD |
+| F4.10 | **Ustawienie domyślnego widoku** (Feed/Wydanie) | SHOULD |
 
 ### F5: Autentykacja
 
@@ -140,6 +143,7 @@ System rozróżnia dwa typy źródeł:
 | F8.3 | Przeglądanie historycznych wydań | SHOULD |
 | F8.4 | Badge z liczbą nieprzeczytanych artykułów w wydaniu | SHOULD |
 | F8.5 | Automatyczne tworzenie nowego wydania o północy | SHOULD |
+| F8.6 | **TTS dla całego wydania** (audio z wszystkich artykułów) | SHOULD |
 
 ---
 

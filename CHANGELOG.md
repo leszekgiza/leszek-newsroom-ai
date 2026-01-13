@@ -6,6 +6,46 @@ Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/).
 
 ---
 
+## [2.8.0] - 2026-01-13
+
+### Added
+- **Synchronizacja wszystkich źródeł z postępem na żywo**
+  - SSE endpoint `/api/scrape/all` streamujący postęp
+  - `SyncProgressModal` - modal z progress barami, statystykami, logami
+  - Automatyczne tworzenie wydań z nowych artykułów podczas sync
+  - Przycisk "Pobierz ze wszystkich" w ustawieniach źródeł
+
+- **TTS dla całego wydania**
+  - Endpoint `/api/editions/[id]/tts` generujący audio dla wydania
+  - Artykuły grupowane po źródłach w audio
+  - Głos zgodny z preferencjami użytkownika
+
+- **Ustawienia użytkownika (User Preferences)**
+  - Endpoint `/api/user/preferences` (GET/PUT)
+  - Wybór głosu TTS (pl-PL-MarekNeural, pl-PL-ZofiaNeural, en-US-GuyNeural, en-US-JennyNeural)
+  - Ustawienie domyślnego widoku (Feed/Wydanie)
+  - Wybór motywu (Light/Dark/System)
+
+- **Filtrowanie po źródle - dropdown z licznikami**
+  - `SourceFilter` - dropdown zamiast poziomych chipów
+  - Licznik artykułów przy każdym źródle
+  - Synchronizacja z URL params (`?source=xxx&date=yyyy-mm-dd`)
+  - Zachowanie filtru po odświeżeniu strony
+
+- **Infinite scroll** dla artykułów (Intersection Observer)
+
+### Fixed
+- Dodano `lucide-react` do dependencies (ikony w SourceFilter)
+- Opakowano HomePage w Suspense boundary (useSearchParams wymaga)
+- Naprawiono TTS route - dosłowny newline w stringu
+
+### Technical
+- Nowe pola w User model: `ttsVoice`, `defaultView`
+- Migracja Prisma dla nowych pól preferencji
+- Edge TTS z edge-tts-universal dla TTS wydań
+
+---
+
 ## [Unreleased]
 
 ### Changed

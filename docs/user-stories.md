@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - User Stories
 
-**Wersja:** 2.3
-**Data:** 2026-01-01
+**Wersja:** 2.4
+**Data:** 2026-01-13
 **Format:** Jako [rola] chcę [funkcja] aby [korzyść]
 
 ---
@@ -20,7 +20,7 @@
 - [x] 2-zdaniowe intro widoczne od razu (bez klikania)
 - [x] Badge "NEW" przy nieprzeczytanych
 - [x] **Sortowanie od najnowszych do najstarszych (wg publishedAt DESC, artykuły bez daty na końcu)**
-- [ ] Infinite scroll lub paginacja
+- [x] Infinite scroll lub paginacja
 
 ---
 
@@ -108,7 +108,7 @@
 
 **Kryteria akceptacji:**
 - [x] Play/Pause/Stop controls
-- [ ] Wybór głosu (męski/żeński) - w ustawieniach
+- [x] Wybór głosu (męski/żeński) - w ustawieniach
 - [x] Postęp odtwarzania widoczny
 - [ ] Działanie na mobile (w tle)
 
@@ -455,6 +455,19 @@
 - Endpoint: `GET /api/editions` - lista wydań
 - Endpoint: `GET /api/editions/[date]` - artykuły z danego dnia
 - Cron job o północy do tworzenia nowego wydania
+
+---
+
+### US9.4 - TTS dla całego wydania
+**Jako** użytkownik
+**Chcę** odsłuchać audio z całego wydania
+**Aby** konsumować dzienne newsy podczas jazdy/spaceru
+
+**Kryteria akceptacji:**
+- [x] Przycisk "Słuchaj wydania" na stronie wydania
+- [x] Audio generowane ze wszystkich artykułów wydania
+- [x] Artykuły grupowane po źródłach
+- [x] Głos zgodny z preferencjami użytkownika
 
 ---
 

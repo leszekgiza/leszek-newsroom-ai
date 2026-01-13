@@ -1,8 +1,33 @@
-# Leszek Newsroom AI - Backlog
+### Search & Pagination
+| Feature | Version |
+|---------|---------|
+| PostgreSQL Full-Text Search (FTS) | v2.6.0 |
+| Infinite scroll z Intersection Observer | v2.7.0 |
+### TTS & Preferences
+| Feature | Version |
+|---------|---------|
+| Wybór głosu TTS w ustawieniach | v2.8.0 |
+| Zapisywanie preferencji (theme, defaultView, ttsVoice) | v2.8.0 |
+| TTS dla całego wydania | v2.8.0 |
+
+### Source Filtering
+| Feature | Version |
+|---------|---------|
+| Dropdown z listą źródeł i licznikami | v2.8.0 |
+| URL params sync (source, date) | v2.8.0 |
+
+### Sync All Sources
+| Feature | Version |
+|---------|---------|
+| SSE endpoint z postępem na żywo | v2.8.0 |
+| SyncProgressModal z logami | v2.8.0 |
+| Automatyczne tworzenie wydań | v2.8.0 |
+
+### Editions# Leszek Newsroom AI - Backlog
 
 **Wersja:** 1.1
-**Data:** 2026-01-12
-**Aktualna wersja aplikacji:** 2.7.0
+**Data:** 2026-01-13
+**Aktualna wersja aplikacji:** 2.8.0
 
 ---
 
@@ -31,7 +56,7 @@
 | E9.5 | Badge z liczbą nieprzeczytanych w wydaniu | US9.1 | ✅ DONE | S |
 | E9.6 | Widok kalendarza/lista dat | US9.2 | 🔮 FUTURE | M |
 | E9.7 | Cron job - tworzenie wydania o północy | US9.3 | ✅ DONE | M |
-| E9.8 | Ustawienie: domyślny widok (Feed/Wydanie) | US9.3 | 🚧 IN PROGRESS | S |
+| E9.8 | Ustawienie: domyślny widok (Feed/Wydanie) | US9.3 | ✅ DONE | S |
 | E9.9 | TTS dla całego wydania | US9.4 | ✅ DONE | M |
 
 ### 2. Wyszukiwanie PostgreSQL FTS [MUST] ✅ DONE
@@ -56,22 +81,22 @@
 | P1.2 | Infinite scroll component | US1.1 | ✅ DONE | M |
 | P1.3 | Loading skeleton podczas ładowania | US1.1 | ✅ DONE | S |
 
-### 4. Filtrowanie po źródle - ulepszenia [MUST] 🚧 IN PROGRESS
+### 4. Filtrowanie po źródle - ulepszenia [MUST] ✅ DONE
 **Cel:** Pełna funkcjonalność filtrowania
 
 | ID | Zadanie | Story | Status | Estimate |
 |----|---------|-------|--------|----------|
-| F1.1 | Dropdown z listą źródeł | US1.2 | 🚧 IN PROGRESS | M |
-| F1.2 | Licznik artykułów przy każdym źródle | US1.2 | 🚧 IN PROGRESS | S |
-| F1.3 | Zachowanie filtru po odświeżeniu (URL params) | US1.2 | 🚧 IN PROGRESS | S |
+| F1.1 | Dropdown z listą źródeł | US1.2 | ✅ DONE | M |
+| F1.2 | Licznik artykułów przy każdym źródle | US1.2 | ✅ DONE | S |
+| F1.3 | Zachowanie filtru po odświeżeniu (URL params) | US1.2 | ✅ DONE | S |
 
-### 5. TTS - wybór głosu [SHOULD] 🚧 IN PROGRESS
+### 5. TTS - wybór głosu [SHOULD] ✅ DONE
 **Cel:** Personalizacja głosu TTS
 
 | ID | Zadanie | Story | Status | Estimate |
 |----|---------|-------|--------|----------|
-| T1.1 | UI: wybór głosu w ustawieniach | US2.3 | 🚧 IN PROGRESS | M |
-| T1.2 | Zapisywanie preferencji głosu w DB | US2.3 | 🚧 IN PROGRESS | S |
+| T1.1 | UI: wybór głosu w ustawieniach | US2.3 | ✅ DONE | M |
+| T1.2 | Zapisywanie preferencji głosu w DB | US2.3 | ✅ DONE | S |
 | T1.3 | TTS działający w tle na mobile | US2.3 | 📋 TODO | L |
 
 ---
@@ -89,8 +114,6 @@
 ### Search & Pagination
 | Feature | Version |
 |---------|---------|
-| PostgreSQL Full-Text Search (FTS) | v2.6.0 |
-| Infinite scroll z Intersection Observer | v2.7.0 |
 
 ---
 
