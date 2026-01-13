@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { Suspense, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
@@ -11,7 +11,7 @@ import { SummaryModal } from "@/components/summary/SummaryModal";
 import { useArticles } from "@/hooks/useArticles";
 import { useUIStore } from "@/stores/uiStore";
 
-export default function HomePage() {
+function HomePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -141,5 +141,13 @@ export default function HomePage() {
         onToggleSave={toggleSave}
       />
     </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="p-4 text-center text-muted">Ładowanie...</div>}>
+      <HomePageContent />
+    </Suspense>
   );
 }

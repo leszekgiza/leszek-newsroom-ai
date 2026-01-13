@@ -48,9 +48,7 @@ function generateEditionTTSText(
     sections.push("");
   }
 
-  return sections.join("
-
-");
+  return sections.join("\n\n");
 }
 
 export async function POST(
@@ -64,13 +62,13 @@ export async function POST(
     }
 
     const { id } = await params;
-    
+
     // Get user voice preference
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
       select: { ttsVoice: true },
     });
-    
+
     const voice = user?.ttsVoice || "pl-PL-MarekNeural";
 
     const edition = await prisma.edition.findFirst({

@@ -55,6 +55,9 @@ export default function SourcesSettingsPage() {
   // Wizard state
   const [wizardSource, setWizardSource] = useState<PrivateSource | null>(null);
 
+  // Sync modal state
+  const [showSyncModal, setShowSyncModal] = useState(false);
+
   const fetchSources = useCallback(async () => {
     try {
       setIsLoading(true);
