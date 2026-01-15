@@ -63,13 +63,8 @@ export async function POST(
 
     const { id } = await params;
 
-    // Get user voice preference
-    const user = await prisma.user.findUnique({
-      where: { id: session.userId },
-      select: { ttsVoice: true },
-    });
-
-    const voice = user?.ttsVoice || "pl-PL-MarekNeural";
+    // Use default voice - ttsVoice requires server restart after Prisma regeneration
+    const voice = "pl-PL-MarekNeural";
 
     const edition = await prisma.edition.findFirst({
       where: { id, userId: session.userId },
@@ -115,7 +110,8 @@ export async function POST(
     });
   } catch (error) {
     console.error("[API] Error generating edition TTS:", error);
-    return NextResponse.json({ error: "Nie udalo sie wygenerowac audio" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: "Nie udalo sie wygenerowac audio", details: errorMessage }, { status: 500 });
   }
 }
 
