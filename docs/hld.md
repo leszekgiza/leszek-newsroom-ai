@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - High-Level Design (HLD)
 
-**Wersja:** 1.1
-**Data:** 2025-12-28
+**Wersja:** 1.2
+**Data:** 2026-01-16
 **Status:** Draft
 
 ---
@@ -13,8 +13,8 @@ System agregacji treści z wielu źródeł internetowych z automatycznym generow
 
 ### 1.2 Główne Funkcje
 - Scraping artykułów ze stron internetowych
-- Generowanie 2-zdaniowych intro i pełnych streszczeń (Claude AI)
-- Text-to-Speech dla streszczeń (Edge TTS)
+- Generowanie 2-zdaniowych intro i pełnych streszczeń (LLM provider-agnostic, przykład: Claude)
+- Text-to-Speech dla streszczeń (TTS provider-agnostic, przykład: Edge TTS)
 - Wyszukiwanie full-text w języku polskim (PostgreSQL FTS)
 - Integracje: Gmail (newslettery), LinkedIn (posty)
 - Autentykacja użytkowników
@@ -54,6 +54,11 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 **Future (v3.0):**
 - Topic-based discovery (user definiuje tematy, AI szuka)
 - Dzienny podcast z podsumowaniem
+
+### 1.4 Niezależność dostawców (Provider-agnostic + BYO keys)
+- Core OSS nie jest związany z jednym dostawcą LLM/TTS
+- Użytkownik OSS dostarcza własne klucze API (BYO keys)
+- W dokumentacji nazwy dostawców są tylko przykładami, nie zależnościami
 
 ---
 
@@ -158,6 +163,9 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
+Note: Nazwy dostawcow w diagramach sa tylko przykladami. Core OSS jest
+provider-agnostic i wymaga BYO keys.
+
 ---
 
 ## 3. Stack Technologiczny
@@ -165,7 +173,7 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 ### 3.1 Frontend
 | Warstwa | Technologia | Uzasadnienie |
 |---------|-------------|--------------|
-| Framework | Next.js 14+ (App Router) | SSR, Server Actions, dobry DX |
+| Framework | Next.js 16.1.1 (App Router) | SSR, Server Actions, dobry DX |
 | Styling | Tailwind CSS | Szybki development, spójność z UI designs |
 | State | Zustand | Lekki, prosty, wystarczający |
 | HTTP | fetch / Server Actions | Wbudowane w Next.js |
@@ -177,7 +185,7 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 | Runtime | Node.js 20+ | LTS, stabilność |
 | Framework | Next.js API Routes | Pełna integracja z frontendem |
 | ORM | Prisma | Type-safety, migracje, PostgreSQL support |
-| Auth | NextAuth.js | Sesje, OAuth gotowe |
+| Auth | Własny JWT cookie auth | Prostota, brak zewnętrznych zależności |
 | Jobs | node-cron | Proste scheduled tasks |
 | Validation | Zod | Współdzielone z frontendem |
 
@@ -191,8 +199,13 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 ### 3.4 AI & TTS
 | Warstwa | Technologia | Uzasadnienie |
 |---------|-------------|--------------|
-| LLM | Claude 3.5 Sonnet | Jakość streszczeń, polski |
-| TTS | Edge TTS | Darmowe, polski głos |
+| LLM | Provider-agnostic (przykład: Claude) | Jakość streszczeń, polski |
+| TTS | Provider-agnostic (przykład: Edge TTS) | Darmowe, polski głos |
+
+**BYO keys (OSS):**
+- Użytkownik dostarcza własne klucze API
+- Brak bezpłatnych limitów w core OSS
+- Dostawcy są przykładami, nie zależnościami
 
 ### 3.5 Database
 | Warstwa | Technologia | Uzasadnienie |
@@ -370,7 +383,7 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 ### ADR-002: Next.js jako full-stack framework
 **Status:** Accepted
 **Kontekst:** Potrzeba SSR + API w jednym
-**Decyzja:** Next.js 14+ z App Router
+**Decyzja:** Next.js 16.1.1 z App Router
 **Konsekwencje:** Jeden codebase, Server Actions, dobre SEO
 
 ### ADR-003: PostgreSQL FTS zamiast Elasticsearch
@@ -379,11 +392,11 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 **Decyzja:** PostgreSQL Full-Text Search z konfiguracją `polish`
 **Konsekwencje:** Brak dodatkowej infrastruktury, wystarczająca wydajność dla MVP
 
-### ADR-004: Edge TTS zamiast płatnych rozwiązań
+### ADR-004: Provider-agnostic TTS (przykład: Edge TTS)
 **Status:** Accepted
 **Kontekst:** TTS dla streszczeń
-**Decyzja:** Microsoft Edge TTS (darmowe)
-**Konsekwencje:** Dobra jakość polskiego głosu, zero kosztów
+**Decyzja:** Core OSS niezależny od dostawcy; Edge TTS jako przykładowy provider
+**Konsekwencje:** Brak lock-in, użytkownik wybiera dostawcę i klucze
 
 ### ADR-005: API-First Architecture
 **Status:** Accepted
@@ -402,7 +415,7 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 | Ryzyko | Prawdopodobieństwo | Impact | Mitygacja |
 |--------|-------------------|--------|-----------|
 | Blokada scraping przez strony | Średnie | Wysoki | Rotacja User-Agent, delays |
-| Koszty Claude API | Niskie | Średni | Cache streszczeń, limity |
+| Koszty LLM API (provider-agnostic) | Niskie | Średni | Cache streszczeń, limity |
 | LinkedIn blokuje li_at | Wysokie | Średni | Fallback, instrukcja dla usera |
 | Oracle Cloud EOL Free Tier | Niskie | Wysoki | Backup strategia (VPS) |
 

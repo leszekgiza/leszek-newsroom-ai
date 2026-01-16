@@ -1,10 +1,15 @@
 # Leszek Newsroom AI - Low-Level Design (LLD)
 
-**Wersja:** 1.1
-**Data:** 2025-12-28
+**Wersja:** 1.2
+**Data:** 2026-01-16
 **Status:** Draft
 
 ---
+
+## 0. Provider-agnostic + BYO keys (OSS)
+- Core OSS nie jest zwiazany z jednym dostawca LLM/TTS
+- Uzytkownik OSS dostarcza wlasne klucze API (BYO keys)
+- Nazwy dostawcow w dokumentacji sa tylko przykladami
 
 ## 1. Schemat Bazy Danych
 
@@ -434,6 +439,18 @@ UPDATE articles SET search_vector =
 | **User** |
 | GET | `/api/user/settings` | Pobierz ustawienia | ✓ |
 | PUT | `/api/user/settings` | Zapisz ustawienia | ✓ |
+| **Editions** |
+| GET | `/api/editions` | Lista wydań użytkownika | ✓ |
+| GET | `/api/editions/:id` | Szczegóły wydania z artykułami | ✓ |
+| POST | `/api/editions/:id/tts` | Generuj audio dla całego wydania | ✓ |
+| **User Preferences** |
+| GET | `/api/user/preferences` | Pobierz preferencje użytkownika | ✓ |
+| PUT | `/api/user/preferences` | Zapisz preferencje użytkownika | ✓ |
+| **Scraping** |
+| POST | `/api/scrape/trigger` | Uruchom scraping dla źródła | ✓ |
+| GET | `/api/scrape/all` | SSE - sync wszystkich źródeł z postępem | ✓ |
+| **Cron** |
+| GET | `/api/cron/editions` | Automatyczne tworzenie wydań (Vercel Cron) | - |
 
 ### 2.2 Szczegóły Endpoints
 
@@ -589,8 +606,134 @@ UPDATE articles SET search_vector =
 |----------|----------|--------|
 | `pl-PL-ZofiaNeural` | Polski | Female |
 | `pl-PL-MarekNeural` | Polski | Male |
-| `en-US-AriaNeural` | English | Female |
+| `en-US-JennyNeural` | English | Female |
 | `en-US-GuyNeural` | English | Male |
+
+
+---
+
+#### GET /api/editions
+
+**Response (200):**
+```json
+{
+  "editions": [
+    {
+      "id": "clx1234567890",
+      "date": "2026-01-15",
+      "title": "Wydanie z 15 stycznia 2026",
+      "summary": "AI podsumowanie wydania...",
+      "articleCount": 25,
+      "unreadCount": 12,
+      "createdAt": "2026-01-15T00:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+#### GET /api/editions/:id
+
+**Response (200):**
+```json
+{
+  "id": "clx1234567890",
+  "date": "2026-01-15",
+  "title": "Wydanie z 15 stycznia 2026",
+  "summary": "AI podsumowanie wydania...",
+  "articleCount": 25,
+  "unreadCount": 12,
+  "articles": [
+    {
+      "id": "clx9876543210",
+      "title": "The Future of AI Agents",
+      "intro": "Artykuł analizuje...",
+      "url": "https://example.com/article",
+      "imageUrl": "https://example.com/image.jpg",
+      "publishedAt": "2026-01-15T10:00:00Z",
+      "source": "One Useful Thing",
+      "sourceLogoUrl": "https://example.com/logo.png",
+      "isRead": false,
+      "isSaved": true
+    }
+  ]
+}
+```
+
+---
+
+#### POST /api/editions/:id/tts
+
+**Request:**
+```json
+{
+  "voice": "pl-PL-MarekNeural"
+}
+```
+
+**Response (200):**
+- Content-Type: audio/mpeg
+- Binary audio data (MP3)
+
+**Errors:**
+- 400 - Brak artykulow w wydaniu lub wydanie za dlugie (max 50000 znakow)
+- 404 - Wydanie nie znalezione
+
+---
+
+#### GET /api/user/preferences
+
+**Response (200):**
+```json
+{
+  "theme": "SYSTEM",
+  "defaultView": "FEED",
+  "ttsVoice": "pl-PL-MarekNeural"
+}
+```
+
+---
+
+#### PUT /api/user/preferences
+
+**Request:**
+```json
+{
+  "theme": "DARK",
+  "defaultView": "EDITION",
+  "ttsVoice": "pl-PL-ZofiaNeural"
+}
+```
+
+**Response (200):**
+```json
+{
+  "theme": "DARK",
+  "defaultView": "EDITION",
+  "ttsVoice": "pl-PL-ZofiaNeural"
+}
+```
+
+---
+
+#### GET /api/scrape/all (SSE)
+
+**Response:** Server-Sent Events stream
+
+```
+event: progress
+data: {"sourceId":"clx123","sourceName":"One Useful Thing","status":"scraping","current":1,"total":5}
+
+event: article
+data: {"sourceId":"clx123","articleTitle":"New AI Article","isNew":true}
+
+event: complete
+data: {"totalSources":5,"newArticles":12,"editionCreated":true,"editionId":"clx456"}
+
+event: error
+data: {"sourceId":"clx123","error":"Connection timeout"}
+```
 
 ---
 
@@ -1215,7 +1358,7 @@ export const ttsSchema = z.object({
   voice: z.enum([
     'pl-PL-ZofiaNeural',
     'pl-PL-MarekNeural',
-    'en-US-AriaNeural',
+    'en-US-JennyNeural',
     'en-US-GuyNeural',
   ]).default('pl-PL-ZofiaNeural'),
   rate: z.number().min(0.5).max(2).default(1),
@@ -1325,13 +1468,19 @@ DATABASE_URL="postgresql://user:password@localhost:5432/newsroom?schema=public"
 
 # Auth
 JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
-SESSION_COOKIE_NAME="newsroom_session"
 
 # Encryption (for stored credentials)
 ENCRYPTION_KEY="32-byte-hex-key-for-aes-256"
 
-# Claude API
+# LLM (provider-agnostic, BYO keys)
+LLM_PROVIDER="anthropic" # example
+LLM_API_KEY="sk-..."
+# Example (current implementation):
 ANTHROPIC_API_KEY="sk-ant-..."
+
+# TTS (provider-agnostic, BYO keys)
+TTS_PROVIDER="edge-tts" # example
+TTS_API_KEY=""
 
 # Gmail OAuth
 GOOGLE_CLIENT_ID="..."
@@ -1339,7 +1488,7 @@ GOOGLE_CLIENT_SECRET="..."
 GOOGLE_REDIRECT_URI="http://localhost:3000/api/auth/google/callback"
 
 # Crawl4AI
-CRAWL4AI_URL="http://localhost:8000"
+SCRAPER_URL="http://localhost:8000"
 
 # App
 NEXT_PUBLIC_APP_URL="http://localhost:3000"

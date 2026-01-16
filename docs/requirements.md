@@ -49,6 +49,11 @@ System rozróżnia dwa typy źródeł:
 - Topic-based discovery (user definiuje tematy, AI szuka w internecie)
 - Dzienny podcast z podsumowaniem
 
+### 1.5 Niezależność dostawców (Provider-agnostic + BYO keys)
+- Core OSS nie jest związany z jednym dostawcą LLM/TTS
+- Użytkownik OSS dostarcza własne klucze API (BYO keys)
+- Dostawcy w dokumencie są tylko przykładami
+
 ---
 
 ## 2. Wymagania Funkcjonalne
@@ -187,6 +192,15 @@ System rozróżnia dwa typy źródeł:
 | NF4.5 | **Szyfrowanie credentials stron zewnętrznych (AES-256)** |
 | NF4.6 | Credential storage w bezpiecznej lokalizacji (env vars) |
 
+### NF5: Niezależność dostawców (Provider-agnostic)
+
+| ID | Wymaganie |
+|----|-----------|
+| NF5.1 | Core OSS nie może być związany z jednym dostawcą LLM/TTS |
+| NF5.2 | BYO keys: użytkownik OSS dostarcza własne klucze API |
+| NF5.3 | Brak bezpłatnych limitów w OSS (koszty po stronie użytkownika) |
+| NF5.4 | Dostawcy w dokumentacji są tylko przykładami, nie zależnościami |
+
 ---
 
 ## 4. Architektura Danych
@@ -241,7 +255,7 @@ ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
 - **Uzasadnienie:** Lepszy UX na mobile, prostszy kod, scroll myszką działa
 
 ### 5.2 Auto-Intro
-- **Decyzja:** Pełne AI Claude (~0.01$/artykuł)
+- **Decyzja:** LLM provider-agnostic (przykład: Claude)
 - **Implementacja:** Background job po dodaniu artykułu
 - **Cache:** Zapisywane w bazie, generowane raz
 
@@ -252,7 +266,8 @@ ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
 - **Dokumentacja:** https://docs.crawl4ai.com/
 
 ### 5.4 Autentykacja
-- **Opcja 1:** Email/hasło (prostsze)
+- **Decyzja:** Własny JWT cookie auth (bez NextAuth)
+- **Uzasadnienie:** Prostota, brak zależności od zewnętrznych providerów auth
 
 ### 5.5 Wyszukiwanie
 - **Decyzja:** PostgreSQL Full-Text Search (FTS)
@@ -287,6 +302,11 @@ ALTER TABLE settings ADD COLUMN user_id INTEGER REFERENCES users(id);
   - Możliwość integracji z zewnętrznymi narzędziami (CLI, automatyzacje)
   - Jasny kontrakt między frontendem a backendem
 - **Implementacja:** Next.js API Routes, UI jako konsument API
+
+### 5.7 Provider-agnostic AI/TTS (BYO keys)
+- **Decyzja:** Core OSS jest niezależny od dostawców LLM/TTS
+- **Uzasadnienie:** Brak lock-in, użytkownik sam wybiera dostawcę i klucze
+- **Implementacja:** Konfiguracja przez env vars (np. `LLM_PROVIDER`, `LLM_API_KEY`, `TTS_PROVIDER`, `TTS_API_KEY`)
 
 ---
 
@@ -346,7 +366,7 @@ Użytkownik sam dodaje źródła które chce śledzić. Aplikacja wspiera:
 ### 7.2 Infrastruktura
 - **Serwer:** Oracle Cloud Free Tier (Ubuntu 22.04)
 - **Baza:** PostgreSQL (lokalna)
-- **Backend:** Node.js + Express
+- **Backend:** Next.js API Routes (Node.js)
 - **Scraping:** Crawl4AI (Python, Docker)
-- **AI:** Claude API (Anthropic)
-- **TTS:** Edge TTS
+- **AI:** Provider-agnostic (przykład: Claude API)
+- **TTS:** Provider-agnostic (przykład: Edge TTS)

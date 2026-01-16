@@ -1,10 +1,15 @@
 # Leszek Newsroom AI - User Stories
 
-**Wersja:** 2.4
-**Data:** 2026-01-13
+**Wersja:** 2.5
+**Data:** 2026-01-16
 **Format:** Jako [rola] chcę [funkcja] aby [korzyść]
 
 ---
+
+## Provider-agnostic + BYO keys (OSS)
+- Core OSS nie jest zwiazany z jednym dostawca LLM/TTS
+- Uzytkownik OSS dostarcza wlasne klucze API
+- Dostawcy w story sa tylko przykladami
 
 ## Epic 1: Przeglądanie Newsów
 
@@ -73,7 +78,7 @@
 - [x] Jakość: zwięzłe, informacyjne, po polsku (nawet dla artykułów anglojęzycznych)
 
 **Szczegóły techniczne:**
-- Claude API (claude-sonnet-4-20250514) w `scrape/trigger` endpoint
+- LLM provider-agnostic (przykład: Claude) w `scrape/trigger` endpoint
 - Generowane podczas scrapowania, nie on-demand
 - Max 50 słów, dokładnie 2 zdania
 
@@ -95,7 +100,7 @@
 - [x] **Przycisk "Wygeneruj ponownie" do manualnej regeneracji**
 
 **Szczegóły techniczne:**
-- Claude API (claude-sonnet-4-20250514)
+- LLM provider-agnostic (przykład: Claude)
 - Endpoint: `POST /api/articles/[id]/summarize`
 - Automatyczne generowanie przy otwieraniu modala
 
@@ -113,7 +118,7 @@
 - [ ] Działanie na mobile (w tle)
 
 **Szczegóły techniczne:**
-- edge-tts-universal (Microsoft Edge TTS)
+- TTS provider-agnostic (przykład: Edge TTS)
 - Endpoint: `POST /api/tts`
 - Głosy: pl-PL-MarekNeural, pl-PL-ZofiaNeural, en-US-GuyNeural, en-US-JennyNeural
 
@@ -340,6 +345,25 @@
 - [ ] Gestures (swipe to save?)
 
 ---
+
+
+### US6.3 - Preferencje użytkownika
+**Jako** użytkownik
+**Chcę** zapisywać moje preferencje (głos TTS, domyślny widok, motyw)
+**Aby** aplikacja pamiętała moje ustawienia między sesjami
+
+**Kryteria akceptacji:**
+- [x] Wybór głosu TTS (pl-PL-MarekNeural, pl-PL-ZofiaNeural, en-US-GuyNeural, en-US-JennyNeural)
+- [x] Wybór domyślnego widoku (Feed / Wydanie dnia)
+- [x] Wybór motywu (Light / Dark / System)
+- [x] Preferencje zapisywane w bazie danych
+- [x] Endpoint API GET/PUT /api/user/preferences
+
+**Szczegóły techniczne:**
+- Nowe pola w modelu User: ttsVoice, defaultView, theme
+- Endpoint: GET/PUT /api/user/preferences
+- Walidacja głosów TTS po stronie serwera
+
 
 ## Epic 7: Integracje
 
