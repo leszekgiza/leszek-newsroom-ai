@@ -36,6 +36,29 @@
 | S0.3 | Q&A backlog (single article) | RAG/QA do pojedynczego artykulu + UI czatu | TODO | L |
 | S0.4 | OSS/Premium repo split plan | Propozycja struktury repo + granice licencji i integracji | TODO | M |
 
+### PWA MVP (Mobile-first) - TODO
+**Cel:** Instalowalna PWA + podstawowe offline + audio w tle
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| PWA.1 | Manifest + icons | PWA manifest, ikony 192/512, theme/background color | TODO | S |
+| PWA.2 | Service worker | Cache strategia (feed, editions, assets), offline fallback | TODO | M |
+| PWA.3 | Install prompt UI | Widoczny przycisk instalacji (Add to Home Screen) | TODO | S |
+| PWA.4 | Media Session | Sterowanie audio z lockscreen/notification | TODO | M |
+| PWA.5 | Background audio | Odtwarzanie na mobile w tle (iOS/Android) | TODO | L |
+| PWA.6 | Offline editions | Minimalny offline cache wybranego wydania | TODO | M |
+
+### Q&A Single Article (Provider-agnostic) - TODO
+**Cel:** Rozmowa z jednym artykulem, BYO keys, brak lock-in
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| QA.1 | API endpoint | POST /api/articles/[id]/qa (LLM provider-agnostic) | TODO | M |
+| QA.2 | Context builder | Pobranie tresci + streszczenie jako kontekst | TODO | M |
+| QA.3 | UI chat | Widok czatu w modalu lub osobnym ekranie | TODO | M |
+| QA.4 | Cost guards | Limity tokenow/wiadomosci + walidacja BYO keys | TODO | M |
+| QA.5 | Cache odpowiedzi | Cache QA per artykul (opcjonalnie) | TODO | S |
+
 ### 1. Wydania (Editions) - Epic 9 [SHOULD] ✅ DONE
 **Cel:** Codzienne grupowanie artykułów jak w gazecie
 

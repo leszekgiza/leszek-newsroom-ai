@@ -135,6 +135,8 @@ npm run db:reset   # Reset database
 - [High-Level Design](docs/hld.md) - Architecture overview
 - [Low-Level Design](docs/lld.md) - Technical details, API specs
 - [User Stories](docs/user-stories.md) - User scenarios
+- [Implementation Brief](docs/implementation-brief.md) - Points 1-3 delivery plan
+- [OSS vs Premium Split](docs/oss-premium-split.md) - Repo split plan
 
 ## Roadmap
 
