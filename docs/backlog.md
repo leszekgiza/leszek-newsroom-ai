@@ -28,12 +28,14 @@
 
 ### S0. Points 1-3 (Documentation + PWA/Q&A + OSS/Premium split)
 **Status:** TODO (do realizacji)
+**Priorytet:** S0.1 -> S0.2 -> S0.3 -> S0.0 -> S0.4
 
 | ID | Zadanie | Opis | Status | Estimate |
 |----|---------|------|--------|----------|
 | S0.1 | Doc alignment + independence | Ujednolicenie dokumentacji z aktualnym kodem, AGPL, BYO keys, vendor-agnostic LLM/TTS | TODO | M |
 | S0.2 | PWA MVP backlog | Manifest, offline cache, install prompt, media session, mobile UX | TODO | M |
 | S0.3 | Q&A backlog (single article) | RAG/QA do pojedynczego artykulu + UI czatu | TODO | L |
+| S0.0 | Authenticated sources plan (first step) | Logowanie, Gmail, LinkedIn: discovery + MVP plan + ryzyka/ToS | TODO | M |
 | S0.4 | OSS/Premium repo split plan | Propozycja struktury repo + granice licencji i integracji | TODO | M |
 
 ### PWA MVP (Mobile-first) - TODO
@@ -58,6 +60,18 @@
 | QA.3 | UI chat | Widok czatu w modalu lub osobnym ekranie | TODO | M |
 | QA.4 | Cost guards | Limity tokenow/wiadomosci + walidacja BYO keys | TODO | M |
 | QA.5 | Cache odpowiedzi | Cache QA per artykul (opcjonalnie) | TODO | S |
+
+### Authenticated Sources (Login + Gmail + LinkedIn) - TODO
+**Cel:** Dostep do tresci za logowaniem i z maila / social
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| AUTH.1 | Feasibility + legal/ToS check | Sprawdzenie ToS/ryzyk, dozwolonych API, modelu kosztow | TODO | M |
+| AUTH.2 | Auth model (BYO) | Sposob dostarczania cookies/credentials/OAuth, bezpieczne przechowywanie | TODO | M |
+| AUTH.3 | Connector architecture | Warstwa connectorow + harmonogram + retry | TODO | M |
+| AUTH.4 | Gmail connector MVP | Gmail API/IMAP: newslettery + filtry/etykiety | TODO | L |
+| AUTH.5 | LinkedIn connector MVP | Wariant: API lub import z email digest; fallback bez scrapingu | TODO | L |
+| AUTH.6 | Logged-in websites | Wspierane domeny + instrukcje BYO cookies | TODO | M |
 
 ### 1. Wydania (Editions) - Epic 9 [SHOULD] ✅ DONE
 **Cel:** Codzienne grupowanie artykułów jak w gazecie

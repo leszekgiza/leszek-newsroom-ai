@@ -28084,3 +28084,1043 @@ Node: v22.17.1
   }
 }
 ---
+{
+  "timestamp": "2026-01-16T23:10:31.025Z",
+  "elapsed": "[+401150.77s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.28 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.15 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5489.25 MB",
+    "usedPercent": "83.1%"
+  },
+  "data": {
+    "output": "GET /api/articles/cmk9n2d6600152cw22piqqr8m \u001b[32m200\u001b[39m in 126ms\u001b[2m (compile: 33ms, render: 93ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:11:00.193Z",
+  "elapsed": "[+401179.94s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.30 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.16 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5410.70 MB",
+    "usedPercent": "83.3%"
+  },
+  "data": {
+    "output": "POST /api/saved \u001b[32m200\u001b[39m in 50ms\u001b[2m (compile: 5ms, render: 45ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:11:47.103Z",
+  "elapsed": "[+401226.85s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.31 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.18 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5746.45 MB",
+    "usedPercent": "82.3%"
+  },
+  "data": {
+    "output": "POST /api/saved \u001b[32m200\u001b[39m in 34ms\u001b[2m (compile: 2ms, render: 32ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:11:50.714Z",
+  "elapsed": "[+401230.46s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.32 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.18 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5737.38 MB",
+    "usedPercent": "82.3%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmk9n2vwe001a2cw2ad2tpx0c/read \u001b[32m200\u001b[39m in 31ms\u001b[2m (compile: 13ms, render: 18ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:12:48.614Z",
+  "elapsed": "[+401288.36s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.34 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.11 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5955.93 MB",
+    "usedPercent": "81.7%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmk9n32pc001c2cw2iepy9pa8/read \u001b[32m200\u001b[39m in 83ms\u001b[2m (compile: 19ms, render: 64ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:13:48.811Z",
+  "elapsed": "[+401348.56s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.36 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.13 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5932.82 MB",
+    "usedPercent": "81.7%"
+  },
+  "data": {
+    "output": "POST /api/saved \u001b[32m200\u001b[39m in 44ms\u001b[2m (compile: 2ms, render: 42ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:14:04.823Z",
+  "elapsed": "[+401364.57s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.37 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.14 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5985.53 MB",
+    "usedPercent": "81.6%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmk9n3b5v001d2cw233be1zmz/read \u001b[32m200\u001b[39m in 49ms\u001b[2m (compile: 11ms, render: 38ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:31:01.076Z",
+  "elapsed": "[+402380.82s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "4.77 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.53 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6455.06 MB",
+    "usedPercent": "80.1%"
+  },
+  "data": {
+    "output": "POST /api/saved \u001b[32m200\u001b[39m in 46ms\u001b[2m (compile: 3ms, render: 43ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:31:07.469Z",
+  "elapsed": "[+402387.21s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "4.78 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.54 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6406.07 MB",
+    "usedPercent": "80.3%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmk9n60at00202cw28n2egnej/read \u001b[32m200\u001b[39m in 38ms\u001b[2m (compile: 12ms, render: 26ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:31:23.845Z",
+  "elapsed": "[+402403.59s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "4.79 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.54 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6203.29 MB",
+    "usedPercent": "80.9%"
+  },
+  "data": {
+    "output": "GET /api/articles/cmk9n60at00202cw28n2egnej \u001b[32m200\u001b[39m in 81ms\u001b[2m (compile: 11ms, render: 70ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:31:36.625Z",
+  "elapsed": "[+402416.37s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "4.80 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.55 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6355.72 MB",
+    "usedPercent": "80.4%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmk9n60at00202cw28n2egnej/summarize \u001b[32m200\u001b[39m in 12.5s\u001b[2m (compile: 14ms, render: 12.5s)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:32:58.428Z",
+  "elapsed": "[+402498.17s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "4.82 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.56 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6801.95 MB",
+    "usedPercent": "79.1%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmk9mwm5o00092cw2dvht3wlw/read \u001b[32m200\u001b[39m in 55ms\u001b[2m (compile: 12ms, render: 42ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:33:16.426Z",
+  "elapsed": "[+402516.17s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "4.83 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.57 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6717.35 MB",
+    "usedPercent": "79.3%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmk9n5t6n001y2cw2k08nn2pm/read \u001b[32m200\u001b[39m in 45ms\u001b[2m (compile: 12ms, render: 33ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:49:39.146Z",
+  "elapsed": "[+403498.89s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.03 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.85 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6617.93 MB",
+    "usedPercent": "79.6%"
+  },
+  "data": {
+    "output": "GET /settings/sources \u001b[32m200\u001b[39m in 49ms\u001b[2m (compile: 11ms, render: 39ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:49:39.245Z",
+  "elapsed": "[+403498.99s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.04 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.86 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6568.56 MB",
+    "usedPercent": "79.8%"
+  },
+  "data": {
+    "output": "GET /api/sources/catalog \u001b[32m200\u001b[39m in 52ms\u001b[2m (compile: 11ms, render: 41ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:49:39.249Z",
+  "elapsed": "[+403498.99s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.05 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.86 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6563.79 MB",
+    "usedPercent": "79.8%"
+  },
+  "data": {
+    "output": "GET /api/sources/private \u001b[32m200\u001b[39m in 57ms\u001b[2m (compile: 5ms, render: 53ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:49:39.293Z",
+  "elapsed": "[+403499.04s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.05 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.87 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6545.83 MB",
+    "usedPercent": "79.8%"
+  },
+  "data": {
+    "output": "GET /api/sources/private \u001b[32m200\u001b[39m in 41ms\u001b[2m (compile: 9ms, render: 32ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:49:39.295Z",
+  "elapsed": "[+403499.04s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.06 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.88 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6542.77 MB",
+    "usedPercent": "79.8%"
+  },
+  "data": {
+    "output": "GET /api/sources/catalog \u001b[32m200\u001b[39m in 43ms\u001b[2m (compile: 5ms, render: 39ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:28.390Z",
+  "elapsed": "[+403968.14s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.16 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.76 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5864.56 MB",
+    "usedPercent": "81.9%"
+  },
+  "data": {
+    "output": "GET /api/scrape/all \u001b[32m200\u001b[39m in 7.8min\u001b[2m (compile: 6ms, render: 7.8min)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:31.526Z",
+  "elapsed": "[+403971.27s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.17 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.77 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5899.68 MB",
+    "usedPercent": "81.8%"
+  },
+  "data": {
+    "output": "GET /api/sources/catalog \u001b[32m200\u001b[39m in 19ms\u001b[2m (compile: 3ms, render: 17ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:31.539Z",
+  "elapsed": "[+403971.28s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.17 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.78 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5899.64 MB",
+    "usedPercent": "81.8%"
+  },
+  "data": {
+    "output": "GET /api/sources/private \u001b[32m200\u001b[39m in 31ms\u001b[2m (compile: 6ms, render: 25ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:32.785Z",
+  "elapsed": "[+403972.53s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.18 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.78 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5972.23 MB",
+    "usedPercent": "81.6%"
+  },
+  "data": {
+    "output": "GET /editions \u001b[32m200\u001b[39m in 26ms\u001b[2m (compile: 6ms, render: 20ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:32.825Z",
+  "elapsed": "[+403972.57s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.19 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.79 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5948.58 MB",
+    "usedPercent": "81.7%"
+  },
+  "data": {
+    "output": "GET /api/editions \u001b[32m200\u001b[39m in 15ms\u001b[2m (compile: 4ms, render: 11ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:32.842Z",
+  "elapsed": "[+403972.59s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.19 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.80 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5947.63 MB",
+    "usedPercent": "81.7%"
+  },
+  "data": {
+    "output": "GET /api/editions \u001b[32m200\u001b[39m in 13ms\u001b[2m (compile: 2ms, render: 10ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:34.180Z",
+  "elapsed": "[+403973.92s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.20 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.80 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5919.23 MB",
+    "usedPercent": "81.8%"
+  },
+  "data": {
+    "output": "GET /editions/cmkhj6jo6001gjww2b5nfrxah \u001b[32m200\u001b[39m in 42ms\u001b[2m (compile: 19ms, render: 23ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:34.253Z",
+  "elapsed": "[+403974.00s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.21 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.81 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5889.76 MB",
+    "usedPercent": "81.9%"
+  },
+  "data": {
+    "output": "GET /api/editions/cmkhj6jo6001gjww2b5nfrxah \u001b[32m200\u001b[39m in 40ms\u001b[2m (compile: 8ms, render: 31ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:57:34.278Z",
+  "elapsed": "[+403974.02s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.21 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.82 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "5887.61 MB",
+    "usedPercent": "81.9%"
+  },
+  "data": {
+    "output": "GET /api/editions/cmkhj6jo6001gjww2b5nfrxah \u001b[32m200\u001b[39m in 19ms\u001b[2m (compile: 2ms, render: 17ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:28.430Z",
+  "elapsed": "[+404028.17s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.23 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.84 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6332.88 MB",
+    "usedPercent": "80.5%"
+  },
+  "data": {
+    "output": "GET /editions \u001b[32m200\u001b[39m in 22ms\u001b[2m (compile: 3ms, render: 19ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:28.486Z",
+  "elapsed": "[+404028.23s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.24 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.86 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6324.45 MB",
+    "usedPercent": "80.5%"
+  },
+  "data": {
+    "output": "GET /api/editions \u001b[32m200\u001b[39m in 28ms\u001b[2m (compile: 3ms, render: 26ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:28.507Z",
+  "elapsed": "[+404028.25s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.24 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.87 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6321.16 MB",
+    "usedPercent": "80.5%"
+  },
+  "data": {
+    "output": "GET /api/editions \u001b[32m200\u001b[39m in 19ms\u001b[2m (compile: 4ms, render: 15ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:29.397Z",
+  "elapsed": "[+404029.14s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.25 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.87 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6276.25 MB",
+    "usedPercent": "80.7%"
+  },
+  "data": {
+    "output": "GET / \u001b[32m200\u001b[39m in 23ms\u001b[2m (compile: 3ms, render: 20ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:29.490Z",
+  "elapsed": "[+404029.23s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.26 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.88 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6270.29 MB",
+    "usedPercent": "80.7%"
+  },
+  "data": {
+    "output": "GET /api/articles?limit=20&offset=0 \u001b[32m200\u001b[39m in 63ms\u001b[2m (compile: 3ms, render: 60ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:29.523Z",
+  "elapsed": "[+404029.27s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.26 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.89 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6269.86 MB",
+    "usedPercent": "80.7%"
+  },
+  "data": {
+    "output": "GET /api/articles?limit=20&offset=0 \u001b[32m200\u001b[39m in 30ms\u001b[2m (compile: 2ms, render: 27ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:32.525Z",
+  "elapsed": "[+404032.27s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.27 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.89 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6256.82 MB",
+    "usedPercent": "80.7%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjg3lq001wjww2j9u293zl/dismiss \u001b[32m200\u001b[39m in 22ms\u001b[2m (compile: 7ms, render: 15ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:33.723Z",
+  "elapsed": "[+404033.47s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.28 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.90 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6246.52 MB",
+    "usedPercent": "80.8%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjfvjn001vjww2onbs6im4/dismiss \u001b[32m200\u001b[39m in 28ms\u001b[2m (compile: 7ms, render: 21ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:35.314Z",
+  "elapsed": "[+404035.06s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.29 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.91 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6219.24 MB",
+    "usedPercent": "80.8%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjeysk001ujww2s6w0pd7c/dismiss \u001b[32m200\u001b[39m in 36ms\u001b[2m (compile: 7ms, render: 29ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:35.923Z",
+  "elapsed": "[+404035.67s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.29 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.91 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6180.74 MB",
+    "usedPercent": "81.0%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjeqw7001tjww25odmoaml/dismiss \u001b[32m200\u001b[39m in 37ms\u001b[2m (compile: 4ms, render: 34ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:36.460Z",
+  "elapsed": "[+404036.21s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.30 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.92 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6218.36 MB",
+    "usedPercent": "80.8%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjdswm001sjww2430vmct5/dismiss \u001b[32m200\u001b[39m in 20ms\u001b[2m (compile: 7ms, render: 13ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:39.300Z",
+  "elapsed": "[+404039.04s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.31 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.93 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6265.89 MB",
+    "usedPercent": "80.7%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjc8gu001rjww2vb5g4evi/dismiss \u001b[32m200\u001b[39m in 21ms\u001b[2m (compile: 8ms, render: 12ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:40.150Z",
+  "elapsed": "[+404039.90s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.31 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.93 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6216.47 MB",
+    "usedPercent": "80.9%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjbxin001qjww22z0o9w3w/dismiss \u001b[32m200\u001b[39m in 28ms\u001b[2m (compile: 8ms, render: 20ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:41.951Z",
+  "elapsed": "[+404041.70s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.32 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.95 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6214.17 MB",
+    "usedPercent": "80.9%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjb03o001pjww2imbegq6m/dismiss \u001b[32m200\u001b[39m in 21ms\u001b[2m (compile: 8ms, render: 13ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:42.822Z",
+  "elapsed": "[+404042.57s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.33 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.95 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6282.49 MB",
+    "usedPercent": "80.7%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjarja001ojww2za4fwz5e/dismiss \u001b[32m200\u001b[39m in 37ms\u001b[2m (compile: 8ms, render: 29ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:44.033Z",
+  "elapsed": "[+404043.78s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.33 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.96 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6299.79 MB",
+    "usedPercent": "80.6%"
+  },
+  "data": {
+    "output": "POST /api/articles/cmkhjah2q001njww2x3jfyzq1/dismiss \u001b[32m200\u001b[39m in 26ms\u001b[2m (compile: 7ms, render: 19ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:48.224Z",
+  "elapsed": "[+404047.97s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.34 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.98 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6309.14 MB",
+    "usedPercent": "80.6%"
+  },
+  "data": {
+    "output": "GET /editions \u001b[32m200\u001b[39m in 18ms\u001b[2m (compile: 3ms, render: 16ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:48.262Z",
+  "elapsed": "[+404048.01s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.35 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.98 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6305.03 MB",
+    "usedPercent": "80.6%"
+  },
+  "data": {
+    "output": "GET /api/editions \u001b[32m200\u001b[39m in 11ms\u001b[2m (compile: 2ms, render: 9ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-16T23:58:48.273Z",
+  "elapsed": "[+404048.02s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.36 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "6.99 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "6304.94 MB",
+    "usedPercent": "80.6%"
+  },
+  "data": {
+    "output": "GET /api/editions \u001b[32m200\u001b[39m in 9ms\u001b[2m (compile: 2ms, render: 7ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-18T06:47:27.182Z",
+  "elapsed": "[+514966.93s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.00 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "19.86 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "8491.86 MB",
+    "usedPercent": "73.8%"
+  },
+  "data": {
+    "output": "GET /settings/sources \u001b[32m200\u001b[39m in 190ms\u001b[2m (compile: 42ms, render: 148ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-18T06:47:27.442Z",
+  "elapsed": "[+514967.19s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.01 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "21.13 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "8424.57 MB",
+    "usedPercent": "74.1%"
+  },
+  "data": {
+    "output": "GET /api/sources/private \u001b[32m200\u001b[39m in 197ms\u001b[2m (compile: 15ms, render: 182ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-18T06:47:27.454Z",
+  "elapsed": "[+514967.20s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.01 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "21.13 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "8425.11 MB",
+    "usedPercent": "74.1%"
+  },
+  "data": {
+    "output": "GET /api/sources/catalog \u001b[32m200\u001b[39m in 204ms\u001b[2m (compile: 47ms, render: 157ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-18T06:47:27.514Z",
+  "elapsed": "[+514967.26s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.02 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "21.14 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "8417.85 MB",
+    "usedPercent": "74.1%"
+  },
+  "data": {
+    "output": "GET /api/sources/private \u001b[32m200\u001b[39m in 54ms\u001b[2m (compile: 26ms, render: 29ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-18T06:47:27.522Z",
+  "elapsed": "[+514967.27s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.03 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "21.14 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "8415.53 MB",
+    "usedPercent": "74.1%"
+  },
+  "data": {
+    "output": "GET /api/sources/catalog \u001b[32m200\u001b[39m in 60ms\u001b[2m (compile: 9ms, render: 51ms)\u001b[22m"
+  }
+}
+---
+{
+  "timestamp": "2026-01-18T06:52:37.622Z",
+  "elapsed": "[+515277.37s]",
+  "message": "STDOUT",
+  "processMemory": {
+    "heapUsed": "5.10 MB",
+    "heapTotal": "6.06 MB",
+    "rss": "21.16 MB",
+    "external": "1.86 MB"
+  },
+  "systemMemory": {
+    "total": "32469.46 MB",
+    "free": "7471.68 MB",
+    "usedPercent": "77.0%"
+  },
+  "data": {
+    "output": "GET /api/scrape/all \u001b[32m200\u001b[39m in 5.1min\u001b[2m (compile: 7ms, render: 5.1min)\u001b[22m"
+  }
+}
+---
