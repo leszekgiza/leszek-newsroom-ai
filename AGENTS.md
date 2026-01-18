@@ -1,4 +1,4 @@
-# Leszek Newsroom AI - Wytyczne dla Claude
+# Leszek Newsroom AI - AGENTS.md
 
 ## Opis projektu
 Agregator newsow i blogow z AI streszczeniami i TTS. Celem jest oszczednosc czasu: sluchanie tresci, a docelowo rozmowa z artykulami (Q&A). Projekt ma byc open source (AGPL) z BYO keys oraz planem wersji premium.

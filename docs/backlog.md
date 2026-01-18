@@ -32,9 +32,9 @@
 
 | ID | Zadanie | Opis | Status | Estimate |
 |----|---------|------|--------|----------|
-| S0.1 | Doc alignment + independence | Ujednolicenie dokumentacji z aktualnym kodem, AGPL, BYO keys, vendor-agnostic LLM/TTS | TODO | M |
-| S0.2 | PWA MVP backlog | Manifest, offline cache, install prompt, media session, mobile UX | TODO | M |
-| S0.3 | Q&A backlog (single article) | RAG/QA do pojedynczego artykulu + UI czatu | TODO | L |
+| S0.1 | Doc alignment + independence | Ujednolicenie dokumentacji z aktualnym kodem, AGPL, BYO keys, vendor-agnostic LLM/TTS | DONE | M |
+| S0.2 | PWA MVP backlog | Manifest, offline cache, install prompt, media session, mobile UX | DONE | M |
+| S0.3 | Q&A backlog (single article) | RAG/QA do pojedynczego artykulu + UI czatu | DONE | L |
 | S0.0 | Authenticated sources plan (first step) | Logowanie, Gmail, LinkedIn: discovery + MVP plan + ryzyka/ToS | TODO | M |
 | S0.4 | OSS/Premium repo split plan | Propozycja struktury repo + granice licencji i integracji | TODO | M |
 
@@ -43,8 +43,8 @@
 
 | ID | Zadanie | Opis | Status | Estimate |
 |----|---------|------|--------|----------|
-| PWA.1 | Manifest + icons | PWA manifest, ikony 192/512, theme/background color | TODO | S |
-| PWA.2 | Service worker | Cache strategia (feed, editions, assets), offline fallback | TODO | M |
+| PWA.1 | Manifest + icons | PWA manifest, ikony 192/512, theme/background color | DONE | S |
+| PWA.2 | Service worker | Cache strategia (feed, editions, assets), offline fallback | DONE | M |
 | PWA.3 | Install prompt UI | Widoczny przycisk instalacji (Add to Home Screen) | TODO | S |
 | PWA.4 | Media Session | Sterowanie audio z lockscreen/notification | TODO | M |
 | PWA.5 | Background audio | Odtwarzanie na mobile w tle (iOS/Android) | TODO | L |
