@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integracje - Porownanie A/B</title>
+  <style>
+    /* ── Reset & Base ──────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #050505;
+      color: #e5e5e5;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Page wrapper ─────────────────────────────────── */
+    .page-title {
+      text-align: center;
+      padding: 48px 24px 12px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #fff;
+    }
+    .page-subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 15px;
+      padding-bottom: 40px;
+    }
+
+    /* ── Side-by-side layout ──────────────────────────── */
+    .comparison-row {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      padding: 0 24px 56px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Column labels ────────────────────────────────── */
+    .mockup-column {
+      flex: 0 1 440px;
+      min-width: 320px;
+    }
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .option-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .option-badge.a { background: #2563eb; color: #fff; }
+    .option-badge.b { background: #9333ea; color: #fff; }
+    .option-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* ── Phone frame ──────────────────────────────────── */
+    .phone-frame {
+      background: #0a0a0a;
+      border: 1.5px solid #262626;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,.55);
+      position: relative;
+    }
+    .phone-frame::before {
+      content: '';
+      display: block;
+      width: 120px;
+      height: 5px;
+      border-radius: 4px;
+      background: #1a1a1a;
+      margin: 10px auto 0;
+    }
+
+    /* ── Shared header ────────────────────────────────── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #1f1f1f;
+    }
+    .back-arrow {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      color: #ccc;
+      font-size: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .app-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    /* ── Content area ─────────────────────────────────── */
+    .content-area {
+      padding: 20px;
+    }
+
+    /* ════════════════════════════════════════════════════
+       OPTION A - Guided Setup
+       ════════════════════════════════════════════════════ */
+    .integration-card {
+      background: #141414;
+      border: 1px solid #262626;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 14px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .integration-card.active:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px #3b82f644;
+    }
+    .integration-card.disabled {
+      opacity: .55;
+    }
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .icon-gmail {
+      background: linear-gradient(135deg, #ea4335 0%, #fbbc05 50%, #34a853 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 20px;
+    }
+    .icon-linkedin {
+      background: #0a66c2;
+      color: #fff;
+      font-weight: 700;
+    }
+    .icon-twitter {
+      background: #fff;
+      color: #000;
+      font-weight: 800;
+      font-size: 20px;
+    }
+    .card-info { flex: 1; }
+    .card-info h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .card-info p {
+      font-size: 13px;
+      color: #999;
+    }
+    .status-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+    .status-not-connected {
+      background: #1c1917;
+      color: #f59e0b;
+      border: 1px solid #422006;
+    }
+    .status-soon {
+      background: #171717;
+      color: #666;
+      border: 1px solid #262626;
+    }
+    .card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+    .btn-configure {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-configure:hover { background: #1d4ed8; }
+
+    /* ════════════════════════════════════════════════════
+       OPTION B - Dashboard-first
+       ════════════════════════════════════════════════════ */
+    .stats-bar {
+      display: flex;
+      gap: 1px;
+      background: #262626;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .stat-item {
+      flex: 1;
+      text-align: center;
+      padding: 14px 8px;
+      background: #141414;
+    }
+    .stat-item:first-child { border-radius: 12px 0 0 12px; }
+    .stat-item:last-child  { border-radius: 0 12px 12px 0; }
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 16px 32px;
+    }
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #1a1a1a;
+      border: 1px solid #262626;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px;
+      color: #555;
+    }
+    .empty-state h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ccc;
+      margin-bottom: 6px;
+    }
+    .empty-state p {
+      font-size: 13px;
+      color: #666;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    .btn-add {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin-top: 24px;
+      background: transparent;
+      border: 2px dashed #333;
+      border-radius: 14px;
+      color: #888;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-add:hover {
+      border-color: #555;
+      color: #bbb;
+    }
+
+    /* ── Modal overlay (Option B) ─────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(4px);
+      z-index: 10;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-sheet {
+      background: #141414;
+      border: 1px solid #262626;
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      padding: 24px 20px 28px;
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .modal-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #262626;
+      border: none;
+      color: #999;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      background: #1a1a1a;
+      border: 1px solid #262626;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .modal-option.active:hover {
+      border-color: #3b82f6;
+    }
+    .modal-option.disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .modal-option .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+    .modal-option-info { flex: 1; }
+    .modal-option-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .modal-option-info span {
+      font-size: 12px;
+      color: #666;
+    }
+    .modal-option .arrow {
+      color: #555;
+      font-size: 16px;
+    }
+
+    /* ════════════════════════════════════════════════════
+       Comparison Table
+       ════════════════════════════════════════════════════ */
+    .table-section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+    .table-section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .comparison-table th,
+    .comparison-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid #1f1f1f;
+    }
+    .comparison-table thead th {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      border-bottom: 2px solid #262626;
+    }
+    .comparison-table thead th:nth-child(2) { color: #60a5fa; }
+    .comparison-table thead th:nth-child(3) { color: #a78bfa; }
+    .comparison-table tbody td:first-child {
+      font-weight: 600;
+      color: #ccc;
+      width: 200px;
+    }
+    .comparison-table tbody td {
+      color: #999;
+    }
+    .comparison-table tbody tr:hover td {
+      background: #111;
+    }
+
+    /* ── Verdict banner ───────────────────────────────── */
+    .verdict {
+      text-align: center;
+      padding: 32px 24px 0;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .verdict-badge {
+      display: inline-block;
+      background: #172554;
+      border: 1px solid #1e40af;
+      color: #60a5fa;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .verdict p {
+      color: #888;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Responsive ────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .comparison-row {
+        flex-direction: column;
+        align-items: center;
+      }
+      .mockup-column {
+        flex: none;
+        width: 100%;
+        max-width: 440px;
+      }
+    }
+    @media (max-width: 600px) {
+      .comparison-table {
+        font-size: 12px;
+      }
+      .comparison-table th,
+      .comparison-table td {
+        padding: 10px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Page header ─────────────────────────────────── -->
+  <h1 class="page-title">Integracje &mdash; Porownanie A/B</h1>
+  <p class="page-subtitle">Dwa warianty ekranu <code>/settings/integrations</code> do oceny</p>
+
+  <!-- ════════════════════════════════════════════════════
+       Mockups side-by-side
+       ════════════════════════════════════════════════════ -->
+  <div class="comparison-row">
+
+    <!-- ── OPTION A ────────────────────────────────────── -->
+    <div class="mockup-column">
+      <div class="option-label">
+        <span class="option-badge a">A</span>
+        <span class="option-name">Guided Setup &mdash; Krok po kroku</span>
+      </div>
+
+      <div class="phone-frame">
+        <!-- Header -->
+        <div class="app-header">
+          <div class="back-arrow">&larr;</div>
+          <h1>Integracje</h1>
+        </div>
+
+        <div class="content-area">
+          <!-- Gmail card -->
+          <div class="integration-card active">
+            <div class="card-top">
+              <div class="card-icon icon-gmail">M</div>
+              <div class="card-info">
+                <h3>Gmail</h3>
+                <p>Importuj newslettery i wazne maile</p>
+              </div>
+            </div>
+            <div class="card-actions">
+              <span class="status-badge status-not-connected">Nie polaczono</span>
+              <button class="btn-configure">Konfiguruj &rarr;</button>
+            </div>
+          </div>
+
+          <!-- LinkedIn card -->
+          <div class="integration-card disabled">
+            <div class="card-top">
+              <div class="card-icon icon-linkedin">in</div>
+              <div class="card-info">
+                <h3>LinkedIn</h3>
+                <p>Sledz posty z Twojego feeda</p>
+              </div>
+            </div>
+            <div class="card-actions">
+              <span class="status-badge status-soon">Wkrotce</span>
+            </div>
+          </div>
+
+          <!-- X / Twitter card -->
+          <div class="integration-card disabled">
+            <div class="card-top">
+              <div class="card-icon icon-twitter">X</div>
+              <div class="card-info">
+                <h3>X / Twitter</h3>
+                <p>Importuj tweety z timeline</p>
+              </div>
+            </div>
+            <div class="card-actions">
+              <span class="status-badge status-soon">Wkrotce</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── OPTION B ────────────────────────────────────── -->
+    <div class="mockup-column">
+      <div class="option-label">
+        <span class="option-badge b">B</span>
+        <span class="option-name">Dashboard-first</span>
+      </div>
+
+      <div class="phone-frame" style="position:relative;">
+        <!-- Header -->
+        <div class="app-header">
+          <div class="back-arrow">&larr;</div>
+          <h1>Integracje</h1>
+        </div>
+
+        <div class="content-area">
+          <!-- Stats bar -->
+          <div class="stats-bar">
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Aktywne</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Wymaga uwagi</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Importowane</div>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.364-2.07a4.5 4.5 0 0 0-1.242-7.244l-4.5-4.5a4.5 4.5 0 0 0-6.364 6.364L4.34 8.818" stroke-linecap="round" stroke-linejoin="round" transform="translate(2,4) scale(0.85)"/>
+              </svg>
+            </div>
+            <h3>Brak skonfigurowanych integracji</h3>
+            <p>Dodaj Gmail, LinkedIn lub X aby importowac tresci</p>
+          </div>
+
+          <!-- Add button -->
+          <button class="btn-add" id="btnOpenModal">+ Dodaj nowa integracje</button>
+        </div>
+
+        <!-- Modal overlay -->
+        <div class="modal-overlay" id="modalOverlay">
+          <div class="modal-sheet">
+            <div class="modal-header">
+              <h2>Wybierz integracje</h2>
+              <button class="modal-close" id="btnCloseModal">&times;</button>
+            </div>
+
+            <!-- Gmail - active -->
+            <div class="modal-option active">
+              <div class="card-icon icon-gmail" style="font-size:16px;">M</div>
+              <div class="modal-option-info">
+                <h4>Gmail</h4>
+                <span>Importuj newslettery i wazne maile</span>
+              </div>
+              <span class="arrow">&rarr;</span>
+            </div>
+
+            <!-- LinkedIn - soon -->
+            <div class="modal-option disabled">
+              <div class="card-icon icon-linkedin" style="font-size:16px;">in</div>
+              <div class="modal-option-info">
+                <h4>LinkedIn</h4>
+                <span>Wkrotce</span>
+              </div>
+            </div>
+
+            <!-- X - soon -->
+            <div class="modal-option disabled">
+              <div class="card-icon icon-twitter" style="font-size:16px;">X</div>
+              <div class="modal-option-info">
+                <h4>X / Twitter</h4>
+                <span>Wkrotce</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════
+       Comparison Table
+       ════════════════════════════════════════════════════ -->
+  <div class="table-section">
+    <h2>Porownanie wariantow</h2>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Cecha</th>
+          <th>Opcja A &mdash; Guided Setup</th>
+          <th>Opcja B &mdash; Dashboard-first</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Pierwszy widok</td>
+          <td>Od razu widac co mozna polaczyc</td>
+          <td>Pusty dashboard, trzeba kliknac &laquo;Dodaj&raquo;</td>
+        </tr>
+        <tr>
+          <td>Onboarding</td>
+          <td>Naturalny &mdash; karty prowadza uzytkownika</td>
+          <td>Wymaga dodatkowego kroku (modal)</td>
+        </tr>
+        <tr>
+          <td>Skalowalnosc</td>
+          <td>Lista rosnie z nowymi integracjami</td>
+          <td>Dashboard rosnie z aktywnymi</td>
+        </tr>
+        <tr>
+          <td>Gdy masz 0 integracji</td>
+          <td>Widac mozliwosci</td>
+          <td>Widac pustke</td>
+        </tr>
+        <tr>
+          <td>Gdy masz 3+ integracji</td>
+          <td>Lista kart + statusy</td>
+          <td>Dashboard ze statystykami</td>
+        </tr>
+        <tr>
+          <td>Lepsze dla</td>
+          <td>Nowych uzytkownikow</td>
+          <td>Zaawansowanych z wieloma integracjami</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="verdict">
+      <div class="verdict-badge">Rekomendacja</div>
+      <p>
+        Opcja A jest lepsza na start (MVP) &mdash; natychmiast pokazuje dostepne integracje
+        i prowadzi uzytkownika. Opcja B ma sens gdy pojawi sie wiecej aktywnych
+        integracji i potrzebny bedzie pulpit zarzadzania.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Interactive modal toggle ─────────────────────── -->
+  <script>
+    const btnOpen  = document.getElementById('btnOpenModal');
+    const btnClose = document.getElementById('btnCloseModal');
+    const overlay  = document.getElementById('modalOverlay');
+
+    btnOpen.addEventListener('click', () => overlay.classList.add('show'));
+    btnClose.addEventListener('click', () => overlay.classList.remove('show'));
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('show');
+    });
+  </script>
+
+</body>
+</html>

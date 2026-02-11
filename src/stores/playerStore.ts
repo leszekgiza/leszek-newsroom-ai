@@ -1,18 +1,17 @@
 import { create } from "zustand";
-
-type TTSVoice = "pl-PL-MarekNeural" | "pl-PL-ZofiaNeural" | "en-US-GuyNeural" | "en-US-JennyNeural";
+import { DEFAULT_TTS_VOICE } from "@/lib/config";
 
 interface PlayerState {
   isPlaying: boolean;
   currentArticleId: string | null;
-  voice: TTSVoice;
+  voice: string;
   progress: number;
   duration: number;
 
   play: (articleId: string) => void;
   pause: () => void;
   stop: () => void;
-  setVoice: (voice: TTSVoice) => void;
+  setVoice: (voice: string) => void;
   setProgress: (progress: number) => void;
   setDuration: (duration: number) => void;
 }
@@ -20,7 +19,7 @@ interface PlayerState {
 export const usePlayerStore = create<PlayerState>((set) => ({
   isPlaying: false,
   currentArticleId: null,
-  voice: "pl-PL-MarekNeural",
+  voice: DEFAULT_TTS_VOICE,
   progress: 0,
   duration: 0,
 

@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - Dokument Wymagań
 
-**Wersja:** 2.4
-**Data:** 2026-01-13
+**Wersja:** 2.6
+**Data:** 2026-02-09
 **Status:** Draft
 
 ---
@@ -63,9 +63,9 @@ System rozróżnia dwa typy źródeł:
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
 | F1.1 | Pobieranie artykułów ale to nie jest z RSS feeds po prostu robimy scraping ze strony internetowej| MUST |
-| F1.2 | Integracja z Gmail (newslettery) | SHOULD |
-| F1.3 | Integracja z LinkedIn (posty) | SHOULD |
-| F1.4 | Integracja z Twitter/X przez Nitter | COULD |
+| F1.2 | Integracja z Gmail (newslettery) - OAuth + Gmail API + LLM matching (3 ścieżki dodawania nadawców) | MUST |
+| F1.3 | Integracja z LinkedIn (wall/feed) - login/cookies + Voyager API (linkedin-api Python) | MUST |
+| F1.4 | Integracja z X/Twitter (timeline) - cookies + Twikit (Python, async) | SHOULD |
 | F1.5 | Automatyczne odświeżanie co X minut | MUST |
 | F1.6 | Deduplikacja artykułów (ten sam URL) | MUST |
 | F1.7 | Ekstrakcja daty publikacji z URL artykułu (wzorce: `/YYYY-MM-DD/`, `/YYYYMMDD/`, `/posts/YYYY-MM-DD-slug/`) | MUST |
@@ -123,13 +123,19 @@ System rozróżnia dwa typy źródeł:
 | F5.4 | Resetowanie hasła | SHOULD |
 | F5.5 | Sesje per urządzenie | SHOULD |
 
-### F6: Integracje Zewnętrzne
+### F6: Source Integrations (Connectors)
 
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
-| F6.1 | Gmail OAuth - pobieranie newsletterów | SHOULD |
-| F6.2 | LinkedIn - śledzenie hashtagów AI/ML | SHOULD |
-| F6.3 | Twitter/Nitter - śledzenie kont ekspertów | COULD |
+| F6.1 | Gmail OAuth (gmail.readonly, test mode) + precyzyjny import nadawców (3 ścieżki: Paste/Search/Browse) | MUST |
+| F6.2 | LinkedIn feed - Voyager API (linkedin-api Python) + disclaimer o ryzyku | MUST |
+| F6.3 | X/Twitter timeline - Twikit (Python, async) + cookies auth | SHOULD |
+| F6.4 | Connector Status Dashboard - status, last sync, article count, inline progress | MUST |
+| F6.5 | Connector health check + retry (max 3, exponential backoff) | MUST |
+| F6.6 | Sync scheduler - per-connector interwały (Gmail 60min, LinkedIn 120min, X 180min) | MUST |
+| F6.7 | Notyfikacje credentials expired (top banner + toast, re-auth prompt) | SHOULD |
+| F6.8 | LLM-assisted Gmail search - konwersja intencji na Gmail query (PAL) | SHOULD |
+| F6.9 | LLM pre-klasyfikacja nadawców Gmail (newsletter / marketing / transakcyjny / osobisty) | SHOULD |
 
 ### F7: Zaawansowane Funkcje (z research'u)
 
@@ -149,6 +155,54 @@ System rozróżnia dwa typy źródeł:
 | F8.4 | Badge z liczbą nieprzeczytanych artykułów w wydaniu | SHOULD |
 | F8.5 | Automatyczne tworzenie nowego wydania o północy | SHOULD |
 | F8.6 | **TTS dla całego wydania** (audio z wszystkich artykułów) | SHOULD |
+
+### F9: Text Q&A per Article (Conversational Agent - OSS)
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F9.1 | Rozmowa tekstowa z pojedynczym artykułem (context stuffing) | MUST |
+| F9.2 | Kontekst = treść artykułu + intro + summary | MUST |
+| F9.3 | Streaming odpowiedzi (SSE) | SHOULD |
+| F9.4 | Historia rozmowy w sesji (in-memory) | SHOULD |
+| F9.5 | Limity tokenów/wiadomości per sesja (cost guards) | MUST |
+| F9.6 | LLM provider-agnostic (BYO keys) | MUST |
+
+### F10: Voice Input / STT (Premium)
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F10.1 | Push-to-talk (nie real-time duplex) | SHOULD |
+| F10.2 | STT provider-agnostic (BYO keys w OSS, managed w Premium) | SHOULD |
+| F10.3 | Transkrypcja mowy → tekst → Q&A pipeline | SHOULD |
+| F10.4 | Odpowiedź głosowa (TTS) na pytanie głosowe | COULD |
+
+### F11: Topic-Clustered Briefings (Premium)
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F11.1 | Automatyczne grupowanie artykułów po tematach (AI clustering) | SHOULD |
+| F11.2 | Generowanie briefing script z clustered artykułów | SHOULD |
+| F11.3 | TTS playback briefingu (podcast-style) | SHOULD |
+| F11.4 | Konfiguracja tematów/preferencji przez użytkownika | COULD |
+
+### F12: Multi-Article Q&A (Premium)
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F12.1 | Q&A across multiple artykułów (cross-article context) | COULD |
+| F12.2 | Context stuffing z wielu artykułów (z limitem tokenów) | COULD |
+| F12.3 | Źródła odpowiedzi (cytaty z konkretnych artykułów) | COULD |
+
+### F13: Managed Connectors (Premium)
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F13.1 | Gmail connector (managed OAuth, bez BYO keys) | SHOULD |
+| F13.2 | LinkedIn connector (managed scraping, rotacja kont) | SHOULD |
+| F13.3 | Twitter/X connector (managed, multi-account rotation) | COULD |
+| F13.4 | SLA monitoring + alerting (Premium ops) | SHOULD |
+
+> **Nota:** F6 (OSS) = BYO credentials/keys. F13 (Premium) = managed infrastructure, wyższe SLA.
 
 ---
 
@@ -200,6 +254,16 @@ System rozróżnia dwa typy źródeł:
 | NF5.2 | BYO keys: użytkownik OSS dostarcza własne klucze API |
 | NF5.3 | Brak bezpłatnych limitów w OSS (koszty po stronie użytkownika) |
 | NF5.4 | Dostawcy w dokumentacji są tylko przykładami, nie zależnościami |
+
+### NF6: Provider Abstraction Layer
+
+| ID | Wymaganie |
+|----|-----------|
+| NF6.1 | Unified interface dla LLM providers (summary, Q&A, clustering) |
+| NF6.2 | Unified interface dla TTS providers (article, edition, briefing) |
+| NF6.3 | Unified interface dla STT providers (voice input) |
+| NF6.4 | Provider selection via env vars (LLM_PROVIDER, TTS_PROVIDER, STT_PROVIDER) |
+| NF6.5 | Graceful degradation: fallback messaging gdy brak BYO keys |
 
 ---
 

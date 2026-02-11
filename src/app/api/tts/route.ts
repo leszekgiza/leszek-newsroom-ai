@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { EdgeTTS } from "edge-tts-universal";
-
-// Edge TTS voices
-const VOICES = {
-  "pl-PL-MarekNeural": "pl-PL-MarekNeural",
-  "pl-PL-ZofiaNeural": "pl-PL-ZofiaNeural",
-  "en-US-GuyNeural": "en-US-GuyNeural",
-  "en-US-JennyNeural": "en-US-JennyNeural",
-} as const;
-
-type VoiceKey = keyof typeof VOICES;
+import { getTTSProvider } from "@/lib/ai/tts";
+import { isValidVoice, DEFAULT_TTS_VOICE } from "@/lib/config";
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { text, voice = "pl-PL-MarekNeural" } = await request.json();
+    const { text, voice = DEFAULT_TTS_VOICE } = await request.json();
 
     if (!text) {
       return NextResponse.json(
@@ -35,14 +26,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const selectedVoice = VOICES[voice as VoiceKey] || VOICES["pl-PL-MarekNeural"];
-
-    // Use edge-tts-universal
-    const tts = new EdgeTTS(text, selectedVoice);
-    const result = await tts.synthesize();
-
-    // Convert Blob to ArrayBuffer
-    const arrayBuffer = await result.audio.arrayBuffer();
+    const selectedVoice = isValidVoice(voice) ? voice : DEFAULT_TTS_VOICE;
+    const tts = await getTTSProvider();
+    const arrayBuffer = await tts.synthesize(text, selectedVoice);
 
     return new NextResponse(arrayBuffer, {
       headers: {

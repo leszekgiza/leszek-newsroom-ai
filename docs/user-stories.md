@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - User Stories
 
-**Wersja:** 2.5
-**Data:** 2026-01-16
+**Wersja:** 2.7
+**Data:** 2026-02-09
 **Format:** Jako [rola] chcę [funkcja] aby [korzyść]
 
 ---
@@ -365,42 +365,167 @@
 - Walidacja głosów TTS po stronie serwera
 
 
-## Epic 7: Integracje
+## Epic 7: Integracje (zastąpione przez Epic 14)
 
-### US7.1 - Gmail - newslettery
-**Jako** użytkownik
-**Chcę** połączyć Gmail
-**Aby** widzieć newslettery AI/ML w jednym miejscu
-
-**Kryteria akceptacji:**
-- [ ] Przycisk "Połącz Gmail" w ustawieniach
-- [ ] OAuth flow (bezpieczne)
-- [ ] Konfiguracja: od kogo pobierać
-- [ ] Automatyczne pobieranie nowych maili
+> **Uwaga:** Epic 7 został zastąpiony przez Epic 14 (Source Integrations) na podstawie analizy v2.0. Szczegóły w `docs/analysis-source-integrations.md`.
 
 ---
 
-### US7.2 - LinkedIn
+## Epic 14: Source Integrations (Gmail + LinkedIn + X/Twitter)
+
+> **Analiza:** `docs/analysis-source-integrations.md` v2.0
+> **Kolejność:** Gmail → LinkedIn → X/Twitter (decyzja PO)
+> **Architektura:** Gmail = Node.js (googleapis), LinkedIn + X = Python microservice (scraper/)
+
+### US14.1 - Połączenie Gmail (OAuth)
 **Jako** użytkownik
-**Chcę** śledzić posty LinkedIn z hashtagami AI/ML
-**Aby** nie przegapić ciekawych dyskusji
+**Chcę** połączyć moje konto Gmail przez OAuth
+**Aby** system mógł wyszukiwać i importować wskazane przeze mnie maile
+
+**Szczegóły:**
+- Google OAuth consent screen z scope `gmail.readonly`
+- Tryb testowy (MVP) - bez weryfikacji Google
+- Refresh token przechowywany zaszyfrowany (AES-256-GCM)
+- Automatyczne odświeżanie access tokena
+- Notyfikacja gdy token wygaśnie i wymaga ponownego połączenia
 
 **Kryteria akceptacji:**
-- [ ] Input na cookie li_at w ustawieniach
-- [ ] Konfiguracja hashtagów do śledzenia
-- [ ] Posty wyświetlane razem z artykułami
+- [ ] Przycisk "Połącz Gmail" w ustawieniach/integracje
+- [ ] Google OAuth consent screen z gmail.readonly
+- [ ] Refresh token zaszyfrowany w PrivateSource.credentials
+- [ ] Auto-refresh access tokena przed wygaśnięciem
+- [ ] Notyfikacja o wygasłym tokenie (re-auth prompt)
 
 ---
 
-### US7.3 - Twitter/X
+### US14.2 - Konfiguracja nadawców Gmail (3 ścieżki)
 **Jako** użytkownik
-**Chcę** śledzić konta ekspertów AI na Twitterze
-**Aby** być na bieżąco z ich opiniami
+**Chcę** precyzyjnie wskazać od jakich nadawców importować maile
+**Aby** mieć pełną kontrolę nad tym co trafia do mojego feedu
+
+**Szczegóły - 3 ścieżki dodawania:**
+
+**Ścieżka A: Wklej nadawcę (Paste & Match)**
+- Użytkownik wpisuje adres email nadawcy
+- System wyszukuje maile od tego nadawcy (Gmail API: `from:X newer_than:30d`)
+- Podgląd: nazwa, ostatni temat, częstotliwość, liczba maili
+- Użytkownik potwierdza → dodaje do listy importu
+
+**Ścieżka B: Wyszukaj (LLM-assisted)**
+- Użytkownik opisuje intencję w naturalnym języku (np. "newslettery o AI")
+- LLM (istniejący PAL z aiService.ts) konwertuje opis na Gmail query
+- System pokazuje wyniki pogrupowane po nadawcy
+- Użytkownik zaznacza których nadawców importować
+
+**Ścieżka C: Przeglądaj skrzynkę (Browse & Select)**
+- System skanuje ostatnie 30 dni, grupuje po nadawcy
+- LLM pre-klasyfikuje: newsletter / marketing / transakcyjny / osobisty
+- Domyślnie NIC nie zaznaczone
+- Użytkownik sam klika których nadawców chce importować
+
+**Fallback:** Ręczne dodanie adresu nadawcy (bez skanowania)
 
 **Kryteria akceptacji:**
-- [ ] Lista kont do śledzenia
-- [ ] Pobieranie przez Nitter (bez logowania)
-- [ ] Tweety wyświetlane jako karty
+- [ ] Ścieżka A: wyszukiwanie po adresie email nadawcy
+- [ ] Ścieżka B: LLM generuje Gmail query z opisu intencji
+- [ ] Ścieżka C: przeglądanie skrzynki pogrupowanej po nadawcach
+- [ ] LLM klasyfikuje nadawców: newsletter / marketing / transakcyjny / osobisty
+- [ ] Podgląd nadawcy: nazwa, email, ostatni temat, częstotliwość, liczba maili
+- [ ] Domyślnie NIC nie jest zaznaczone - użytkownik sam wybiera
+- [ ] Fallback: ręczne dodanie adresu email nadawcy
+- [ ] UI: 3 zakładki w Gmail Wizard (mockup: `ui_gmail_wizard_v2_1.html`)
+
+---
+
+### US14.3 - Połączenie LinkedIn (Voyager API)
+**Jako** użytkownik
+**Chcę** połączyć LinkedIn
+**Aby** widzieć posty ekspertów i tematyczne dyskusje w moim feedzie
+
+**Szczegóły:**
+- Login/hasło → Voyager API (linkedin-api Python)
+- Disclaimer o braku oficjalnego API i ryzyku bana (użytkownik musi zaakceptować)
+- Session cookies przechowywane zaszyfrowane
+- Fallback: manual cookie input (li_at z DevTools) gdy 2FA blokuje
+
+> **Nota:** Oficjalne LinkedIn API nie daje dostępu do feeda (r_member_social zamknięte od 06/2023). Używamy nieoficjalnego Voyager API z pełną świadomością ryzyka.
+
+**Kryteria akceptacji:**
+- [ ] Disclaimer o ryzyku (brak oficjalnego API, możliwy ban konta, naruszenie ToS)
+- [ ] Użytkownik musi zaakceptować disclaimer przed połączeniem
+- [ ] Login/hasło → Voyager API session (linkedin-api Python)
+- [ ] Fallback: manual cookie li_at (z DevTools)
+- [ ] Test połączenia przed zapisaniem
+- [ ] Credentials zaszyfrowane AES-256-GCM
+- [ ] UI: mockup `ui_linkedin_wizard_v2_1.html`
+
+---
+
+### US14.4 - Filtrowanie postów LinkedIn
+**Jako** użytkownik
+**Chcę** filtrować posty LinkedIn po hashtagach i autorach
+**Aby** dostawać tylko wartościowe treści, nie cały feed
+
+**Kryteria akceptacji:**
+- [ ] Input na hashtagi (multi-tag, np. #AI, #ML)
+- [ ] Input na profile autorów do śledzenia
+- [ ] Opcja include/exclude reposts
+- [ ] Minimalny rozmiar posta (filtr spamu)
+
+---
+
+### US14.5 - Połączenie X/Twitter (Twikit)
+**Jako** użytkownik
+**Chcę** połączyć X/Twitter
+**Aby** widzieć tweety i wątki z mojego timeline'u w feedzie
+
+**Szczegóły:**
+- Auth przez cookies (auth_token, ct0) - preferowana metoda
+- Alternatywnie: login/hasło (mniej stabilne)
+- Twikit (Python, async) jako scraper
+- Disclaimer o ryzyku bana i anty-bot zabezpieczeniach
+- Rate limit: 600 tweetów/15 min per konto
+
+**Kryteria akceptacji:**
+- [ ] Disclaimer o ryzyku (anty-bot, możliwy ban, nieoficjalne API)
+- [ ] Auth: cookies (auth_token + ct0) jako preferowana metoda
+- [ ] Auth: login/hasło jako fallback (mniej stabilne)
+- [ ] Konfiguracja timeline: Following / For You
+- [ ] Toggle: retweets, replies, threads
+- [ ] Test połączenia przed zapisaniem
+- [ ] Credentials zaszyfrowane AES-256-GCM
+- [ ] UI: mockup `ui_twitter_wizard_1.html`
+
+---
+
+### US14.6 - Status połączeń (Connector Dashboard)
+**Jako** użytkownik
+**Chcę** widzieć status moich połączeń (Gmail, LinkedIn, X)
+**Aby** wiedzieć czy synchronizacja działa poprawnie
+
+**Kryteria akceptacji:**
+- [ ] Dashboard w Settings/Integrations ze statusem per connector
+- [ ] Statusy: connected (zielony) / syncing (niebieski) / error (czerwony) / expired (pomarańczowy) / disconnected (szary)
+- [ ] Data ostatniej synchronizacji
+- [ ] Liczba zaimportowanych artykułów
+- [ ] Przycisk "Synchronizuj teraz" (manual sync)
+- [ ] Inline progress synchronizacji (paski postępu, stats nowe/pominięte/błędy)
+- [ ] Notyfikacja gdy credentials wygasną (top banner + toast)
+- [ ] UI: mockupy `ui_connectors_dashboard_1.html`, `ui_notification_credentials_expired_1.html`
+
+---
+
+### US14.7 - Bezpieczeństwo credentials
+**Jako** użytkownik
+**Chcę** mieć pewność że moje dane logowania są bezpieczne
+**Aby** nie bać się podawać credentials do swoich kont
+
+**Kryteria akceptacji:**
+- [ ] Credentials szyfrowane AES-256-GCM at-rest
+- [ ] Klucz szyfrowania poza bazą danych (env var CREDENTIALS_ENCRYPTION_KEY)
+- [ ] Credentials nigdy nie są logowane ani wyświetlane w UI
+- [ ] Użytkownik może usunąć credentials w dowolnym momencie (przycisk "Rozłącz")
+- [ ] Po usunięciu konta, wszystkie credentials są kasowane (cascade delete)
 
 ---
 
@@ -492,6 +617,89 @@
 - [x] Audio generowane ze wszystkich artykułów wydania
 - [x] Artykuły grupowane po źródłach
 - [x] Głos zgodny z preferencjami użytkownika
+
+---
+
+## Epic 10: Text Q&A per Article (Conversational Agent - OSS)
+
+### US10.1 - Rozmowa tekstowa z artykułem
+**Jako** użytkownik
+**Chcę** zadawać pytania o treść artykułu w formie czatu
+**Aby** szybko uzyskać odpowiedzi bez czytania całego tekstu
+
+**Kryteria akceptacji:**
+- [ ] Przycisk "Zapytaj o artykuł" w modalu streszczenia
+- [ ] Widok czatu (modal lub osobny ekran)
+- [ ] Kontekst = treść artykułu + intro + summary (context stuffing)
+- [ ] Streaming odpowiedzi (SSE)
+- [ ] Historia rozmowy w sesji
+- [ ] LLM provider-agnostic (BYO keys)
+
+**Szczegóły techniczne:**
+- Endpoint: `POST /api/articles/[id]/chat`
+- Context stuffing (nie vector DB)
+- Max context: ~100k tokens (zależy od providera)
+- Streaming via SSE
+
+---
+
+### US10.2 - Cost guards dla Q&A
+**Jako** użytkownik OSS
+**Chcę** widzieć limity zużycia tokenów
+**Aby** kontrolować koszty BYO keys
+
+**Kryteria akceptacji:**
+- [ ] Limit wiadomości per sesja (np. 20)
+- [ ] Walidacja BYO keys przed pierwszym użyciem
+- [ ] Informacja o szacowanym koszcie
+- [ ] Graceful error gdy brak/niewłaściwe klucze
+
+---
+
+## Epic 11: Voice Input / STT (Premium)
+
+### US11.1 - Push-to-talk
+**Jako** użytkownik premium
+**Chcę** zadawać pytania głosem (push-to-talk)
+**Aby** prowadzić rozmowę hands-free
+
+**Kryteria akceptacji:**
+- [ ] Przycisk mikrofonu (push-to-talk, nie real-time duplex)
+- [ ] Wizualizacja nagrywania (ikona, czas)
+- [ ] Transkrypcja mowy → tekst → Q&A pipeline
+- [ ] Odpowiedź głosowa (TTS) na pytanie głosowe
+- [ ] STT provider-agnostic
+
+---
+
+## Epic 12: Topic-Clustered Briefings (Premium)
+
+### US12.1 - Briefing z artykułów
+**Jako** użytkownik premium
+**Chcę** słuchać briefingu pogrupowanego tematycznie
+**Aby** konsumować newsy jak podcast
+
+**Kryteria akceptacji:**
+- [ ] Automatyczne grupowanie artykułów po tematach (AI clustering)
+- [ ] Generowanie briefing script z clustered artykułów
+- [ ] TTS playback briefingu (podcast-style)
+- [ ] Wybór tematów do briefingu
+- [ ] Kontrola głębokości (krótki vs szczegółowy)
+
+---
+
+## Epic 13: Multi-Article Q&A (Premium)
+
+### US13.1 - Q&A across multiple artykułów
+**Jako** użytkownik premium
+**Chcę** zadawać pytania dotyczące wielu artykułów naraz
+**Aby** uzyskać syntetyczne odpowiedzi z wielu źródeł
+
+**Kryteria akceptacji:**
+- [ ] Wybór artykułów do kontekstu (multi-select)
+- [ ] Context stuffing z wielu artykułów (z limitem tokenów)
+- [ ] Cytaty z konkretnych artykułów w odpowiedzi
+- [ ] Informacja o źródłach odpowiedzi
 
 ---
 

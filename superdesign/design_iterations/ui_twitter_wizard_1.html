@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsroom AI - X/Twitter Wizard (cookies + disclaimer)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a2e',
+                        secondary: '#16213e',
+                        accent: '#0f3460',
+                        highlight: '#e94560',
+                        surface: '#f8fafc',
+                        muted: '#64748b',
+                        xblack: '#000000'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <div class="max-w-md mx-auto bg-white min-h-screen relative pb-24">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
+            <div class="px-4 py-3 flex items-center gap-3">
+                <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h1 class="font-bold text-primary text-lg">Dodaj X / Twitter</h1>
+            </div>
+        </header>
+
+        <main class="p-4 space-y-5">
+
+            <!-- X Icon -->
+            <div class="text-center py-4">
+                <div class="w-16 h-16 mx-auto bg-black rounded-2xl flex items-center justify-center shadow-lg mb-3">
+                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold text-primary">Integracja X / Twitter</h2>
+                <p class="text-sm text-muted mt-1">Importuj tweety i wątki z timeline'u</p>
+            </div>
+
+            <!-- DISCLAIMER -->
+            <div class="bg-amber-50 border border-amber-300 rounded-2xl p-4 space-y-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold text-amber-800 text-sm">Ważne informacje</p>
+                        <ul class="text-xs text-amber-700 mt-2 space-y-1.5">
+                            <li class="flex items-start gap-1.5">
+                                <span class="mt-0.5">&#8226;</span>
+                                <span>X/Twitter <strong>ogranicza nieautoryzowany dostęp</strong>. Używamy Twikit (scraper).</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="mt-0.5">&#8226;</span>
+                                <span>Scraping narusza <strong>regulamin X</strong> i może skutkować ograniczeniami konta.</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="mt-0.5">&#8226;</span>
+                                <span>Limit: <strong>600 tweetów / 15 min</strong> per konto.</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="mt-0.5">&#8226;</span>
+                                <span>Twoje cookies są <strong>szyfrowane (AES-256)</strong> i nigdy nie opuszczają serwera.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <label class="flex items-start gap-3 pt-2 border-t border-amber-200 cursor-pointer">
+                    <input type="checkbox" checked class="w-5 h-5 rounded border-amber-400 text-amber-600 focus:ring-amber-200 mt-0.5">
+                    <span class="text-sm text-amber-800 font-medium">Rozumiem i akceptuję ryzyko związane ze scrapingiem X/Twitter</span>
+                </label>
+            </div>
+
+            <!-- Auth Method: Cookies (preferred) -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-4">
+                <h3 class="font-semibold text-primary flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                    Cookies z przeglądarki
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-medium rounded-full">Zalecane</span>
+                </h3>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-medium text-muted block mb-1.5">auth_token</label>
+                        <input
+                            type="password"
+                            placeholder="Wklej auth_token z DevTools..."
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
+                        >
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-muted block mb-1.5">ct0</label>
+                        <input
+                            type="password"
+                            placeholder="Wklej ct0 z DevTools..."
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
+                        >
+                    </div>
+                </div>
+
+                <a href="#" class="text-xs text-primary underline flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Jak znaleźć cookies auth_token i ct0?
+                </a>
+
+                <button class="w-full py-3 bg-black text-white font-medium rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
+                    Połącz przez cookies
+                </button>
+            </div>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-3">
+                <div class="flex-1 h-px bg-slate-200"></div>
+                <span class="text-xs text-muted">lub (mniej stabilne)</span>
+                <div class="flex-1 h-px bg-slate-200"></div>
+            </div>
+
+            <!-- Alt Auth: Login/Password -->
+            <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-3">
+                <h3 class="text-sm font-medium text-muted flex items-center gap-2">
+                    Login / hasło (fallback)
+                </h3>
+                <div class="space-y-2.5">
+                    <input
+                        type="text"
+                        placeholder="@username lub email"
+                        class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                    >
+                    <input
+                        type="password"
+                        placeholder="Hasło"
+                        class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                    >
+                </div>
+                <button class="w-full py-2.5 border border-slate-300 text-slate-600 font-medium rounded-xl hover:bg-white transition-colors text-sm">
+                    Połącz przez login
+                </button>
+            </div>
+
+            <!-- Timeline Config (shown after connection) -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-4">
+                <h3 class="font-semibold text-primary">Konfiguracja timeline'u</h3>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-medium text-muted block mb-1.5">Typ timeline'u</label>
+                        <div class="flex gap-2">
+                            <button class="flex-1 py-2.5 bg-primary text-white text-sm font-medium rounded-xl">Following</button>
+                            <button class="flex-1 py-2.5 bg-slate-100 text-muted text-sm font-medium rounded-xl hover:bg-slate-200">For You</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between py-2">
+                        <div>
+                            <p class="text-sm font-medium text-primary">Retweety</p>
+                            <p class="text-xs text-muted">Importuj retweety</p>
+                        </div>
+                        <div class="w-12 h-7 bg-slate-200 rounded-full relative cursor-pointer">
+                            <div class="absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow transition-all"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between py-2">
+                        <div>
+                            <p class="text-sm font-medium text-primary">Odpowiedzi</p>
+                            <p class="text-xs text-muted">Importuj odpowiedzi (replies)</p>
+                        </div>
+                        <div class="w-12 h-7 bg-slate-200 rounded-full relative cursor-pointer">
+                            <div class="absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow transition-all"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between py-2">
+                        <div>
+                            <p class="text-sm font-medium text-primary">Rozwijaj wątki</p>
+                            <p class="text-xs text-muted">Łącz tweety z wątków w jeden artykuł</p>
+                        </div>
+                        <div class="w-12 h-7 bg-emerald-500 rounded-full relative cursor-pointer">
+                            <div class="absolute right-1 top-1 w-5 h-5 bg-white rounded-full shadow transition-all"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button class="flex-1 py-3.5 border border-slate-200 text-slate-600 font-medium rounded-xl hover:bg-slate-50 transition-colors">
+                    Anuluj
+                </button>
+                <button class="flex-1 py-3.5 bg-black text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors">
+                    Zapisz
+                </button>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200 px-6 py-2 z-50">
+            <div class="flex justify-around">
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Feed</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Zapisane</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500">Źródła</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 py-2 px-4">
+                    <div class="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-semibold text-primary">Ustawienia</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+</body>
+</html>

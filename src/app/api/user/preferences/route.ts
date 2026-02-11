@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-// Available TTS voices
-export const TTS_VOICES = [
-  { id: "pl-PL-MarekNeural", name: "Marek (męski)", language: "pl-PL" },
-  { id: "pl-PL-ZofiaNeural", name: "Zofia (żeński)", language: "pl-PL" },
-  { id: "en-US-GuyNeural", name: "Guy (English)", language: "en-US" },
-  { id: "en-US-JennyNeural", name: "Jenny (English)", language: "en-US" },
-] as const;
+import { TTS_VOICES } from "@/lib/config";
 
 // GET - fetch user preferences
 export async function GET() {

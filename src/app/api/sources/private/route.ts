@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { encrypt } from "@/lib/encryption";
 
 export async function GET() {
   try {
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
         url,
         type: type || "WEBSITE",
         config: config || null,
-        credentials: credentials || null, // TODO: Encrypt this
+        credentials: credentials ? encrypt(credentials) : null,
       },
     });
 

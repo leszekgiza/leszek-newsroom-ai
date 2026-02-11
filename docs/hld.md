@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - High-Level Design (HLD)
 
-**Wersja:** 1.2
-**Data:** 2026-01-16
+**Wersja:** 1.4
+**Data:** 2026-02-09
 **Status:** Draft
 
 ---
@@ -12,12 +12,17 @@
 System agregacji treści z wielu źródeł internetowych z automatycznym generowaniem streszczeń AI i funkcją Text-to-Speech.
 
 ### 1.2 Główne Funkcje
-- Scraping artykułów ze stron internetowych
+- Scraping artykułów ze stron internetowych (Crawl4AI)
 - Generowanie 2-zdaniowych intro i pełnych streszczeń (LLM provider-agnostic, przykład: Claude)
-- Text-to-Speech dla streszczeń (TTS provider-agnostic, przykład: Edge TTS)
+- Text-to-Speech dla streszczeń i wydań (TTS provider-agnostic, przykład: Edge TTS)
 - Wyszukiwanie full-text w języku polskim (PostgreSQL FTS)
-- Integracje: Gmail (newslettery), LinkedIn (posty)
+- Codzienne wydania (Editions) z TTS dla całego wydania
+- PWA z offline support (manifest, service worker, installable)
+- SSE streaming dla postępu scrapowania
+- Source Integrations: Gmail (OAuth + 3 ścieżki importu nadawców), LinkedIn (Voyager API), X/Twitter (Twikit)
+- Architektura dwujęzyczna: Gmail w Node.js, LinkedIn + X w Python microservice (scraper/)
 - Autentykacja użytkowników
+- **Planowane:** Text Q&A per article (OSS), Voice STT, Briefings, Multi-Article Q&A (Premium)
 
 ### 1.3 Architektura Źródeł (Catalog vs Private)
 
@@ -35,8 +40,9 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 ┌─────────────────────────────────────────────────────────────────┐
 │                    PRIVATE SOURCES (per-user)                    │
 │  • Strony z auth: strefainwestora.pl (user podaje credentials)  │
-│  • Gmail: OAuth, newslettery z wybranych nadawców               │
-│  • LinkedIn: li_at cookie, hashtagi, obserwowani eksperci       │
+│  • Gmail: OAuth + precyzyjny import (3 ścieżki, LLM matching)  │
+│  • LinkedIn: Voyager API (linkedin-api Python) + disclaimer     │
+│  • X/Twitter: Twikit (Python, async) + cookies auth             │
 │  • Scrapowane PER-USER, widoczne TYLKO dla właściciela          │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -77,28 +83,28 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         UŻYTKOWNICY                              │
-│                    (Przeglądarka / Mobile)                       │
+│                    (Przeglądarka / PWA Mobile)                   │
 └─────────────────────┬───────────────────────────────────────────┘
                       │ HTTPS
                       ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    NEWSROOM AI SYSTEM                            │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │  Frontend   │  │   Backend   │  │  Scraper    │              │
-│  │  (Next.js)  │◄─┤  (Node.js)  │◄─┤ (Crawl4AI)  │              │
-│  └─────────────┘  └──────┬──────┘  └─────────────┘              │
-│                          │                                       │
-│                   ┌──────▼──────┐                                │
-│                   │ PostgreSQL  │                                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
+│  │  Frontend   │  │   Backend   │  │  Python Microservice    │  │
+│  │  (Next.js)  │◄─┤  (Node.js)  │◄─┤  (scraper/)            │  │
+│  └─────────────┘  └──────┬──────┘  │  • Crawl4AI (scraping) │  │
+│                          │         │  • linkedin-api (feed)  │  │
+│                   ┌──────▼──────┐  │  • twikit (timeline)   │  │
+│                   │ PostgreSQL  │  └─────────────────────────┘  │
 │                   └─────────────┘                                │
 └─────────────────────────────────────────────────────────────────┘
-                      │         │         │
-          ┌───────────┘         │         └───────────┐
-          ▼                     ▼                     ▼
-    ┌───────────┐        ┌───────────┐        ┌───────────┐
-    │ Claude AI │        │  Gmail    │        │ LinkedIn  │
-    │   (API)   │        │  (OAuth)  │        │  (Scrape) │
-    └───────────┘        └───────────┘        └───────────┘
+              │         │         │         │
+    ┌─────────┘         │         │         └─────────┐
+    ▼                   ▼         ▼                   ▼
+┌─────────┐      ┌──────────┐ ┌──────────┐     ┌──────────┐
+│ LLM API │      │  Gmail   │ │ LinkedIn │     │ X/Twitter│
+│ (BYO)   │      │  (OAuth) │ │ (Voyager)│     │ (Twikit) │
+└─────────┘      └──────────┘ └──────────┘     └──────────┘
 ```
 
 ### 2.3 Diagram Komponentów (C4 Level 2)
@@ -112,59 +118,73 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 │  ├──────────────┤  ├──────────────┤  ├──────────────┤  ├────────────┤ │
 │  │ /            │  │ ArticleCard  │  │ useArticles  │  │ authStore  │ │
 │  │ /saved       │  │ SummaryModal │  │ useTTS       │  │ uiStore    │ │
-│  │ /settings    │  │ TTSPlayer    │  │ useSearch    │  │            │ │
-│  │ /login       │  │ SearchBar    │  │ useSources   │  │            │ │
-│  │ /register    │  │ SourceFilter │  │              │  │            │ │
+│  │ /editions    │  │ TTSPlayer    │  │ useSearch    │  │ playerStore│ │
+│  │ /settings    │  │ SearchBar    │  │ useSources   │  │            │ │
+│  │ /settings/   │  │ SourceFilter │  │ useConnector │  │            │ │
+│  │  integrations│  │ GmailWizard  │  │              │  │            │ │
+│  │ /login       │  │ LinkedInWiz  │  │              │  │            │ │
+│  │ /register    │  │ TwitterWiz   │  │              │  │            │ │
+│  │              │  │ ConnectorDash│  │              │  │            │ │
 │  └──────────────┘  └──────────────┘  └──────────────┘  └────────────┘ │
 └────────────────────────────────────────────────────────────────────────┘
                                     │
                                     │ REST API / Server Actions
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│                           BACKEND (Node.js)                             │
+│                     BACKEND (Node.js + Python)                          │
 ├────────────────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐ │
-│  │     API      │  │   Services   │  │    Jobs      │  │   Utils    │ │
-│  │   Routes     │  │              │  │  (Scheduled) │  │            │ │
-│  ├──────────────┤  ├──────────────┤  ├──────────────┤  ├────────────┤ │
-│  │ /articles    │  │ ArticleSvc   │  │ ScrapeJob    │  │ encryption │ │
-│  │ /sources     │  │ ScrapeSvc    │  │ SummaryJob   │  │ auth       │ │
-│  │ /auth        │  │ SummarySvc   │  │ GmailSyncJob │  │ validators │ │
-│  │ /search      │  │ TTSSvc       │  │              │  │            │ │
-│  │ /saved       │  │ SearchSvc    │  │              │  │            │ │
-│  │ /tts         │  │ GmailSvc     │  │              │  │            │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └────────────┘ │
+│  ┌───────────────────────────────────────────────────────────────────┐ │
+│  │                    Node.js (Next.js API Routes)                    │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐ │ │
+│  │  │     API      │  │   Services   │  │     Connectors          │ │ │
+│  │  │   Routes     │  │              │  │                          │ │ │
+│  │  ├──────────────┤  ├──────────────┤  ├──────────────────────────┤ │ │
+│  │  │ /articles    │  │ ArticleSvc   │  │ ConnectorInterface       │ │ │
+│  │  │ /sources     │  │ ScrapeSvc    │  │ GmailConnector (Node.js) │ │ │
+│  │  │ /auth        │  │ SummarySvc   │  │ LinkedInConnector (→Py)  │ │ │
+│  │  │ /connectors  │  │ TTSSvc       │  │ TwitterConnector (→Py)   │ │ │
+│  │  │ /tts         │  │ GmailSvc     │  │ ConnectorFactory         │ │ │
+│  │  │ /editions    │  │ ConnectorSvc │  │ CredentialEncryption     │ │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘ │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
+│                                    │ HTTP                              │
+│  ┌───────────────────────────────────────────────────────────────────┐ │
+│  │                    Python Microservice (scraper/)                  │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐ │ │
+│  │  │   FastAPI    │  │   Crawl4AI   │  │   Social Connectors     │ │ │
+│  │  ├──────────────┤  ├──────────────┤  ├──────────────────────────┤ │ │
+│  │  │ /scrape      │  │ Web scraping │  │ linkedin-api (Voyager)  │ │ │
+│  │  │ /linkedin/*  │  │ JS rendering │  │ twikit (async timeline) │ │ │
+│  │  │ /twitter/*   │  │              │  │                          │ │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘ │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
+│                                    │                                   │
+│                                    ▼                                   │
+│  ┌───────────────────────────────────────────────────────────────────┐ │
+│  │                         DATA LAYER                                │ │
+│  │  ┌──────────────────────────────┐  ┌────────────────────────────┐ │ │
+│  │  │         PostgreSQL           │  │      File Storage          │ │ │
+│  │  ├──────────────────────────────┤  ├────────────────────────────┤ │ │
+│  │  │ users, sessions             │  │ /audio (TTS cache)         │ │ │
+│  │  │ articles, editions          │  │                            │ │ │
+│  │  │ catalog_sources             │  │                            │ │ │
+│  │  │ private_sources (encrypted) │  │                            │ │ │
+│  │  │ saved/read/dismissed        │  │                            │ │ │
+│  │  └──────────────────────────────┘  └────────────────────────────┘ │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
 └────────────────────────────────────────────────────────────────────────┘
                                     │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                           DATA LAYER                                    │
-├────────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────┐  ┌──────────────────────────────┐ │
-│  │         PostgreSQL              │  │        File Storage          │ │
-│  ├─────────────────────────────────┤  ├──────────────────────────────┤ │
-│  │ users                           │  │ /audio (TTS cache)           │ │
-│  │ articles                        │  │                              │ │
-│  │ sources                         │  │                              │ │
-│  │ saved_articles                  │  │                              │ │
-│  │ integrations                    │  │                              │ │
-│  │ sessions                        │  │                              │ │
-│  └─────────────────────────────────┘  └──────────────────────────────┘ │
-└────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                        EXTERNAL SERVICES                                │
-├────────────────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐ │
-│  │  Crawl4AI    │  │  Claude API  │  │   Edge TTS   │  │   Gmail    │ │
-│  │  (Docker)    │  │  (Anthropic) │  │  (Microsoft) │  │   (OAuth)  │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └────────────┘ │
-└────────────────────────────────────────────────────────────────────────┘
+                      ┌─────────────┼─────────────┐
+                      ▼             ▼             ▼
+               ┌────────────┐ ┌──────────┐ ┌──────────┐
+               │  LLM API   │ │  Gmail   │ │  TTS API │
+               │  (BYO key) │ │  (OAuth) │ │ (BYO key)│
+               └────────────┘ └──────────┘ └──────────┘
 ```
 
 Note: Nazwy dostawcow w diagramach sa tylko przykladami. Core OSS jest
-provider-agnostic i wymaga BYO keys.
+provider-agnostic i wymaga BYO keys. LinkedIn i X/Twitter nie mają
+oficjalnych API - używamy nieoficjalnych bibliotek (Voyager API, Twikit).
 
 ---
 
@@ -189,12 +209,15 @@ provider-agnostic i wymaga BYO keys.
 | Jobs | node-cron | Proste scheduled tasks |
 | Validation | Zod | Współdzielone z frontendem |
 
-### 3.3 Scraping
+### 3.3 Scraping + Social Connectors (Python Microservice)
 | Warstwa | Technologia | Uzasadnienie |
 |---------|-------------|--------------|
 | Engine | Crawl4AI | Open source, LLM-ready output |
-| Runtime | Python 3.11+ (Docker) | Wymagane przez Crawl4AI |
-| Browser | Playwright | JS rendering, login support |
+| Runtime | Python 3.11+ (Docker) | Wymagane przez Crawl4AI, linkedin-api, twikit |
+| Browser | Playwright | JS rendering, login support (Crawl4AI) |
+| LinkedIn | linkedin-api (Voyager API) | Jedyna opcja dostępu do feeda (oficjalne API zamknięte 06/2023) |
+| X/Twitter | twikit (async) | Python async scraper, cookies/login auth, rate limit 600/15min |
+| Framework | FastAPI | Już używany przez Crawl4AI scraper |
 
 ### 3.4 AI & TTS
 | Warstwa | Technologia | Uzasadnienie |
@@ -257,7 +280,46 @@ provider-agnostic i wymaga BYO keys.
  widzi listę                                   i paginacją
 ```
 
-### 4.3 TTS Flow
+### 4.3 Connector Sync Flow (Gmail / LinkedIn / X)
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────┐
+│  Scheduler   │────▶│  Node.js     │────▶│  Connector   │────▶│ Database │
+│  (per-conn)  │     │  Backend     │     │  (type-spec) │     │          │
+└──────────────┘     └──────┬───────┘     └──────────────┘     └──────────┘
+    │                       │                    │
+    │                       │                    │
+    ▼                       ▼                    ▼
+ Gmail: 60min         Decrypt             Gmail: googleapis (Node.js)
+ LinkedIn: 120min     credentials         LinkedIn: HTTP → Python /linkedin/feed
+ X/Twitter: 180min    (AES-256-GCM)       X/Twitter: HTTP → Python /twitter/timeline
+                                                │
+                                                ▼
+                                          Parse content
+                                          → Article {url, title, content}
+                                          → AI intro + summary (LLM)
+                                          → Save to DB + assign to Edition
+```
+
+**Status transitions per sync:**
+```
+connected ──sync──▶ syncing ──success──▶ connected
+                        │
+                        ├──failure──▶ error (retry 1/3)
+                        │                    │
+                        │               ├──failure──▶ error (retry 2/3)
+                        │               │                    │
+                        │               │               ├──failure──▶ error (retry 3/3)
+                        │               │               │                    │
+                        │               │               │               24h timeout
+                        │               │               │                    │
+                        │               │               │                    ▼
+                        │               │               │               expired
+                        │               │               │               (re-auth needed)
+                        └──success──────┴──success──────┘
+```
+
+### 4.4 TTS Flow
 
 ```
 ┌─────────┐     ┌─────────┐     ┌──────────┐     ┌──────────┐
@@ -286,8 +348,10 @@ provider-agnostic i wymaga BYO keys.
 
 ### 5.3 Szyfrowanie
 - **Transport:** HTTPS (TLS 1.3)
-- **At Rest:** AES-256 dla credentials stron zewnętrznych
-- **Klucze:** Przechowywane w env vars
+- **At Rest:** AES-256-GCM dla credentials (OAuth tokens, hasła, cookies)
+- **Format:** `iv:encrypted:authTag` (base64)
+- **Klucz:** 32 bajty z env var `CREDENTIALS_ENCRYPTION_KEY`
+- **Rotacja:** Manual (v1), automated (v2)
 
 ### 5.4 Rate Limiting
 - **API:** 100 req/min per user
@@ -408,6 +472,67 @@ provider-agnostic i wymaga BYO keys.
 - Możliwość integracji z zewnętrznymi narzędziami (CLI, automatyzacje)
 - Jasny kontrakt między frontendem a backendem
 
+### ADR-006: Editions (Daily Grouping)
+**Status:** Accepted (Implemented v2.6.0)
+**Kontekst:** Użytkownicy chcą przeglądać artykuły pogrupowane chronologicznie jak w gazecie
+**Decyzja:** Model Edition z relacją 1:N do Article, automatyczne tworzenie via cron job
+**Konsekwencje:**
+- Artykuły grupowane po dacie publikacji/pobrania
+- TTS dla całego wydania (concat streszczeń, grouped by source)
+- Cron job `/api/cron/editions` do automatycznego tworzenia
+
+### ADR-007: PWA (Progressive Web App)
+**Status:** Accepted (Implemented v2.8.0)
+**Kontekst:** Mobile-first UX, instalacja na home screen, offline basic support
+**Decyzja:** Web App Manifest + Service Worker z cache strategią
+**Konsekwencje:**
+- Manifest z ikonami 192/512, theme color
+- Service worker: cache-first dla statycznych zasobów, network-first dla API
+- Offline fallback page
+- Przyszłość: Media Session API dla lockscreen controls, background audio
+
+### ADR-008: SSE for Scraping Progress
+**Status:** Accepted (Implemented v2.8.0)
+**Kontekst:** Scraping wielu źródeł trwa długo, użytkownik potrzebuje feedback
+**Decyzja:** Server-Sent Events (SSE) via `GET /api/scrape/all`
+**Konsekwencje:**
+- Real-time progress per source (status, current/total)
+- Automatyczne tworzenie wydania po zakończeniu sync
+- UI: SyncProgressModal z logami na żywo
+
+### ADR-009: Dual-Language Connector Architecture
+**Status:** Accepted
+**Kontekst:** Gmail ma oficjalne SDK dla Node.js (`googleapis`), ale LinkedIn i X/Twitter wymagają nieoficjalnych bibliotek dostępnych tylko w Pythonie (`linkedin-api`, `twikit`)
+**Decyzja:** Gmail connector w Node.js (blisko Next.js API routes), LinkedIn + X/Twitter w Python microservice (rozszerzenie istniejącego `scraper/`)
+**Konsekwencje:**
+- Gmail: `googleapis` + `google-auth-library` w `package.json`
+- LinkedIn: `linkedin-api` w `scraper/requirements.txt`, endpoint `POST /scrape/linkedin/feed`
+- X/Twitter: `twikit` w `scraper/requirements.txt`, endpoint `POST /scrape/twitter/timeline`
+- Node.js backend komunikuje się z Python microservice przez HTTP (localhost:8000)
+- Wspólny `SourceConnector` interface w Node.js, LinkedIn/Twitter connectors delegują do Python
+
+### ADR-010: Gmail Precise Import (3 Paths)
+**Status:** Accepted
+**Kontekst:** PO odrzucił auto-detekcję newsletterów. Użytkownik chce precyzyjnie wskazać co importować
+**Decyzja:** 3 ścieżki dodawania nadawców: Paste & Match (primary), LLM Search, Browse & Select
+**Konsekwencje:**
+- Domyślnie NIC nie jest importowane - pełna kontrola użytkownika
+- LLM (istniejący PAL z aiService.ts) konwertuje intencje na Gmail query
+- `List-Unsubscribe` header jako sygnał pomocniczy (nie trigger importu)
+- Config schema: `senders[]` z email, name, matchQuery (bez labels)
+- Gmail wizard UI z 3 zakładkami (mockup: `ui_gmail_wizard_v2_1.html`)
+
+### ADR-011: Q&A Agent Architecture (Planned)
+**Status:** Proposed
+**Kontekst:** Ewolucja z pasywnego readera w konwersacyjnego agenta newsowego
+**Decyzja:** Context stuffing (nie vector DB), provider-agnostic LLM, SSE streaming odpowiedzi
+**Konsekwencje:**
+- Single-article Q&A: kontekst = article content + intro + summary
+- Multi-article Q&A (Premium): context z wielu artykułów z limitem tokenów
+- Provider Abstraction Layer: unified interface LLM/TTS/STT
+- Feature flags dla OSS vs Premium boundary (nie repo split)
+- Conversation history in-memory (nie persisted w MVP)
+
 ---
 
 ## 10. Ryzyka
@@ -416,7 +541,10 @@ provider-agnostic i wymaga BYO keys.
 |--------|-------------------|--------|-----------|
 | Blokada scraping przez strony | Średnie | Wysoki | Rotacja User-Agent, delays |
 | Koszty LLM API (provider-agnostic) | Niskie | Średni | Cache streszczeń, limity |
-| LinkedIn blokuje li_at | Wysokie | Średni | Fallback, instrukcja dla usera |
+| LinkedIn ban konta (Voyager API) | Wysokie (~23%) | Średni | Disclaimer dla usera, manual cookie fallback, rate limiting 120min |
+| X/Twitter ban konta (Twikit) | Średnie | Średni | Cookies auth (stabilniejsze), rate limit 600/15min, disclaimer |
+| Voyager API zmiana endpointów | Wysokie | Średni | linkedin-api jako wrapper (aktualizacje), fallback na manual cookies |
+| Google OAuth token expiry | Niskie | Niski | Auto-refresh, notyfikacja re-auth w UI |
 | Oracle Cloud EOL Free Tier | Niskie | Wysoki | Backup strategia (VPS) |
 
 ---

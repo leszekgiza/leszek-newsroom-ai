@@ -5,3 +5,10 @@ crawl4ai>=0.4.24
 pydantic>=2.0.0
 python-dotenv>=1.0.0
 httpx>=0.26.0
+beautifulsoup4>=4.12.0
+
+# LinkedIn connector (Voyager API)
+linkedin-api>=2.2.1
+
+# X/Twitter connector (async scraper)
+twikit>=2.1.0

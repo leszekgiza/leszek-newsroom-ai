@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - Low-Level Design (LLD)
 
-**Wersja:** 1.2
-**Data:** 2026-01-16
+**Wersja:** 1.4
+**Data:** 2026-02-09
 **Status:** Draft
 
 ---
@@ -47,6 +47,8 @@ System rozróżnia dwa typy źródeł:
 │ password_hash   │                                         │
 │ name            │                                         │
 │ theme           │                                         │
+│ default_view    │                                         │
+│ tts_voice       │                                         │
 │ created_at      │                                         │
 └─────────────────┘                                         │
          │                                                  │
@@ -102,24 +104,38 @@ System rozróżnia dwa typy źródeł:
 │ private_source_id   │◄─────────────────────────┘  (nullable)
 └─────────────────────┘
          │
-         │    ┌─────────────────┐    ┌─────────────────┐
-         │    │  saved_articles │    │  read_articles  │
-         │    ├─────────────────┤    ├─────────────────┤
-         └───▶│ article_id (FK) │    │ article_id (FK) │◄───┘
-              │ user_id (FK)    │    │ user_id (FK)    │
-              │ saved_at        │    │ read_at         │
-              └─────────────────┘    └─────────────────┘
+         │    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────────┐
+         │    │  saved_articles │    │  read_articles  │    │ dismissed_articles  │
+         │    ├─────────────────┤    ├─────────────────┤    ├─────────────────────┤
+         └───▶│ article_id (FK) │    │ article_id (FK) │◄───│ article_id (FK)     │
+              │ user_id (FK)    │    │ user_id (FK)    │    │ user_id (FK)        │
+              │ saved_at        │    │ read_at         │    │ dismissed_at        │
+              └─────────────────┘    └─────────────────┘    └─────────────────────┘
 
 ┌─────────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  hidden_catalog_src │    │    sessions     │    │  user_topics    │
+│      editions       │    │    sessions     │    │  user_topics    │
 ├─────────────────────┤    ├─────────────────┤    ├─────────────────┤
-│ user_id (FK)        │    │ id (PK)         │    │ id (PK)         │
-│ catalog_source_id   │    │ user_id (FK)    │    │ user_id (FK)    │
-│ hidden_at           │    │ token           │    │ name            │
-└─────────────────────┘    │ expires_at      │    │ keywords[]      │
-                           └─────────────────┘    │ is_active       │
-                                                  └─────────────────┘
-                                                  (FUTURE: topic-based)
+│ id (PK)             │    │ id (PK)         │    │ id (PK)         │
+│ user_id (FK)        │    │ user_id (FK)    │    │ user_id (FK)    │
+│ date (UNIQUE w/uid) │    │ token           │    │ name            │
+│ title               │    │ expires_at      │    │ keywords[]      │
+│ summary             │    └─────────────────┘    │ is_active       │
+│ article_count       │                           └─────────────────┘
+│ unread_count        │                           (FUTURE: topic-based)
+│ created_at          │
+└─────────────────────┘
+         │
+         │ 1:N
+         ▼
+    articles.edition_id (FK, nullable)
+
+┌─────────────────────┐
+│  hidden_catalog_src │
+├─────────────────────┤
+│ user_id (FK)        │
+│ catalog_source_id   │
+│ hidden_at           │
+└─────────────────────┘
 ```
 
 ### 1.2 Prisma Schema
@@ -142,23 +158,27 @@ datasource db {
 // ============================================
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String      @map("password_hash")
   name         String?
-  avatarUrl    String?  @map("avatar_url")
-  theme        Theme    @default(SYSTEM)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  avatarUrl    String?     @map("avatar_url")
+  theme        Theme       @default(SYSTEM)
+  defaultView  DefaultView @default(FEED) @map("default_view")
+  ttsVoice     String      @default("pl-PL-MarekNeural") @map("tts_voice")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
 
   // Relations
-  subscriptions       UserSubscription[]
-  privateSources      PrivateSource[]
-  savedArticles       SavedArticle[]
-  readArticles        ReadArticle[]
+  subscriptions        UserSubscription[]
+  privateSources       PrivateSource[]
+  savedArticles        SavedArticle[]
+  readArticles         ReadArticle[]
+  dismissedArticles    DismissedArticle[]
   hiddenCatalogSources HiddenCatalogSource[]
-  sessions            Session[]
-  topics              UserTopic[]  // FUTURE: topic-based discovery
+  sessions             Session[]
+  topics               UserTopic[]  // FUTURE: topic-based discovery
+  editions             Edition[]
 
   @@map("users")
 }
@@ -179,6 +199,11 @@ enum Theme {
   LIGHT
   DARK
   SYSTEM
+}
+
+enum DefaultView {
+  FEED
+  EDITIONS
 }
 
 // ============================================
@@ -234,16 +259,19 @@ model HiddenCatalogSource {
 // ============================================
 
 model PrivateSource {
-  id            String            @id @default(cuid())
-  userId        String            @map("user_id")
+  id            String              @id @default(cuid())
+  userId        String              @map("user_id")
   name          String
   url           String
-  type          PrivateSourceType @default(WEBSITE)
-  config        Json?             // CSS selectors, hashtags, senders, etc.
-  credentials   String?           // Encrypted (AES-256) - passwords, tokens
-  isActive      Boolean           @default(true) @map("is_active")
-  lastScrapedAt DateTime?         @map("last_scraped_at")
-  createdAt     DateTime          @default(now()) @map("created_at")
+  type          PrivateSourceType   @default(WEBSITE)
+  status        ConnectorStatus     @default(DISCONNECTED)
+  config        Json?               // Per-type config (see Connector Config Schemas below)
+  credentials   String?             // Encrypted (AES-256-GCM) - OAuth tokens, passwords, cookies
+  syncInterval  Int                 @default(60) @map("sync_interval") // minutes
+  isActive      Boolean             @default(true) @map("is_active")
+  lastScrapedAt DateTime?           @map("last_scraped_at")
+  lastSyncError String?             @map("last_sync_error")
+  createdAt     DateTime            @default(now()) @map("created_at")
 
   // Relations
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -255,10 +283,18 @@ model PrivateSource {
 
 enum PrivateSourceType {
   WEBSITE   // Auth-required websites (strefainwestora.pl)
-  GMAIL     // User's Gmail newsletters
-  LINKEDIN  // User's LinkedIn feed
-  TWITTER   // User's Twitter/X
+  GMAIL     // User's Gmail newsletters (OAuth + 3-path sender selection)
+  LINKEDIN  // User's LinkedIn feed (Voyager API / cookies)
+  TWITTER   // User's Twitter/X timeline (Twikit / cookies)
   RSS       // Private RSS feeds
+}
+
+enum ConnectorStatus {
+  CONNECTED     // Active, last sync OK
+  SYNCING       // Sync in progress
+  ERROR         // Last sync failed (retrying)
+  EXPIRED       // Credentials expired, needs re-auth
+  DISCONNECTED  // Disconnected by user (or never connected)
 }
 
 // ============================================
@@ -266,33 +302,39 @@ enum PrivateSourceType {
 // ============================================
 
 model Article {
-  id              String    @id @default(cuid())
-  url             String    @unique
-  title           String
-  intro           String?   // 2-sentence AI intro
-  summary         String?   // Full AI summary
-  imageUrl        String?   @map("image_url")
-  author          String?
-  publishedAt     DateTime? @map("published_at")
-  scrapedAt       DateTime  @default(now()) @map("scraped_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
+  id          String    @id @default(cuid())
+  url         String    @unique
+  title       String
+  intro       String?   // 2-sentence AI intro
+  summary     String?   // Full AI summary
+  imageUrl    String?   @map("image_url")
+  author      String?
+  publishedAt DateTime? @map("published_at")
+  scrapedAt   DateTime  @default(now()) @map("scraped_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   // Polymorphic source relation (one or the other, not both)
-  catalogSourceId String?        @map("catalog_source_id")
-  privateSourceId String?        @map("private_source_id")
+  catalogSourceId String? @map("catalog_source_id")
+  privateSourceId String? @map("private_source_id")
+
+  // Edition relation (optional)
+  editionId String? @map("edition_id")
 
   // Full-text search vector (managed by trigger)
-  // searchVector Unsupported("tsvector")? @map("search_vector")
+  searchVector Unsupported("tsvector")? @map("search_vector")
 
   // Relations
   catalogSource CatalogSource? @relation(fields: [catalogSourceId], references: [id], onDelete: Cascade)
   privateSource PrivateSource? @relation(fields: [privateSourceId], references: [id], onDelete: Cascade)
+  edition       Edition?       @relation(fields: [editionId], references: [id], onDelete: SetNull)
   savedBy       SavedArticle[]
   readBy        ReadArticle[]
+  dismissedBy   DismissedArticle[]
 
   @@index([catalogSourceId])
   @@index([privateSourceId])
   @@index([publishedAt(sort: Desc)])
+  @@index([editionId])
   @@map("articles")
 }
 
@@ -318,6 +360,42 @@ model ReadArticle {
 
   @@id([userId, articleId])
   @@map("read_articles")
+}
+
+model DismissedArticle {
+  userId      String   @map("user_id")
+  articleId   String   @map("article_id")
+  dismissedAt DateTime @default(now()) @map("dismissed_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@map("dismissed_articles")
+}
+
+// ============================================
+// EDITIONS (Daily article groupings)
+// ============================================
+
+model Edition {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  date         DateTime @db.Date
+  title        String?  // Optional title like "Wydanie poranne"
+  summary      String?  // AI-generated summary of the edition
+  articleCount Int      @default(0) @map("article_count")
+  unreadCount  Int      @default(0) @map("unread_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articles Article[]
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date(sort: Desc)])
+  @@map("editions")
 }
 
 // ============================================
@@ -429,11 +507,28 @@ UPDATE articles SET search_vector =
 | DELETE | `/api/catalog/:id/hide` | Pokaż ukryte | ✓ |
 | **Private Sources (per-user)** |
 | GET | `/api/private-sources` | Prywatne źródła usera | ✓ |
-| POST | `/api/private-sources` | Dodaj prywatne źródło | ✓ |
+| POST | `/api/private-sources` | Dodaj prywatne źródło (WEBSITE/RSS) | ✓ |
 | PUT | `/api/private-sources/:id` | Edytuj źródło | ✓ |
-| DELETE | `/api/private-sources/:id` | Usuń źródło | ✓ |
-| POST | `/api/private-sources/gmail` | Połącz Gmail (OAuth) | ✓ |
-| POST | `/api/private-sources/linkedin` | Połącz LinkedIn (li_at) | ✓ |
+| DELETE | `/api/private-sources/:id` | Usuń źródło + credentials | ✓ |
+| **Connectors (Source Integrations)** |
+| GET | `/api/connectors` | Lista connectorów ze statusem | ✓ |
+| GET | `/api/connectors/:id/status` | Status + stats connectora | ✓ |
+| POST | `/api/connectors/:id/sync` | Manual sync (SSE progress) | ✓ |
+| DELETE | `/api/connectors/:id` | Rozłącz connector (usuń credentials) | ✓ |
+| **Gmail Connector** |
+| GET | `/api/auth/gmail` | Redirect do Google OAuth consent | ✓ |
+| GET | `/api/auth/gmail/callback` | OAuth callback (exchange code → tokens) | - |
+| POST | `/api/connectors/gmail/search-sender` | Szukaj maili po nadawcy (Paste & Match) | ✓ |
+| POST | `/api/connectors/gmail/llm-query` | LLM konwersja intencji → Gmail query (Search) | ✓ |
+| GET | `/api/connectors/gmail/browse` | Przeglądaj skrzynkę (Browse & Select) | ✓ |
+| POST | `/api/connectors/gmail/senders` | Zapisz wybranych nadawców do importu | ✓ |
+| **LinkedIn Connector** |
+| POST | `/api/connectors/linkedin/connect` | Login/hasło → Voyager session (via Python) | ✓ |
+| POST | `/api/connectors/linkedin/cookie` | Manual cookie li_at (fallback) | ✓ |
+| POST | `/api/connectors/linkedin/test` | Test połączenia | ✓ |
+| **X/Twitter Connector** |
+| POST | `/api/connectors/twitter/connect` | Cookies (auth_token+ct0) lub login/hasło (via Python) | ✓ |
+| POST | `/api/connectors/twitter/test` | Test połączenia | ✓ |
 | **TTS** |
 | POST | `/api/tts` | Generuj audio | ✓ |
 | **User** |
@@ -449,6 +544,12 @@ UPDATE articles SET search_vector =
 | **Scraping** |
 | POST | `/api/scrape/trigger` | Uruchom scraping dla źródła | ✓ |
 | GET | `/api/scrape/all` | SSE - sync wszystkich źródeł z postępem | ✓ |
+| **Dismissed (Trash)** |
+| GET | `/api/trash` | Lista odrzuconych artykułów | ✓ |
+| POST | `/api/articles/:id/dismiss` | Odrzuć artykuł (przenieś do kosza) | ✓ |
+| DELETE | `/api/articles/:id/dismiss` | Przywróć artykuł z kosza | ✓ |
+| **Q&A (Planned - OSS)** |
+| POST | `/api/articles/:id/chat` | Text Q&A z artykułem (SSE streaming) | ✓ |
 | **Cron** |
 | GET | `/api/cron/editions` | Automatyczne tworzenie wydań (Vercel Cron) | - |
 
@@ -769,48 +870,147 @@ data: {"sourceId":"clx123","error":"Connection timeout"}
 
 ---
 
-#### POST /api/integrations/gmail
+#### POST /api/connectors/gmail/search-sender (Ścieżka A: Paste & Match)
 
 **Request:**
 ```json
 {
-  "authCode": "4/0AY0e-g7...",  // OAuth authorization code
-  "config": {
-    "senders": [
-      "newsletter@deeplearning.ai",
-      "hello@changelog.com"
-    ],
-    "autoSync": true
-  }
+  "email": "newsletter@deeplearning.ai"
 }
 ```
 
 **Response (200):**
 ```json
 {
-  "integration": {
-    "type": "GMAIL",
-    "isConnected": true,
-    "email": "user@gmail.com",
-    "config": { ... }
+  "found": true,
+  "sender": {
+    "email": "newsletter@deeplearning.ai",
+    "name": "The Batch",
+    "lastSubject": "What's new in ML this week",
+    "lastDate": "2026-02-06T10:00:00Z",
+    "frequency": "weekly",
+    "messageCount": 24,
+    "matchQuery": "from:newsletter@deeplearning.ai"
   }
 }
 ```
 
 ---
 
-#### POST /api/integrations/linkedin
+#### POST /api/connectors/gmail/llm-query (Ścieżka B: LLM Search)
 
 **Request:**
 ```json
 {
-  "liAtCookie": "AQED...",
+  "intent": "cotygodniowe newslettery o AI i machine learning"
+}
+```
+
+**Response (200):**
+```json
+{
+  "gmailQuery": "subject:(\"AI\" OR \"machine learning\" OR \"weekly\") newer_than:90d",
+  "senders": [
+    {
+      "email": "newsletter@deeplearning.ai",
+      "name": "The Batch",
+      "messageCount": 24,
+      "matchQuery": "from:newsletter@deeplearning.ai"
+    },
+    {
+      "email": "dan@tldrnewsletter.com",
+      "name": "TLDR AI",
+      "messageCount": 30,
+      "matchQuery": "from:dan@tldrnewsletter.com"
+    }
+  ]
+}
+```
+
+---
+
+#### GET /api/connectors/gmail/browse (Ścieżka C: Browse & Select)
+
+**Response (200):**
+```json
+{
+  "senders": [
+    {
+      "email": "newsletter@deeplearning.ai",
+      "name": "The Batch",
+      "classification": "newsletter",
+      "messageCount": 24,
+      "frequency": "weekly",
+      "lastSubject": "What's new in ML this week"
+    },
+    {
+      "email": "noreply@amazon.com",
+      "name": "Amazon",
+      "classification": "marketing",
+      "messageCount": 156,
+      "frequency": "daily",
+      "lastSubject": "Your order has shipped"
+    }
+  ],
+  "classifications": {
+    "newsletter": 12,
+    "marketing": 45,
+    "transactional": 23,
+    "personal": 8
+  }
+}
+```
+
+---
+
+#### POST /api/connectors/gmail/senders
+
+**Request:**
+```json
+{
+  "senders": [
+    {
+      "email": "newsletter@deeplearning.ai",
+      "name": "The Batch",
+      "matchQuery": "from:newsletter@deeplearning.ai"
+    }
+  ],
+  "maxAgeDays": 7,
+  "syncInterval": 60
+}
+```
+
+**Response (201):**
+```json
+{
+  "connector": {
+    "id": "clx2222222222",
+    "type": "GMAIL",
+    "status": "CONNECTED",
+    "config": {
+      "senders": [{ "email": "newsletter@deeplearning.ai", "name": "The Batch" }],
+      "maxAgeDays": 7,
+      "syncInterval": 60
+    }
+  }
+}
+```
+
+---
+
+#### POST /api/connectors/linkedin/connect
+
+**Request:**
+```json
+{
+  "username": "user@example.com",
+  "password": "...",
+  "disclaimerAccepted": true,
   "config": {
-    "hashtags": ["#AI", "#MachineLearning", "#LLM"],
-    "people": [
-      { "name": "Andrej Karpathy", "profileId": "karpathy" },
-      { "name": "Yann LeCun", "profileId": "yann-lecun" }
-    ]
+    "hashtags": ["#AI", "#MachineLearning"],
+    "authors": ["karpathy", "yann-lecun"],
+    "excludeReposts": true,
+    "minLength": 100
   }
 }
 ```
@@ -818,9 +1018,49 @@ data: {"sourceId":"clx123","error":"Connection timeout"}
 **Response (200):**
 ```json
 {
-  "integration": {
+  "connector": {
+    "id": "clx3333333333",
     "type": "LINKEDIN",
-    "isConnected": true,
+    "status": "CONNECTED",
+    "profileName": "User Name",
+    "config": { ... }
+  }
+}
+```
+
+**Errors:**
+- `401` - Invalid LinkedIn credentials
+- `403` - Disclaimer not accepted
+- `429` - LinkedIn rate limit / anti-bot
+
+---
+
+#### POST /api/connectors/twitter/connect
+
+**Request (cookies - preferowane):**
+```json
+{
+  "authMethod": "cookies",
+  "authToken": "abc123...",
+  "ct0": "def456...",
+  "disclaimerAccepted": true,
+  "config": {
+    "timeline": "following",
+    "includeRetweets": false,
+    "includeReplies": false,
+    "includeThreads": true
+  }
+}
+```
+
+**Response (200):**
+```json
+{
+  "connector": {
+    "id": "clx4444444444",
+    "type": "TWITTER",
+    "status": "CONNECTED",
+    "username": "@user",
     "config": { ... }
   }
 }
@@ -901,11 +1141,16 @@ src/
 │   │   ├── AddSourceForm.tsx
 │   │   └── HiddenSourcesList.tsx
 │   │
-│   ├── integrations/             # Integration components
-│   │   ├── IntegrationCard.tsx
-│   │   ├── GmailConfig.tsx
-│   │   ├── LinkedInConfig.tsx
-│   │   └── TwitterConfig.tsx
+│   ├── connectors/               # Source Integration components
+│   │   ├── ConnectorDashboard.tsx    # Status dashboard (all connectors)
+│   │   ├── ConnectorCard.tsx         # Single connector status card
+│   │   ├── ConnectorSyncProgress.tsx # Inline sync progress (bars, stats)
+│   │   ├── GmailWizard.tsx           # 3-tab wizard (Paste/Search/Browse)
+│   │   ├── GmailSenderList.tsx       # Sender selection list
+│   │   ├── GmailSenderPreview.tsx    # Sender details preview
+│   │   ├── LinkedInWizard.tsx        # Login + disclaimer + test
+│   │   ├── TwitterWizard.tsx         # Cookies/login + disclaimer
+│   │   └── CredentialsExpired.tsx    # Re-auth notification (banner+toast)
 │   │
 │   └── auth/                     # Auth components
 │       ├── LoginForm.tsx
@@ -920,6 +1165,7 @@ src/
 │   ├── useSaved.ts
 │   ├── useTTS.ts
 │   ├── useAuth.ts
+│   ├── useConnectors.ts          # Connector CRUD, status, sync
 │   └── useDebounce.ts
 │
 ├── stores/                       # Zustand stores
@@ -940,14 +1186,24 @@ src/
 │   ├── user.ts
 │   └── api.ts
 │
+├── lib/connectors/               # Connector implementations
+│   ├── connectorInterface.ts     # SourceConnector interface + types
+│   ├── connectorFactory.ts       # ConnectorFactory (type → implementation)
+│   ├── gmailConnector.ts         # Gmail: googleapis (Node.js native)
+│   ├── linkedinConnector.ts      # LinkedIn: delegates to Python /linkedin/*
+│   ├── twitterConnector.ts       # X/Twitter: delegates to Python /twitter/*
+│   └── credentialEncryption.ts   # AES-256-GCM encrypt/decrypt
+│
 └── services/                     # Backend services
     ├── articleService.ts
     ├── scrapeService.ts
     ├── summaryService.ts
     ├── ttsService.ts
     ├── searchService.ts
-    ├── gmailService.ts
-    └── linkedinService.ts
+    ├── connectorService.ts       # Connector orchestration (sync, health, schedule)
+    ├── gmailService.ts           # Gmail API client (search, fetch, senders)
+    ├── linkedinService.ts        # LinkedIn → Python microservice proxy
+    └── twitterService.ts         # X/Twitter → Python microservice proxy
 ```
 
 ### 3.2 Kluczowe Komponenty
@@ -1364,17 +1620,67 @@ export const ttsSchema = z.object({
   rate: z.number().min(0.5).max(2).default(1),
 });
 
-// LinkedIn Integration
-export const linkedinConfigSchema = z.object({
-  liAtCookie: z.string().min(10, 'Nieprawidłowy cookie li_at'),
-  config: z.object({
-    hashtags: z.array(z.string().startsWith('#')).max(10),
-    people: z.array(z.object({
-      name: z.string(),
-      profileId: z.string(),
-    })).max(20),
-  }),
+// Gmail Connector
+export const gmailSenderSchema = z.object({
+  email: z.string().email(),
+  name: z.string().optional(),
+  matchQuery: z.string().optional(),
 });
+
+export const gmailConfigSchema = z.object({
+  senders: z.array(gmailSenderSchema).min(1, 'Wybierz min. 1 nadawcę'),
+  maxAgeDays: z.number().min(1).max(365).default(7),
+  syncInterval: z.number().min(15).max(1440).default(60),
+});
+
+export const gmailLlmQuerySchema = z.object({
+  intent: z.string().min(3, 'Opisz co szukasz').max(500),
+});
+
+// LinkedIn Connector
+export const linkedinConnectSchema = z.object({
+  username: z.string().email('Podaj email LinkedIn'),
+  password: z.string().min(1, 'Hasło jest wymagane'),
+  disclaimerAccepted: z.literal(true, {
+    errorMap: () => ({ message: 'Musisz zaakceptować disclaimer' }),
+  }),
+  config: z.object({
+    hashtags: z.array(z.string().startsWith('#')).max(10).optional(),
+    authors: z.array(z.string()).max(20).optional(),
+    excludeReposts: z.boolean().default(false),
+    minLength: z.number().min(0).default(0),
+  }).optional(),
+});
+
+export const linkedinCookieSchema = z.object({
+  liAtCookie: z.string().min(10, 'Nieprawidłowy cookie li_at'),
+  disclaimerAccepted: z.literal(true),
+});
+
+// X/Twitter Connector
+export const twitterConnectSchema = z.object({
+  authMethod: z.enum(['cookies', 'login']),
+  // cookies auth
+  authToken: z.string().optional(),
+  ct0: z.string().optional(),
+  // login auth
+  username: z.string().optional(),
+  password: z.string().optional(),
+  disclaimerAccepted: z.literal(true, {
+    errorMap: () => ({ message: 'Musisz zaakceptować disclaimer' }),
+  }),
+  config: z.object({
+    timeline: z.enum(['following', 'foryou']).default('following'),
+    includeRetweets: z.boolean().default(false),
+    includeReplies: z.boolean().default(false),
+    includeThreads: z.boolean().default(true),
+  }).optional(),
+}).refine(
+  (data) => data.authMethod === 'cookies'
+    ? (data.authToken && data.ct0)
+    : (data.username && data.password),
+  { message: 'Podaj wymagane dane uwierzytelniające' }
+);
 ```
 
 ---
@@ -1456,7 +1762,265 @@ export function handleApiError(error: unknown): NextResponse {
 
 ---
 
-## 8. Konfiguracja Środowiska
+## 8. Connector Config Schemas (JSON in PrivateSource.config)
+
+### 8.1 Gmail Config
+```json
+{
+  "senders": [
+    {
+      "email": "newsletter@deeplearning.ai",
+      "name": "The Batch",
+      "lastSubject": "What's new in ML this week",
+      "matchQuery": "from:newsletter@deeplearning.ai"
+    }
+  ],
+  "maxAgeDays": 7,
+  "syncInterval": 60,
+  "lastSyncMessageId": "18d4f5a2b3c4d5e6"
+}
+```
+
+### 8.2 LinkedIn Config
+```json
+{
+  "hashtags": ["#AI", "#MachineLearning"],
+  "authors": ["karpathy", "yann-lecun"],
+  "excludeReposts": true,
+  "minLength": 100,
+  "maxPosts": 50,
+  "syncInterval": 120
+}
+```
+
+### 8.3 X/Twitter Config
+```json
+{
+  "timeline": "following",
+  "includeRetweets": false,
+  "includeReplies": false,
+  "includeThreads": true,
+  "maxTweets": 100,
+  "syncInterval": 180
+}
+```
+
+---
+
+## 9. Python Microservice Endpoints (scraper/)
+
+### 9.1 Istniejące (Crawl4AI)
+| Method | Endpoint | Opis |
+|--------|----------|------|
+| POST | `/scrape` | Scrape URL → markdown |
+| GET | `/health` | Health check |
+
+### 9.2 Nowe (LinkedIn)
+| Method | Endpoint | Opis |
+|--------|----------|------|
+| POST | `/linkedin/auth` | Login → Voyager session |
+| POST | `/linkedin/auth/cookie` | Manual cookie auth |
+| POST | `/linkedin/feed` | Pobierz feed (posty) |
+| GET | `/linkedin/status` | Sprawdź status sesji |
+
+#### POST /linkedin/feed
+**Request:**
+```json
+{
+  "credentials": "encrypted_session_cookies",
+  "maxPosts": 50,
+  "hashtags": ["#AI"],
+  "authors": ["karpathy"]
+}
+```
+**Response (200):**
+```json
+{
+  "posts": [
+    {
+      "id": "urn:li:activity:123",
+      "author": { "name": "Andrej Karpathy", "profileId": "karpathy" },
+      "content": "Post content in markdown...",
+      "publishedAt": "2026-02-08T15:00:00Z",
+      "hashtags": ["#AI", "#LLM"],
+      "likes": 1234,
+      "comments": 56,
+      "isRepost": false
+    }
+  ]
+}
+```
+
+### 9.3 Nowe (X/Twitter)
+| Method | Endpoint | Opis |
+|--------|----------|------|
+| POST | `/twitter/auth` | Login (Twikit) |
+| POST | `/twitter/auth/cookies` | Cookie auth (auth_token + ct0) |
+| POST | `/twitter/timeline` | Pobierz timeline |
+| GET | `/twitter/status` | Sprawdź status sesji |
+
+#### POST /twitter/timeline
+**Request:**
+```json
+{
+  "credentials": "encrypted_cookies",
+  "timeline": "following",
+  "maxTweets": 100,
+  "includeRetweets": false,
+  "includeReplies": false
+}
+```
+**Response (200):**
+```json
+{
+  "tweets": [
+    {
+      "id": "1234567890",
+      "author": { "name": "Andrej Karpathy", "username": "@karpathy" },
+      "content": "Tweet content...",
+      "publishedAt": "2026-02-08T15:00:00Z",
+      "isRetweet": false,
+      "isReply": false,
+      "isThread": true,
+      "threadTweets": ["..."],
+      "likes": 5678,
+      "retweets": 890,
+      "mediaUrls": []
+    }
+  ],
+  "rateLimit": {
+    "remaining": 580,
+    "resetAt": "2026-02-08T15:15:00Z"
+  }
+}
+```
+
+---
+
+## 10. Connector Sync Sequence Diagram
+
+### 10.1 Gmail Sync (Node.js native)
+
+```
+┌──────────┐     ┌──────────────┐     ┌──────────┐     ┌─────────┐     ┌────────┐
+│Scheduler │     │ConnectorSvc  │     │GmailSvc  │     │Gmail API│     │  DB    │
+└────┬─────┘     └──────┬───────┘     └────┬─────┘     └────┬────┘     └───┬────┘
+     │                  │                   │                │              │
+     │ trigger sync     │                   │                │              │
+     │─────────────────>│                   │                │              │
+     │                  │ decrypt creds     │                │              │
+     │                  │─────────┐         │                │              │
+     │                  │<────────┘         │                │              │
+     │                  │ set SYNCING       │                │              │
+     │                  │──────────────────────────────────────────────────>│
+     │                  │                   │                │              │
+     │                  │ fetchItems()      │                │              │
+     │                  │──────────────────>│                │              │
+     │                  │                   │ for each sender│              │
+     │                  │                   │ from:X query   │              │
+     │                  │                   │───────────────>│              │
+     │                  │                   │    messages    │              │
+     │                  │                   │<───────────────│              │
+     │                  │                   │ parse MIME     │              │
+     │                  │                   │ → markdown     │              │
+     │                  │  articles[]       │                │              │
+     │                  │<──────────────────│                │              │
+     │                  │                   │                │              │
+     │                  │ AI intro+summary  │                │              │
+     │                  │ (via aiService)   │                │              │
+     │                  │                   │                │              │
+     │                  │ save articles     │                │              │
+     │                  │──────────────────────────────────────────────────>│
+     │                  │ set CONNECTED     │                │              │
+     │                  │──────────────────────────────────────────────────>│
+```
+
+### 10.2 LinkedIn/Twitter Sync (via Python)
+
+```
+┌──────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────┐     ┌────────┐
+│Scheduler │     │ConnectorSvc  │     │LinkedInSvc   │     │Python    │     │  DB    │
+│          │     │  (Node.js)   │     │  (Node.js)   │     │scraper/  │     │        │
+└────┬─────┘     └──────┬───────┘     └──────┬───────┘     └────┬─────┘     └───┬────┘
+     │                  │                    │                   │               │
+     │ trigger sync     │                    │                   │               │
+     │─────────────────>│                    │                   │               │
+     │                  │ set SYNCING        │                   │               │
+     │                  │──────────────────────────────────────────────────────>│
+     │                  │                    │                   │               │
+     │                  │ fetchItems()       │                   │               │
+     │                  │───────────────────>│                   │               │
+     │                  │                    │ POST /linkedin/   │               │
+     │                  │                    │ feed (HTTP)       │               │
+     │                  │                    │──────────────────>│               │
+     │                  │                    │                   │ Voyager API   │
+     │                  │                    │                   │ get_feed()    │
+     │                  │                    │    posts[]        │               │
+     │                  │                    │<──────────────────│               │
+     │                  │  articles[]        │                   │               │
+     │                  │<───────────────────│                   │               │
+     │                  │                    │                   │               │
+     │                  │ AI intro+summary   │                   │               │
+     │                  │ save to DB         │                   │               │
+     │                  │──────────────────────────────────────────────────────>│
+     │                  │ set CONNECTED      │                   │               │
+     │                  │──────────────────────────────────────────────────────>│
+```
+
+---
+
+## 11. SourceConnector Interface
+
+```typescript
+// lib/connectors/connectorInterface.ts
+
+interface AuthResult {
+  success: boolean;
+  error?: string;
+  profileName?: string;  // e.g. Gmail email, LinkedIn name, X username
+}
+
+interface ConnectorItem {
+  externalId: string;    // Gmail messageId, LinkedIn postId, Tweet id
+  url: string;           // Unique URL for dedup
+  title: string;
+  content: string;       // Markdown
+  author?: string;
+  publishedAt?: Date;
+  metadata?: Record<string, unknown>;  // Source-specific data
+}
+
+interface ConnectionStatus {
+  status: ConnectorStatus;
+  lastSync?: Date;
+  articleCount: number;
+  error?: string;
+}
+
+interface SyncProgress {
+  phase: 'senders' | 'messages' | 'parsing' | 'ai';
+  current: number;
+  total: number;
+  currentItem?: string;  // e.g. sender email or article title
+}
+
+interface SourceConnector {
+  type: PrivateSourceType;
+
+  authenticate(credentials: unknown): Promise<AuthResult>;
+  fetchItems(source: PrivateSource): Promise<ConnectorItem[]>;
+  validateConfig(config: unknown): boolean;
+  getConnectionStatus(source: PrivateSource): Promise<ConnectionStatus>;
+  disconnect(source: PrivateSource): Promise<void>;
+
+  // Optional: progress callback for UI
+  onProgress?: (progress: SyncProgress) => void;
+}
+```
+
+---
+
+## 12. Konfiguracja Środowiska
 
 ### 8.1 Environment Variables
 
@@ -1469,8 +2033,8 @@ DATABASE_URL="postgresql://user:password@localhost:5432/newsroom?schema=public"
 # Auth
 JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
 
-# Encryption (for stored credentials)
-ENCRYPTION_KEY="32-byte-hex-key-for-aes-256"
+# Encryption (for stored credentials - AES-256-GCM)
+CREDENTIALS_ENCRYPTION_KEY="32-byte-hex-key-for-aes-256-gcm"
 
 # LLM (provider-agnostic, BYO keys)
 LLM_PROVIDER="anthropic" # example
@@ -1497,13 +2061,14 @@ NODE_ENV="development"
 
 ---
 
-## 9. Następne Kroki
+## 13. Następne Kroki
 
 1. ✅ LLD (ten dokument)
-2. ⏳ Setup projektu (Next.js, Prisma, PostgreSQL)
-3. ⏳ Implementacja auth (register, login, logout)
-4. ⏳ Implementacja articles (list, search, save)
-5. ⏳ Implementacja sources (CRUD)
-6. ⏳ Implementacja TTS
-7. ⏳ Implementacja integrations (Gmail, LinkedIn)
-8. ⏳ Deployment (Oracle Cloud)
+2. ✅ Setup projektu (Next.js, Prisma, PostgreSQL)
+3. ✅ Implementacja auth, articles, search, sources, TTS, editions
+4. ⏳ **Sprint SI-1:** Connector infrastructure + Gmail OAuth
+5. ⏳ **Sprint SI-2:** Gmail content + wizard (3 ścieżki)
+6. ⏳ **Sprint SI-3:** Connector dashboard + health monitoring
+7. ⏳ **Sprint SI-4:** LinkedIn connector (Voyager API)
+8. ⏳ **Sprint SI-5:** X/Twitter connector (Twikit)
+9. ⏳ Deployment (Oracle Cloud)

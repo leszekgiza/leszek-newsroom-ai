@@ -17,6 +17,9 @@ from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 from bs4 import BeautifulSoup
 import aiohttp
 
+from linkedin_service import router as linkedin_router
+from twitter_service import router as twitter_router
+
 app = FastAPI(
     title="Crawl4AI Scraper Service",
     description="Web scraping microservice for Newsroom AI",
@@ -31,6 +34,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount connector routers
+app.include_router(linkedin_router, prefix="/linkedin", tags=["linkedin"])
+app.include_router(twitter_router, prefix="/twitter", tags=["twitter"])
 
 # =============================================================================
 # Models

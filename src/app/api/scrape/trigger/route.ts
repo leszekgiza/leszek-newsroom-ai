@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -8,6 +9,10 @@ import {
   SourceConfig,
 } from "@/lib/scrapeService";
 import { generatePolishIntro } from "@/lib/aiService";
+import { getConnector } from "@/lib/connectors/factory";
+
+// Source types that use the connector pipeline (not the scraper)
+const CONNECTOR_TYPES = new Set(["GMAIL", "LINKEDIN", "TWITTER"]);
 
 interface ScrapeResult {
   sourceId: string;
@@ -33,16 +38,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "ID źródła jest wymagane" },
         { status: 400 }
-      );
-    }
-
-    // Check scraper health
-    const scraperHealthy = await checkScraperHealth();
-    console.log(`[SCRAPE] Scraper health: ${scraperHealthy}`);
-    if (!scraperHealthy) {
-      return NextResponse.json(
-        { error: "Serwis scrapowania jest niedostępny" },
-        { status: 503 }
       );
     }
 
@@ -78,6 +73,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Źródło jest wyłączone" },
         { status: 400 }
+      );
+    }
+
+    // For connector-type sources (GMAIL, LINKEDIN, TWITTER), use the connector pipeline
+    // (no scraper health check needed — connectors use their own API)
+    if (isPrivate && "type" in source && CONNECTOR_TYPES.has(source.type as string)) {
+      console.log(`[SCRAPE] Routing to connector pipeline for type=${source.type}`);
+      return await handleConnectorSync(source as { id: string; type: string; status: string; credentials: string | null; config: Prisma.JsonValue; name: string });
+    }
+
+    // Check scraper health (only for scraper-type sources)
+    const scraperHealthy = await checkScraperHealth();
+    console.log(`[SCRAPE] Scraper health: ${scraperHealthy}`);
+    if (!scraperHealthy) {
+      return NextResponse.json(
+        { error: "Serwis scrapowania jest niedostępny" },
+        { status: 503 }
       );
     }
 
@@ -218,6 +230,124 @@ export async function POST(request: NextRequest) {
     console.error("[SCRAPE] CRITICAL ERROR:", error);
     return NextResponse.json(
       { error: "Wystąpił błąd podczas scrapowania" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * Handle sync for connector-type sources (GMAIL, LINKEDIN, TWITTER).
+ * Uses the connector pipeline instead of Crawl4AI scraper.
+ */
+async function handleConnectorSync(source: {
+  id: string;
+  type: string;
+  status: string;
+  credentials: string | null;
+  config: Prisma.JsonValue;
+  name: string;
+}) {
+  if (source.status === "DISCONNECTED" || !source.credentials) {
+    return NextResponse.json(
+      { error: "Konektor nie jest połączony. Przejdź do Integracji aby go skonfigurować." },
+      { status: 400 }
+    );
+  }
+
+  if (source.status === "SYNCING") {
+    return NextResponse.json(
+      { error: "Synchronizacja już trwa" },
+      { status: 409 }
+    );
+  }
+
+  // Mark as syncing
+  await prisma.privateSource.update({
+    where: { id: source.id },
+    data: { status: "SYNCING" },
+  });
+
+  try {
+    const connector = await getConnector(source.type as "GMAIL" | "LINKEDIN" | "TWITTER");
+
+    // Fetch full source from DB for connector (needs all fields)
+    const fullSource = await prisma.privateSource.findUnique({
+      where: { id: source.id },
+    });
+
+    if (!fullSource) {
+      throw new Error("Source not found");
+    }
+
+    const items = await connector.fetchItems(fullSource);
+    console.log(`[CONNECTOR] Fetched ${items.length} items from ${source.type}`);
+
+    let newCount = 0;
+    for (const item of items) {
+      const existing = await prisma.article.findUnique({
+        where: { url: item.url },
+      });
+      if (!existing) {
+        await prisma.article.create({
+          data: {
+            url: item.url,
+            title: item.title,
+            intro: null,
+            summary: null,
+            author: item.author,
+            publishedAt: item.publishedAt,
+            privateSourceId: source.id,
+          },
+        });
+        newCount++;
+      }
+    }
+
+    // Update sync metadata
+    const config = (fullSource.config as Record<string, unknown>) || {};
+    const lastId = items.length > 0 ? items[0].externalId : config.lastSyncMessageId;
+
+    await prisma.privateSource.update({
+      where: { id: source.id },
+      data: {
+        status: "CONNECTED",
+        lastScrapedAt: new Date(),
+        lastSyncError: null,
+        config: {
+          ...config,
+          lastSyncMessageId: lastId,
+        } as Prisma.InputJsonValue,
+      },
+    });
+
+    console.log(`[CONNECTOR] DONE: ${newCount} new articles from ${items.length} fetched`);
+
+    return NextResponse.json({
+      success: true,
+      result: {
+        sourceId: source.id,
+        sourceName: source.name,
+        articlesFound: items.length,
+        articlesNew: newCount,
+        articlesFailed: 0,
+        errors: [],
+      },
+      message: `Pobrano ${newCount} nowych artykułów z ${items.length} znalezionych`,
+    });
+  } catch (syncError) {
+    const message = syncError instanceof Error ? syncError.message : "Sync failed";
+    console.error(`[CONNECTOR] ERROR: ${message}`);
+
+    await prisma.privateSource.update({
+      where: { id: source.id },
+      data: {
+        status: "ERROR",
+        lastSyncError: message,
+      },
+    });
+
+    return NextResponse.json(
+      { error: `Błąd synchronizacji: ${message}` },
       { status: 500 }
     );
   }

@@ -3,11 +3,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { getLLMProvider } from "@/lib/ai/llm";
 
 /**
  * Get or create edition for a specific date and user
@@ -231,13 +227,7 @@ export async function generateEditionSummary(
     .join("\n");
 
   try {
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 300,
-      messages: [
-        {
-          role: "user",
-          content: `Napisz krotkie podsumowanie (3-4 zdania) tego wydania wiadomosci w jezyku polskim.
+    const prompt = `Napisz krotkie podsumowanie (3-4 zdania) tego wydania wiadomosci w jezyku polskim.
 
 ARTYKULY:
 ${articleList}
@@ -248,12 +238,10 @@ ZASADY:
 - Nie uzywaj slow "wydanie", "artykuly"
 - Przedstaw glowne trendy i tematy dnia
 
-Odpowiedz TYLKO podsumowaniem.`,
-        },
-      ],
-    });
+Odpowiedz TYLKO podsumowaniem.`;
 
-    const summary = (message.content[0] as { type: string; text: string }).text.trim();
+    const llm = await getLLMProvider();
+    const summary = await llm.generateText(prompt, { maxTokens: 300 });
 
     await prisma.edition.update({
       where: { id: editionId },

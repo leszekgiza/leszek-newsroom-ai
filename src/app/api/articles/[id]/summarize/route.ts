@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { getLLMProvider } from "@/lib/ai/llm";
 
 // Fetch article content from URL
 async function fetchArticleContent(url: string): Promise<string> {
@@ -88,14 +84,8 @@ export async function POST(
       );
     }
 
-    // Generate summary with Claude
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: `Jestes ekspertem od podsumowywania artykulow technicznych. Twoim zadaniem jest stworzyc wartosciowe, szczegolowe streszczenie artykulu.
+    // Generate summary with LLM
+    const prompt = `Jestes ekspertem od podsumowywania artykulow technicznych. Twoim zadaniem jest stworzyc wartosciowe, szczegolowe streszczenie artykulu.
 
 TYTUL ARTYKULU: ${article.title}
 ${article.author ? `AUTOR: ${article.author}` : ""}
@@ -123,12 +113,10 @@ WAZNE:
 - Badz konkretny - podawaj liczby, nazwy narzedzi, przyklady
 - Unikaj ogolnikow typu "autor omawia rozne tematy"
 
-Odpowiedz TYLKO streszczeniem, bez zadnych dodatkowych komentarzy.`,
-        },
-      ],
-    });
+Odpowiedz TYLKO streszczeniem, bez zadnych dodatkowych komentarzy.`;
 
-    const summary = (message.content[0] as { type: string; text: string }).text;
+    const llm = await getLLMProvider();
+    const summary = await llm.generateText(prompt, { maxTokens: 1024 });
 
     // Update article with new summary
     await prisma.article.update({

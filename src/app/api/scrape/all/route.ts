@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -9,6 +10,10 @@ import {
 } from "@/lib/scrapeService";
 import { generatePolishIntro } from "@/lib/aiService";
 import { addArticleToEdition } from "@/lib/editionService";
+import { getConnector } from "@/lib/connectors/factory";
+
+// Source types that use the connector pipeline (not the scraper)
+const CONNECTOR_TYPES = new Set(["GMAIL", "LINKEDIN", "TWITTER"]);
 
 interface ProgressEvent {
   type: "start" | "source_start" | "article_check" | "article_new" | "article_skip" | "article_error" | "source_done" | "done" | "error";
@@ -52,6 +57,8 @@ export async function GET() {
       name: s.catalogSource.name,
       url: s.catalogSource.url,
       isPrivate: false,
+      isConnector: false,
+      sourceType: "WEBSITE" as string,
       config: null as SourceConfig | null,
     })),
     ...privateSources.map(s => ({
@@ -59,6 +66,8 @@ export async function GET() {
       name: s.name,
       url: s.url,
       isPrivate: true,
+      isConnector: CONNECTOR_TYPES.has(s.type),
+      sourceType: s.type as string,
       config: s.config as SourceConfig | null,
     })),
   ];
@@ -71,8 +80,15 @@ export async function GET() {
       };
 
       try {
-        const scraperHealthy = await checkScraperHealth();
-        if (!scraperHealthy) {
+        // Check if scraper is needed (any non-connector sources?)
+        const hasScraperSources = sources.some(s => !s.isConnector);
+        let scraperHealthy = true;
+        if (hasScraperSources) {
+          scraperHealthy = await checkScraperHealth();
+        }
+
+        if (!scraperHealthy && !sources.some(s => s.isConnector)) {
+          // No connector sources and scraper is down → abort
           send({ type: "error", error: "Serwis scrapowania jest niedostepny" });
           controller.close();
           return;
@@ -93,8 +109,24 @@ export async function GET() {
           });
 
           try {
+            // Route connector-type sources through connector pipeline
+            if (source.isConnector) {
+              const result = await syncConnectorSource(source.id, source.sourceType, source.name, send, session.userId);
+              totalNew += result.newCount;
+              totalSkip += result.skipCount;
+              totalError += result.errorCount;
+              continue;
+            }
+
+            // Skip scraper sources if scraper is down
+            if (!scraperHealthy) {
+              send({ type: "source_done", sourceId: source.id, sourceName: source.name, newCount: 0, skipCount: 0, errorCount: 1, error: "Scraper niedostepny" });
+              totalError++;
+              continue;
+            }
+
             const articlesResult = await scrapeArticlesList(source.url, 20, source.config);
-            
+
             if (!articlesResult.success) {
               send({ type: "source_done", sourceId: source.id, sourceName: source.name, newCount: 0, skipCount: 0, errorCount: 1, error: articlesResult.error });
               totalError++;
@@ -105,7 +137,7 @@ export async function GET() {
 
             for (let artIdx = 0; artIdx < articlesResult.articles.length; artIdx++) {
               const articleInfo = articlesResult.articles[artIdx];
-              
+
               send({
                 type: "article_check",
                 sourceId: source.id,
@@ -145,7 +177,7 @@ export async function GET() {
                 };
 
                 const createdArticle = await prisma.article.create({ data: articleData });
-                
+
                 // Add to today's edition
                 await addArticleToEdition(createdArticle.id, session.userId);
                 newCount++;
@@ -189,4 +221,123 @@ export async function GET() {
       "Connection": "keep-alive",
     },
   });
+}
+
+/**
+ * Sync a connector-type source (GMAIL, LINKEDIN, TWITTER) through the connector pipeline.
+ * Sends SSE progress events and returns counts.
+ */
+async function syncConnectorSource(
+  sourceId: string,
+  sourceType: string,
+  sourceName: string,
+  send: (event: ProgressEvent) => void,
+  userId: string
+): Promise<{ newCount: number; skipCount: number; errorCount: number }> {
+  const fullSource = await prisma.privateSource.findUnique({
+    where: { id: sourceId },
+  });
+
+  if (!fullSource || !fullSource.credentials || fullSource.status === "DISCONNECTED") {
+    send({
+      type: "source_done",
+      sourceId,
+      sourceName,
+      newCount: 0,
+      skipCount: 0,
+      errorCount: 1,
+      error: "Konektor nie jest połączony",
+    });
+    return { newCount: 0, skipCount: 0, errorCount: 1 };
+  }
+
+  // Mark as syncing
+  await prisma.privateSource.update({
+    where: { id: sourceId },
+    data: { status: "SYNCING" },
+  });
+
+  try {
+    const connector = await getConnector(sourceType as "GMAIL" | "LINKEDIN" | "TWITTER");
+    const items = await connector.fetchItems(fullSource);
+
+    let newCount = 0;
+    let skipCount = 0;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      send({
+        type: "article_check",
+        sourceId,
+        articleUrl: item.url,
+        articleTitle: item.title,
+        articleIndex: i + 1,
+        totalArticles: items.length,
+      });
+
+      const existing = await prisma.article.findUnique({ where: { url: item.url } });
+      if (existing) {
+        skipCount++;
+        send({ type: "article_skip", sourceId, articleTitle: item.title });
+        continue;
+      }
+
+      const createdArticle = await prisma.article.create({
+        data: {
+          url: item.url,
+          title: item.title,
+          intro: null,
+          summary: null,
+          author: item.author,
+          publishedAt: item.publishedAt,
+          privateSourceId: sourceId,
+        },
+      });
+
+      await addArticleToEdition(createdArticle.id, userId);
+      newCount++;
+      send({ type: "article_new", sourceId, articleTitle: item.title });
+    }
+
+    // Update sync metadata
+    const config = (fullSource.config as Record<string, unknown>) || {};
+    const lastId = items.length > 0 ? items[0].externalId : config.lastSyncMessageId;
+
+    await prisma.privateSource.update({
+      where: { id: sourceId },
+      data: {
+        status: "CONNECTED",
+        lastScrapedAt: new Date(),
+        lastSyncError: null,
+        config: {
+          ...config,
+          lastSyncMessageId: lastId,
+        } as Prisma.InputJsonValue,
+      },
+    });
+
+    send({ type: "source_done", sourceId, sourceName, newCount, skipCount, errorCount: 0 });
+    return { newCount, skipCount, errorCount: 0 };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Nieznany blad";
+
+    await prisma.privateSource.update({
+      where: { id: sourceId },
+      data: {
+        status: "ERROR",
+        lastSyncError: message,
+      },
+    });
+
+    send({
+      type: "source_done",
+      sourceId,
+      sourceName,
+      newCount: 0,
+      skipCount: 0,
+      errorCount: 1,
+      error: message,
+    });
+    return { newCount: 0, skipCount: 0, errorCount: 1 };
+  }
 }

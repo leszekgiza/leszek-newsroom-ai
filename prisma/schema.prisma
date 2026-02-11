@@ -121,7 +121,10 @@ model PrivateSource {
   url           String
   type          PrivateSourceType @default(WEBSITE)
   config        Json? // CSS selectors, hashtags, senders, etc.
-  credentials   String? // Encrypted (AES-256) - passwords, tokens
+  credentials   String? // Encrypted (AES-256-GCM) - passwords, tokens
+  status        ConnectorStatus   @default(DISCONNECTED)
+  syncInterval  Int               @default(60) @map("sync_interval") // minutes
+  lastSyncError String?           @map("last_sync_error")
   isActive      Boolean           @default(true) @map("is_active")
   lastScrapedAt DateTime?         @map("last_scraped_at")
   createdAt     DateTime          @default(now()) @map("created_at")
@@ -132,6 +135,14 @@ model PrivateSource {
 
   @@unique([userId, url])
   @@map("private_sources")
+}
+
+enum ConnectorStatus {
+  CONNECTED
+  SYNCING
+  ERROR
+  EXPIRED
+  DISCONNECTED
 }
 
 enum PrivateSourceType {

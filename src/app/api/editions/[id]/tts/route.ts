@@ -1,21 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { EdgeTTS } from "edge-tts-universal";
-
-// Edge TTS voices - must match those in /api/user/preferences
-const VALID_VOICES = [
-  "pl-PL-MarekNeural",
-  "pl-PL-ZofiaNeural",
-  "en-US-GuyNeural",
-  "en-US-JennyNeural",
-] as const;
-
-type Voice = (typeof VALID_VOICES)[number];
-
-function isValidVoice(voice: string): voice is Voice {
-  return VALID_VOICES.includes(voice as Voice);
-}
+import { getTTSProvider } from "@/lib/ai/tts";
+import { isValidVoice, DEFAULT_TTS_VOICE } from "@/lib/config";
 
 function generateEditionTTSText(
   articles: Array<{
@@ -63,8 +50,12 @@ export async function POST(
 
     const { id } = await params;
 
-    // Use default voice - ttsVoice requires server restart after Prisma regeneration
-    const voice = "pl-PL-MarekNeural";
+    // Use user's preferred voice or default
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { ttsVoice: true },
+    });
+    const voice = user?.ttsVoice && isValidVoice(user.ttsVoice) ? user.ttsVoice : DEFAULT_TTS_VOICE;
 
     const edition = await prisma.edition.findFirst({
       where: { id, userId: session.userId },
@@ -96,10 +87,8 @@ export async function POST(
       return NextResponse.json({ error: "Wydanie za dlugie (max 50000 znakow)" }, { status: 400 });
     }
 
-    const selectedVoice = isValidVoice(voice) ? voice : "pl-PL-MarekNeural";
-    const tts = new EdgeTTS(ttsText, selectedVoice);
-    const result = await tts.synthesize();
-    const arrayBuffer = await result.audio.arrayBuffer();
+    const tts = await getTTSProvider();
+    const arrayBuffer = await tts.synthesize(ttsText, voice);
 
     return new NextResponse(arrayBuffer, {
       headers: {
