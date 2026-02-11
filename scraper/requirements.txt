@@ -9,6 +9,7 @@ beautifulsoup4>=4.12.0
 
 # LinkedIn connector (Voyager API)
 linkedin-api>=2.2.1
+playwright>=1.40.0
 
 # X/Twitter connector (async scraper)
 twikit>=2.1.0

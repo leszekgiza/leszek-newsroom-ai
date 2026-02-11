@@ -3,6 +3,7 @@
  */
 
 const TIMEOUT_MS = 30000;
+const BROWSER_AUTH_TIMEOUT_MS = 60000;
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 3000;
 
@@ -144,4 +145,107 @@ export async function linkedInDisconnect(sessionId: string): Promise<void> {
   await fetchWithRetry(`${getBaseUrl()}/linkedin/disconnect`, {
     session_id: sessionId,
   });
+}
+
+// === Browser Auth (Playwright) ===
+
+export type BrowserLoginState =
+  | "success"
+  | "2fa_email"
+  | "2fa_sms"
+  | "2fa_app"
+  | "2fa_unknown"
+  | "captcha"
+  | "failed";
+
+export interface BrowserLoginStartResult {
+  success: boolean;
+  sessionId?: string;
+  state: BrowserLoginState;
+  liAt?: string;
+  profileName?: string;
+  screenshot?: string;
+  error?: string;
+}
+
+export async function linkedInBrowserLoginStart(
+  email: string,
+  password: string
+): Promise<BrowserLoginStartResult> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), BROWSER_AUTH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(`${getBaseUrl()}/linkedin/browser-login/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      signal: controller.signal,
+    });
+
+    const data = await res.json();
+    return {
+      success: data.success,
+      sessionId: data.session_id,
+      state: data.state,
+      liAt: data.li_at,
+      profileName: data.profile_name,
+      screenshot: data.screenshot,
+      error: data.error,
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export interface BrowserLoginVerifyResult {
+  success: boolean;
+  state: BrowserLoginState;
+  liAt?: string;
+  profileName?: string;
+  screenshot?: string;
+  error?: string;
+}
+
+export async function linkedInBrowserLoginVerify(
+  sessionId: string,
+  code: string
+): Promise<BrowserLoginVerifyResult> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), BROWSER_AUTH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(`${getBaseUrl()}/linkedin/browser-login/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, code }),
+      signal: controller.signal,
+    });
+
+    const data = await res.json();
+    return {
+      success: data.success,
+      state: data.state,
+      liAt: data.li_at,
+      profileName: data.profile_name,
+      screenshot: data.screenshot,
+      error: data.error,
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function linkedInBrowserLoginClose(
+  sessionId: string
+): Promise<void> {
+  try {
+    await fetch(`${getBaseUrl()}/linkedin/browser-login/close`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+  } catch {
+    // Best-effort cleanup
+  }
 }

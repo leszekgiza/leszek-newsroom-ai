@@ -1,14 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
-type Step = "disclaimer" | "auth" | "connected" | "config";
+type Step =
+  | "disclaimer"
+  | "auth"
+  | "authenticating"
+  | "2fa"
+  | "captcha"
+  | "connected"
+  | "config";
+
+type ChallengeType =
+  | "2fa_email"
+  | "2fa_sms"
+  | "2fa_app"
+  | "2fa_unknown";
 
 interface LinkedInConfig {
   hashtags: string[];
   maxPosts: number;
   includeReposts: boolean;
 }
+
+const CHALLENGE_MESSAGES: Record<ChallengeType, string> = {
+  "2fa_email": "LinkedIn wysłał kod weryfikacyjny na Twój email",
+  "2fa_sms": "LinkedIn wysłał SMS z kodem weryfikacyjnym",
+  "2fa_app": "Otwórz aplikację uwierzytelniającą i wpisz kod",
+  "2fa_unknown": "LinkedIn wymaga weryfikacji dwuetapowej",
+};
+
+const SESSION_TTL_SECONDS = 300; // 5 min
 
 export function LinkedInWizard() {
   const [step, setStep] = useState<Step>("disclaimer");
@@ -22,6 +44,16 @@ export function LinkedInWizard() {
   const [showCookieFallback, setShowCookieFallback] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // Browser auth / 2FA
+  const [browserSessionId, setBrowserSessionId] = useState<string | null>(null);
+  const [challengeType, setChallengeType] = useState<ChallengeType | null>(null);
+  const [verifyCode, setVerifyCode] = useState("");
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [captchaScreenshot, setCaptchaScreenshot] = useState<string | null>(null);
+  const [timeoutSeconds, setTimeoutSeconds] = useState(SESSION_TTL_SECONDS);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Connected state
   const [profileName, setProfileName] = useState<string | null>(null);
@@ -39,47 +71,166 @@ export function LinkedInWizard() {
   // Disconnect
   const [disconnecting, setDisconnecting] = useState(false);
 
+  // Countdown timer for 2FA
+  const startCountdown = useCallback(() => {
+    setTimeoutSeconds(SESSION_TTL_SECONDS);
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeoutSeconds((prev) => {
+        if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  // Close browser session on timeout
+  useEffect(() => {
+    if (timeoutSeconds === 0 && browserSessionId && step === "2fa") {
+      fetch("/api/connectors/linkedin/browser-auth/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: browserSessionId, code: "" }),
+      }).catch(() => {});
+      setVerifyError("Sesja wygasła. Spróbuj ponownie.");
+      setBrowserSessionId(null);
+    }
+  }, [timeoutSeconds, browserSessionId, step]);
+
   const handleAuth = async (method: "login" | "cookie") => {
     setAuthLoading(true);
     setAuthError(null);
 
     try {
-      const body: Record<string, unknown> = { disclaimerAccepted: true };
       if (method === "cookie") {
-        body.liAt = liAt.trim();
-      } else {
-        body.email = email.trim();
-        body.password = password;
+        // Cookie fallback - use existing auth endpoint
+        const res = await fetch("/api/connectors/linkedin/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ disclaimerAccepted: true, liAt: liAt.trim() }),
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Autoryzacja nie powiodła się");
+        }
+
+        setProfileName(data.profileName);
+        setStep("connected");
+        return;
       }
 
-      const res = await fetch("/api/connectors/linkedin/auth", {
+      // Browser-based login
+      setStep("authenticating");
+
+      const res = await fetch("/api/connectors/linkedin/browser-auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          disclaimerAccepted: true,
+          email: email.trim(),
+          password,
+        }),
       });
       const data = await res.json();
 
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Autoryzacja nie powiodła się");
+      if (data.success) {
+        setProfileName(data.profileName);
+        setStep("connected");
+
+        // Test connection to get post count
+        try {
+          const testRes = await fetch("/api/connectors/linkedin/test", {
+            method: "POST",
+          });
+          const testData = await testRes.json();
+          if (testData.success) {
+            setPostCount(testData.postCount || null);
+          }
+        } catch {
+          // Non-critical
+        }
+        return;
       }
 
-      setProfileName(data.profileName);
-      setStep("connected");
-
-      // Test connection to get post count
-      const testRes = await fetch("/api/connectors/linkedin/test", {
-        method: "POST",
-      });
-      const testData = await testRes.json();
-      if (testData.success) {
-        setPostCount(testData.postCount || null);
+      // 2FA required
+      if (data.state?.startsWith("2fa")) {
+        setBrowserSessionId(data.sessionId);
+        setChallengeType(data.state as ChallengeType);
+        setStep("2fa");
+        startCountdown();
+        return;
       }
+
+      // CAPTCHA
+      if (data.state === "captcha") {
+        setCaptchaScreenshot(data.screenshot || null);
+        setStep("captcha");
+        return;
+      }
+
+      // Failed
+      setStep("auth");
+      throw new Error(data.error || "Logowanie nie powiodło się");
     } catch (err) {
+      if (step === "authenticating") setStep("auth");
       setAuthError(
         err instanceof Error ? err.message : "Wystąpił błąd"
       );
     } finally {
       setAuthLoading(false);
+    }
+  };
+
+  const handleVerify2FA = async () => {
+    if (!browserSessionId || !verifyCode.trim()) return;
+
+    setVerifyLoading(true);
+    setVerifyError(null);
+
+    try {
+      const res = await fetch("/api/connectors/linkedin/browser-auth/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: browserSessionId,
+          code: verifyCode.trim(),
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setProfileName(data.profileName);
+        setStep("connected");
+        return;
+      }
+
+      // Still on 2FA (wrong code)
+      if (data.state?.startsWith("2fa")) {
+        setVerifyError("Nieprawidłowy kod. Spróbuj ponownie.");
+        setVerifyCode("");
+        return;
+      }
+
+      // Failed
+      if (timerRef.current) clearInterval(timerRef.current);
+      setVerifyError(data.error || "Weryfikacja nie powiodła się");
+      setBrowserSessionId(null);
+    } catch (err) {
+      setVerifyError(
+        err instanceof Error ? err.message : "Wystąpił błąd"
+      );
+    } finally {
+      setVerifyLoading(false);
     }
   };
 
@@ -129,6 +280,12 @@ export function LinkedInWizard() {
     } catch {
       setDisconnecting(false);
     }
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -349,7 +506,7 @@ export function LinkedInWizard() {
                   d="M9 5l7 7-7 7"
                 />
               </svg>
-              Masz 2FA? Wklej cookie li_at z przeglądarki
+              Wklej cookie li_at z przeglądarki (zaawansowane)
             </button>
 
             {showCookieFallback && (
@@ -377,6 +534,178 @@ export function LinkedInWizard() {
               {authError}
             </p>
           )}
+        </div>
+      )}
+
+      {/* AUTHENTICATING SPINNER */}
+      {step === "authenticating" && (
+        <div className="bg-card rounded-2xl border border-border p-8 text-center space-y-4">
+          <div className="w-12 h-12 mx-auto border-3 border-[#0A66C2] border-t-transparent rounded-full animate-spin" />
+          <div>
+            <p className="font-semibold text-foreground">
+              Logowanie do LinkedIn...
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              To może potrwać do 15 sekund.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 2FA VERIFICATION */}
+      {step === "2fa" && (
+        <div className="bg-card rounded-2xl border border-border p-4 space-y-4">
+          {/* Challenge info banner */}
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-3">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg
+                  className="w-4 h-4 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium text-blue-800 dark:text-blue-300 text-sm">
+                  Weryfikacja dwuetapowa
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
+                  {challengeType
+                    ? CHALLENGE_MESSAGES[challengeType]
+                    : "LinkedIn wymaga dodatkowej weryfikacji"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Code input */}
+          <div className="text-center space-y-3">
+            <label className="text-xs font-medium text-muted-foreground block">
+              Kod weryfikacyjny
+            </label>
+            <input
+              type="text"
+              value={verifyCode}
+              onChange={(e) =>
+                setVerifyCode(e.target.value.replace(/[^0-9]/g, ""))
+              }
+              placeholder="000000"
+              maxLength={8}
+              autoFocus
+              onKeyDown={(e) => e.key === "Enter" && handleVerify2FA()}
+              className="w-48 mx-auto block px-4 py-3 bg-muted/10 border border-border rounded-xl text-center text-2xl font-mono tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-[#0A66C2]/20 focus:border-[#0A66C2]"
+            />
+
+            {/* Countdown */}
+            <p
+              className={`text-xs ${
+                timeoutSeconds <= 60
+                  ? "text-red-500"
+                  : "text-muted-foreground"
+              }`}
+            >
+              Pozostało: {formatTime(timeoutSeconds)}
+            </p>
+          </div>
+
+          {/* Verify button */}
+          <button
+            onClick={handleVerify2FA}
+            disabled={
+              verifyLoading ||
+              !verifyCode.trim() ||
+              !browserSessionId ||
+              timeoutSeconds === 0
+            }
+            className="w-full py-3 bg-[#0A66C2] text-white font-medium rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {verifyLoading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Weryfikacja...
+              </>
+            ) : (
+              "Zweryfikuj"
+            )}
+          </button>
+
+          {verifyError && (
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 p-3 rounded-xl">
+              {verifyError}
+            </p>
+          )}
+
+          {/* Fallback to retry */}
+          {(timeoutSeconds === 0 || !browserSessionId) && (
+            <button
+              onClick={() => {
+                setStep("auth");
+                setVerifyCode("");
+                setVerifyError(null);
+                setBrowserSessionId(null);
+                setChallengeType(null);
+              }}
+              className="w-full py-2.5 border border-border text-foreground font-medium rounded-xl hover:bg-muted/10 transition-colors text-sm"
+            >
+              Powrót do logowania
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* CAPTCHA FALLBACK */}
+      {step === "captcha" && (
+        <div className="bg-card rounded-2xl border border-border p-4 space-y-4">
+          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+            <p className="font-medium text-amber-800 dark:text-amber-300 text-sm">
+              LinkedIn wyświetlił CAPTCHA
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+              Automatyczne logowanie nie jest możliwe. Użyj metody z cookie
+              li_at.
+            </p>
+          </div>
+
+          {captchaScreenshot && (
+            <div className="rounded-xl overflow-hidden border border-border">
+              <img
+                src={`data:image/png;base64,${captchaScreenshot}`}
+                alt="CAPTCHA screenshot"
+                className="w-full"
+              />
+            </div>
+          )}
+
+          <button
+            onClick={() => {
+              setStep("auth");
+              setShowCookieFallback(true);
+              setCaptchaScreenshot(null);
+              setAuthError(null);
+            }}
+            className="w-full py-3 bg-[#0A66C2] text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            Wklej cookie li_at
+          </button>
+
+          <button
+            onClick={() => {
+              setStep("auth");
+              setCaptchaScreenshot(null);
+              setAuthError(null);
+            }}
+            className="w-full py-2.5 border border-border text-foreground font-medium rounded-xl hover:bg-muted/10 transition-colors text-sm"
+          >
+            Spróbuj ponownie
+          </button>
         </div>
       )}
 
@@ -538,16 +867,18 @@ export function LinkedInWizard() {
       )}
 
       {/* Cancel */}
-      {step !== "connected" && (
-        <div className="flex gap-3">
-          <a
-            href="/settings/integrations"
-            className="flex-1 py-3.5 bg-muted/10 text-foreground border border-border font-medium rounded-xl hover:bg-muted/20 transition-colors text-center"
-          >
-            Anuluj
-          </a>
-        </div>
-      )}
+      {step !== "connected" &&
+        step !== "authenticating" &&
+        step !== "2fa" && (
+          <div className="flex gap-3">
+            <a
+              href="/settings/integrations"
+              className="flex-1 py-3.5 bg-muted/10 text-foreground border border-border font-medium rounded-xl hover:bg-muted/20 transition-colors text-center"
+            >
+              Anuluj
+            </a>
+          </div>
+        )}
     </div>
   );
 }
