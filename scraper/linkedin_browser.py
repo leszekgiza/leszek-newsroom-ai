@@ -168,12 +168,23 @@ async def _detect_state(page: Page) -> Tuple[str, Optional[str]]:
     # Still on login page - check for error messages
     if "/login" in url or "/uas" in url:
         error_msg = None
-        try:
-            error_el = await page.query_selector('[role="alert"], .form__label--error, #error-for-username, #error-for-password, .login__form_action_container .form__label--error')
-            if error_el:
-                error_msg = await error_el.inner_text()
-        except Exception:
-            pass
+        # Use specific login error selectors (avoid catching cookie consent banner)
+        for selector in [
+            '#error-for-username',
+            '#error-for-password',
+            '.form__label--error',
+            '.alert-content',
+            'div[role="alert"] p',
+        ]:
+            try:
+                error_el = await page.query_selector(selector)
+                if error_el:
+                    text = (await error_el.inner_text()).strip()
+                    if text and "cookie" not in text.lower() and len(text) < 200:
+                        error_msg = text
+                        break
+            except Exception:
+                continue
         return "failed", error_msg or "Login failed"
 
     # Unknown state
@@ -237,6 +248,43 @@ async def browser_login_start(request: BrowserLoginStartRequest):
 
             # Navigate to LinkedIn login
             await page.goto("https://www.linkedin.com/login", wait_until="networkidle", timeout=15000)
+
+            # Dismiss cookie consent dialog if present
+            for consent_label in ["Reject", "Odrzuć", "Accept", "Akceptuj"]:
+                try:
+                    btn = page.get_by_role("button", name=consent_label, exact=True)
+                    if await btn.count() > 0:
+                        await btn.first.click(timeout=3000)
+                        await page.wait_for_load_state("networkidle", timeout=5000)
+                        break
+                except Exception:
+                    continue
+
+            # Debug: check if login form is visible
+            username_input = await page.query_selector('input#username')
+            if not username_input:
+                # Maybe cookie consent still showing - take screenshot for debug
+                screenshot = await _take_screenshot_b64(page)
+                # Try force-clicking via JS on any visible button
+                await page.evaluate("""() => {
+                    const btns = Array.from(document.querySelectorAll('button'));
+                    const reject = btns.find(b => /reject|odrzuć/i.test(b.textContent));
+                    const accept = btns.find(b => /accept|akceptuj/i.test(b.textContent));
+                    (reject || accept)?.click();
+                }""")
+                await asyncio.sleep(2)
+                # Check again
+                username_input = await page.query_selector('input#username')
+                if not username_input:
+                    await page.close()
+                    await context.close()
+                    await browser.close()
+                    return BrowserLoginStartResponse(
+                        success=False,
+                        state="failed",
+                        screenshot=screenshot,
+                        error="Login form not found - cookie consent may be blocking",
+                    )
 
             # Fill credentials
             await page.fill('input#username', request.email)
