@@ -28,7 +28,14 @@ export async function POST(request: NextRequest) {
 
     const selectedVoice = isValidVoice(voice) ? voice : DEFAULT_TTS_VOICE;
     const tts = await getTTSProvider();
-    const arrayBuffer = await tts.synthesize(text, selectedVoice);
+
+    const timeoutMs = 30000;
+    const arrayBuffer = await Promise.race([
+      tts.synthesize(text, selectedVoice),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("TTS synthesis timeout after 30s")), timeoutMs)
+      ),
+    ]);
 
     return new NextResponse(arrayBuffer, {
       headers: {
@@ -39,9 +46,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("TTS error:", error);
+    const message = error instanceof Error ? error.message : "Nie udało się wygenerować audio";
+    const isTimeout = message.includes("timeout");
     return NextResponse.json(
-      { error: "Nie udało się wygenerować audio" },
-      { status: 500 }
+      { error: isTimeout ? "Przekroczono czas generowania audio. Spróbuj ponownie." : "Nie udało się wygenerować audio" },
+      { status: isTimeout ? 504 : 500 }
     );
   }
 }
