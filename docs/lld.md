@@ -284,7 +284,7 @@ model PrivateSource {
 enum PrivateSourceType {
   WEBSITE   // Auth-required websites (strefainwestora.pl)
   GMAIL     // User's Gmail newsletters (OAuth + 3-path sender selection)
-  LINKEDIN  // User's LinkedIn feed (Voyager API / cookies)
+  LINKEDIN  // User's LinkedIn observed profiles (Voyager API / cookies)
   TWITTER   // User's Twitter/X timeline (Twikit / cookies)
   RSS       // Private RSS feeds
 }
@@ -526,6 +526,7 @@ UPDATE articles SET search_vector =
 | POST | `/api/connectors/linkedin/connect` | Login/hasło → Voyager session (via Python) | ✓ |
 | POST | `/api/connectors/linkedin/cookie` | Manual cookie li_at (fallback) | ✓ |
 | POST | `/api/connectors/linkedin/test` | Test połączenia | ✓ |
+| POST | `/api/connectors/linkedin/search-profiles` | Wyszukiwanie profili LinkedIn (via Python scraper) | ✓ |
 | **X/Twitter Connector** |
 | POST | `/api/connectors/twitter/connect` | Cookies (auth_token+ct0) lub login/hasło (via Python) | ✓ |
 | POST | `/api/connectors/twitter/test` | Test połączenia | ✓ |
@@ -552,6 +553,7 @@ UPDATE articles SET search_vector =
 | POST | `/api/articles/:id/chat` | Text Q&A z artykułem (SSE streaming) | ✓ |
 | **Cron** |
 | GET | `/api/cron/editions` | Automatyczne tworzenie wydań (Vercel Cron) | - |
+| GET | `/api/cron/cleanup-trash` | Czyszczenie kosza po 15 dniach (Vercel Cron, 01:00 UTC) | - |
 
 ### 2.2 Szczegóły Endpoints
 
@@ -764,7 +766,10 @@ UPDATE articles SET search_vector =
 
 ---
 
-#### POST /api/editions/:id/tts
+#### POST /api/editions/:id/tts (DEPRECATED)
+
+> **Deprecated:** Zastąpione przez playlist player, który wywołuje `POST /api/tts`
+> per artykuł. Ten endpoint generował jedno monolityczne audio ze wszystkich artykułów.
 
 **Request:**
 ```json
@@ -780,6 +785,17 @@ UPDATE articles SET search_vector =
 **Errors:**
 - 400 - Brak artykulow w wydaniu lub wydanie za dlugie (max 50000 znakow)
 - 404 - Wydanie nie znalezione
+
+#### EditionTTSPlayer.tsx (Playlist)
+- Props: articles[] (id, title, intro, summary, source)
+- Stan: currentTrack, isPlaying, audioCacheRef (Map<index, blobURL>)
+- Generowanie: POST /api/tts per artykuł (reuse istniejącego endpointu)
+- Prefetch: generuj track N+1 gdy N gra
+- Nawigacja: prev (restart/back), play/pause, next
+- Koordynacja: playerStore.stop() przy starcie, pause przy card-level TTS
+- Auto-read: gdy onended fires, wywołaj onArticleListened(articleId) callback
+- Parent (edition page) przekazuje markAsRead jako onArticleListened
+- Fires tylko na naturalny koniec tracku, NIE na next/prev/skip/error
 
 ---
 
@@ -1007,10 +1023,10 @@ data: {"sourceId":"clx123","error":"Connection timeout"}
   "password": "...",
   "disclaimerAccepted": true,
   "config": {
-    "hashtags": ["#AI", "#MachineLearning"],
-    "authors": ["karpathy", "yann-lecun"],
-    "excludeReposts": true,
-    "minLength": 100
+    "profiles": [
+      { "publicId": "karpathy", "name": "Andrej Karpathy", "profileUrl": "https://www.linkedin.com/in/karpathy" }
+    ],
+    "maxPostsPerProfile": 10
   }
 }
 ```
@@ -1645,10 +1661,13 @@ export const linkedinConnectSchema = z.object({
     errorMap: () => ({ message: 'Musisz zaakceptować disclaimer' }),
   }),
   config: z.object({
-    hashtags: z.array(z.string().startsWith('#')).max(10).optional(),
-    authors: z.array(z.string()).max(20).optional(),
-    excludeReposts: z.boolean().default(false),
-    minLength: z.number().min(0).default(0),
+    profiles: z.array(z.object({
+      publicId: z.string(),
+      name: z.string(),
+      headline: z.string().optional(),
+      profileUrl: z.string().url(),
+    })).default([]),
+    maxPostsPerProfile: z.number().min(1).max(50).default(10),
   }).optional(),
 });
 
@@ -1784,12 +1803,15 @@ export function handleApiError(error: unknown): NextResponse {
 ### 8.2 LinkedIn Config
 ```json
 {
-  "hashtags": ["#AI", "#MachineLearning"],
-  "authors": ["karpathy", "yann-lecun"],
-  "excludeReposts": true,
-  "minLength": 100,
-  "maxPosts": 50,
-  "syncInterval": 120
+  "profiles": [
+    {
+      "publicId": "string",
+      "name": "string",
+      "headline?": "string",
+      "profileUrl": "string"
+    }
+  ],
+  "maxPostsPerProfile": 10
 }
 ```
 
@@ -1820,17 +1842,39 @@ export function handleApiError(error: unknown): NextResponse {
 |--------|----------|------|
 | POST | `/linkedin/auth` | Login → Voyager session |
 | POST | `/linkedin/auth/cookie` | Manual cookie auth |
-| POST | `/linkedin/feed` | Pobierz feed (posty) |
+| POST | `/linkedin/search-profiles` | Wyszukiwanie profili LinkedIn |
+| POST | `/linkedin/profile-posts` | Pobieranie postów konkretnego profilu |
 | GET | `/linkedin/status` | Sprawdź status sesji |
 
-#### POST /linkedin/feed
+#### POST /linkedin/search-profiles
 **Request:**
 ```json
 {
   "credentials": "encrypted_session_cookies",
-  "maxPosts": 50,
-  "hashtags": ["#AI"],
-  "authors": ["karpathy"]
+  "query": "Andrej Karpathy"
+}
+```
+**Response (200):**
+```json
+{
+  "profiles": [
+    {
+      "publicId": "karpathy",
+      "name": "Andrej Karpathy",
+      "headline": "AI @ Tesla, former Research Director @ OpenAI",
+      "profileUrl": "https://www.linkedin.com/in/karpathy"
+    }
+  ]
+}
+```
+
+#### POST /linkedin/profile-posts
+**Request:**
+```json
+{
+  "credentials": "encrypted_session_cookies",
+  "profileId": "karpathy",
+  "maxPosts": 10
 }
 ```
 **Response (200):**
@@ -2058,6 +2102,38 @@ SCRAPER_URL="http://localhost:8000"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NODE_ENV="development"
 ```
+
+---
+
+## 12.1 Edition Service — Dismiss Integration
+
+### updateEditionCounts(editionId, userId)
+Przelicza `articleCount` i `unreadCount` dla wydania z uwzględnieniem dismissed artykułów:
+- Query: `articles WHERE dismissedBy.none(userId)` + `readBy WHERE userId`
+- Update: `prisma.edition.update({ articleCount, unreadCount })`
+- Wywoływana z: `POST/DELETE /api/articles/:id/dismiss`
+
+### getUserEditions — dismissed filter
+- Include articles z `where: { dismissedBy: { none: { userId } } }` + `readBy`
+- Dynamiczne `articleCount` i `unreadCount` obliczane z przefiltrowanych artykułów
+- Select minimalne pola (`id`, `readBy`) aby nie ładować pełnych artykułów
+
+### getEditionWithArticles — dismissed filter
+- Dodany `where: { dismissedBy: { none: { userId } } }` do articles query
+- Dynamiczne counts z przefiltrowanych artykułów (zamiast DB counts)
+
+## 12.2 Trash Service (trashService.ts)
+
+### cleanupExpiredTrash()
+- Cutoff: 15 dni od `dismissedAt`
+- Private articles (`privateSourceId NOT NULL`): `prisma.article.deleteMany` (cascade)
+- Catalog articles: DismissedArticle record persist (permanently hidden)
+- Return: count of deleted articles
+
+### Cron: GET /api/cron/cleanup-trash
+- Schedule: `0 1 * * *` (01:00 UTC daily)
+- Auth: `Bearer CRON_SECRET`
+- Pattern: identyczny z `/api/cron/editions`
 
 ---
 

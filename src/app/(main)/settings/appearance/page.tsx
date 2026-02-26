@@ -2,14 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronLeft, Sun, Moon, Monitor, Newspaper, Rss, Volume2, Check, Loader2 } from "lucide-react";
+import { ChevronLeft, Sun, Moon, Monitor, Newspaper, Rss, Volume2, Check, Loader2, Bell, Clock } from "lucide-react";
 
 interface UserPreferences {
   theme: "LIGHT" | "DARK" | "SYSTEM";
   defaultView: "FEED" | "EDITIONS";
   ttsVoice: string;
+  briefingEnabled: boolean;
+  briefingTime: string | null;
   availableVoices: Array<{id: string; name: string; language: string;}>;
 }
+
+const BRIEFING_TIMES = [
+  "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
+  "08:00", "08:30", "09:00", "09:30", "10:00",
+];
 
 const THEME_OPTIONS = [
   { value: "LIGHT", label: "Jasny", icon: Sun },
@@ -38,6 +45,55 @@ export default function AppearanceSettingsPage() {
       setPreferences(await response.json());
     } catch (err) { setError(err instanceof Error ? err.message : "Blad"); }
     finally { setIsLoading(false); }
+  };
+
+  const updateBoolPreference = async (key: string, value: boolean) => {
+    if (!preferences) return;
+    setIsSaving(true); setError(null); setSavedMessage(null);
+    try {
+      const response = await fetch("/api/user/preferences", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ [key]: value }) });
+      if (!response.ok) throw new Error("Nie udalo sie zapisac");
+      const data = await response.json();
+      setPreferences((prev) => prev ? { ...prev, ...data } : prev);
+      setSavedMessage("Zapisano"); setTimeout(() => setSavedMessage(null), 2000);
+    } catch (err) { setError(err instanceof Error ? err.message : "Blad"); }
+    finally { setIsSaving(false); }
+  };
+
+  const requestPushPermission = async () => {
+    if (!("Notification" in window)) {
+      setError("Twoja przeglądarka nie obsługuje powiadomień push");
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidKey) {
+          setError("Klucze VAPID nie są skonfigurowane");
+          return;
+        }
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: vapidKey,
+        });
+        const subJson = subscription.toJSON();
+        await fetch("/api/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            endpoint: subJson.endpoint,
+            keys: subJson.keys,
+          }),
+        });
+        setSavedMessage("Powiadomienia włączone");
+        setTimeout(() => setSavedMessage(null), 2000);
+      } catch (err) {
+        setError("Nie udało się włączyć powiadomień");
+        console.error("[Push] Subscribe error:", err);
+      }
+    }
   };
 
   const updatePreference = async (key: string, value: string) => {
@@ -93,6 +149,57 @@ export default function AppearanceSettingsPage() {
             {preferences?.ttsVoice === voice.id && <Check className="w-5 h-5 text-accent" />}
           </button>
         ))}</div>
+      </section>
+      <section><h2 className="text-sm font-semibold text-muted uppercase mb-3">Poranny briefing</h2>
+        <p className="text-sm text-muted mb-3">Codzienny audio-briefing z najważniejszymi artykułami.</p>
+        <div className="space-y-3">
+          {/* Enable/disable toggle */}
+          <div className="flex items-center justify-between p-4 rounded-xl border-2 border-border">
+            <div className="flex items-center gap-3">
+              <div className={"w-10 h-10 rounded-full flex items-center justify-center " + (preferences?.briefingEnabled ? "bg-accent text-card" : "bg-muted/20 text-muted")}><Bell className="w-5 h-5" /></div>
+              <div><p className="text-sm text-primary font-medium">Włącz briefing</p><p className="text-xs text-muted">Automatyczne generowanie co rano</p></div>
+            </div>
+            <button
+              onClick={() => updateBoolPreference("briefingEnabled", !preferences?.briefingEnabled)}
+              disabled={isSaving}
+              className={"relative w-12 h-7 rounded-full transition-colors " + (preferences?.briefingEnabled ? "bg-accent" : "bg-muted/30")}
+            >
+              <span className={"absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform " + (preferences?.briefingEnabled ? "translate-x-5" : "translate-x-0")} />
+            </button>
+          </div>
+
+          {/* Time selector */}
+          {preferences?.briefingEnabled && (
+            <div className="flex items-center gap-4 p-4 rounded-xl border-2 border-border">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-muted/20 text-muted"><Clock className="w-5 h-5" /></div>
+              <div className="flex-1">
+                <p className="text-sm text-primary font-medium mb-1">Godzina powiadomienia</p>
+                <select
+                  value={preferences?.briefingTime || "07:00"}
+                  onChange={(e) => updatePreference("briefingTime", e.target.value)}
+                  disabled={isSaving}
+                  className="w-full p-2 rounded-lg border border-border bg-card text-primary text-sm"
+                >
+                  {BRIEFING_TIMES.map((time) => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Push notifications permission */}
+          {preferences?.briefingEnabled && (
+            <button
+              onClick={requestPushPermission}
+              disabled={isSaving}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-accent/50 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-muted/20 text-muted"><Bell className="w-5 h-5" /></div>
+              <div className="flex-1 text-left"><p className="text-sm text-primary font-medium">Pozwól na powiadomienia push</p><p className="text-xs text-muted">Potrzebne do otrzymywania briefingu na telefonie</p></div>
+            </button>
+          )}
+        </div>
       </section>
     </div>
   </div>);

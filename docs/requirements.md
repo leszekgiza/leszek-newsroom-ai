@@ -64,13 +64,14 @@ System rozróżnia dwa typy źródeł:
 |----|-----------|-----------|
 | F1.1 | Pobieranie artykułów ale to nie jest z RSS feeds po prostu robimy scraping ze strony internetowej| MUST |
 | F1.2 | Integracja z Gmail (newslettery) - OAuth + Gmail API + LLM matching (3 ścieżki dodawania nadawców) | MUST |
-| F1.3 | Integracja z LinkedIn (wall/feed) - login/cookies + Voyager API (linkedin-api Python) | MUST |
+| F1.3 | Integracja z LinkedIn (obserwowane profile) - login/cookies + Voyager API (linkedin-api Python) | MUST |
 | F1.4 | Integracja z X/Twitter (timeline) - cookies + Twikit (Python, async) | SHOULD |
 | F1.5 | Automatyczne odświeżanie co X minut | MUST |
 | F1.6 | Deduplikacja artykułów (ten sam URL) | MUST |
 | F1.7 | Ekstrakcja daty publikacji z URL artykułu (wzorce: `/YYYY-MM-DD/`, `/YYYYMMDD/`, `/posts/YYYY-MM-DD-slug/`) | MUST |
 | F1.8 | Wyświetlanie rzeczywistej daty publikacji (nie daty pobrania) | MUST |
 | F1.9 | **Pobieranie ze wszystkich źródeł z postępem na żywo (SSE)** | SHOULD |
+| F1.10 | Dodawanie profili LinkedIn do obserwowania (URL lub wyszukiwanie) | MUST |
 
 ### F2: Czytanie i Konsumpcja
 
@@ -94,9 +95,10 @@ System rozróżnia dwa typy źródeł:
 | F3.3 | Filtrowanie po źródle | MUST |
 | F3.4 | Wyszukiwanie w tytułach i streszczeniach (PostgreSQL FTS, język polski) | MUST |
 | F3.5 | Tagowanie/kategoryzacja artykułów | COULD |
-| F3.6 | Oznaczanie artykułów jako "nie interesuje mnie" (przeniesienie do Kosza) | SHOULD |
+| F3.6 | Oznaczanie artykułów jako "nie interesuje mnie" (z feedu i wydania, przeniesienie do Kosza) | SHOULD |
 | F3.7 | Przeglądanie i przywracanie artykułów z Kosza | SHOULD |
 | F3.8 | **Sortowanie artykułów od najnowszych do najstarszych** (wg daty publikacji, artykuły bez daty na końcu) | MUST |
+| F3.9 | Automatyczne czyszczenie Kosza po 15 dniach (cron, prywatne artykuły fizycznie usuwane z DB) | SHOULD |
 
 ### F4: Personalizacja
 
@@ -154,7 +156,9 @@ System rozróżnia dwa typy źródeł:
 | F8.3 | Przeglądanie historycznych wydań | SHOULD |
 | F8.4 | Badge z liczbą nieprzeczytanych artykułów w wydaniu | SHOULD |
 | F8.5 | Automatyczne tworzenie nowego wydania o północy | SHOULD |
-| F8.6 | **TTS dla całego wydania** (audio z wszystkich artykułów) | SHOULD |
+| F8.6 | **TTS playlist dla wydania** — osobne audio per artykuł z nawigacją prev/next, sekwencyjne generowanie i prefetch | SHOULD |
+| F8.7 | Automatyczne oznaczanie artykułu jako przeczytanego po odsłuchaniu w TTS playlist | SHOULD |
+| F8.8 | Dismissed artykuły ukryte z widoku wydania, z listy wydań (articleCount/unreadCount) oraz wyłączone z TTS playlist | SHOULD |
 
 ### F9: Text Q&A per Article (Conversational Agent - OSS)
 

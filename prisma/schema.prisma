@@ -21,9 +21,11 @@ model User {
   avatarUrl    String?     @map("avatar_url")
   theme        Theme       @default(SYSTEM)
   defaultView  DefaultView @default(FEED) @map("default_view")
-  ttsVoice     String      @default("pl-PL-MarekNeural") @map("tts_voice")
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
+  ttsVoice        String      @default("pl-PL-MarekNeural") @map("tts_voice")
+  briefingEnabled Boolean     @default(false) @map("briefing_enabled")
+  briefingTime    String?     @default("07:00") @map("briefing_time")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
 
   // Relations
   subscriptions        UserSubscription[]
@@ -35,6 +37,8 @@ model User {
   sessions             Session[]
   topics               UserTopic[] // FUTURE: topic-based discovery
   editions             Edition[]
+  briefings            Briefing[]
+  pushSubscriptions    PushSubscription[]
 
   @@map("users")
 }
@@ -245,8 +249,9 @@ model Edition {
   createdAt    DateTime @default(now()) @map("created_at")
 
   // Relations
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  articles Article[]
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articles   Article[]
+  briefings  Briefing[]
 
   @@unique([userId, date])
   @@index([userId])
@@ -269,4 +274,45 @@ model UserTopic {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_topics")
+}
+
+// ============================================
+// BRIEFINGS (Morning audio briefings)
+// ============================================
+
+model Briefing {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  editionId   String   @map("edition_id")
+  date        DateTime @db.Date
+  introScript String?  @map("intro_script") // AI-generated narrative text
+  status      String   @default("generating") // generating | ready | failed
+  articleIds  String[] @map("article_ids") // ordered list of curated article IDs
+  top3Ids     String[] @map("top3_ids") // IDs of top 3 articles (for intro)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  edition Edition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date(sort: Desc)])
+  @@map("briefings")
+}
+
+// ============================================
+// PUSH SUBSCRIPTIONS (Web Push notifications)
+// ============================================
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }

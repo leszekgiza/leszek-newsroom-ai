@@ -18,6 +18,8 @@ export async function GET() {
         theme: true,
         defaultView: true,
         ttsVoice: true,
+        briefingEnabled: true,
+        briefingTime: true,
       },
     });
 
@@ -29,6 +31,8 @@ export async function GET() {
       theme: user.theme,
       defaultView: user.defaultView,
       ttsVoice: user.ttsVoice,
+      briefingEnabled: user.briefingEnabled,
+      briefingTime: user.briefingTime,
       availableVoices: TTS_VOICES,
     });
   } catch (error) {
@@ -50,14 +54,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { theme, defaultView, ttsVoice } = body;
+    const { theme, defaultView, ttsVoice, briefingEnabled, briefingTime } = body;
 
     // Validate values
     const validThemes = ["LIGHT", "DARK", "SYSTEM"];
     const validViews = ["FEED", "EDITIONS"];
     const validVoices = TTS_VOICES.map((v) => v.id);
 
-    const updateData: Record<string, string> = {};
+    const updateData: Record<string, string | boolean> = {};
 
     if (theme !== undefined) {
       if (!validThemes.includes(theme)) {
@@ -89,6 +93,31 @@ export async function PATCH(request: NextRequest) {
       updateData.ttsVoice = ttsVoice;
     }
 
+    if (briefingEnabled !== undefined) {
+      if (typeof briefingEnabled !== "boolean") {
+        return NextResponse.json(
+          { error: "Invalid briefingEnabled value" },
+          { status: 400 }
+        );
+      }
+      updateData.briefingEnabled = briefingEnabled;
+    }
+
+    if (briefingTime !== undefined) {
+      const validTimes = [];
+      for (let h = 5; h <= 10; h++) {
+        validTimes.push(`${h.toString().padStart(2, "0")}:00`);
+        validTimes.push(`${h.toString().padStart(2, "0")}:30`);
+      }
+      if (!validTimes.includes(briefingTime)) {
+        return NextResponse.json(
+          { error: "Invalid briefingTime value" },
+          { status: 400 }
+        );
+      }
+      updateData.briefingTime = briefingTime;
+    }
+
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No valid fields to update" },
@@ -103,6 +132,8 @@ export async function PATCH(request: NextRequest) {
         theme: true,
         defaultView: true,
         ttsVoice: true,
+        briefingEnabled: true,
+        briefingTime: true,
       },
     });
 
@@ -110,6 +141,8 @@ export async function PATCH(request: NextRequest) {
       theme: user.theme,
       defaultView: user.defaultView,
       ttsVoice: user.ttsVoice,
+      briefingEnabled: user.briefingEnabled,
+      briefingTime: user.briefingTime,
     });
   } catch (error) {
     console.error("[API] Error updating preferences:", error);

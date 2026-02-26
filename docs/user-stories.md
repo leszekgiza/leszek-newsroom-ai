@@ -168,17 +168,24 @@
 **Aby** usunąć go z głównego feedu bez trwałego usuwania
 
 **Kryteria akceptacji:**
-- [ ] Przycisk "Nie interesuje" przy każdym artykule (ikona X lub kosz)
-- [ ] Artykuł znika z głównego feedu
-- [ ] Artykuł trafia do folderu "Kosz"
-- [ ] Możliwość przywrócenia artykułu z Kosza
+- [x] Przycisk "Nie interesuje" przy każdym artykule (ikona X lub kosz)
+- [x] Artykuł znika z głównego feedu
+- [x] Artykuł trafia do folderu "Kosz"
+- [x] Możliwość przywrócenia artykułu z Kosza
 - [ ] Opcja trwałego usunięcia z Kosza
+- [x] Dismiss z widoku wydania (nie tylko feedu)
+- [x] Dismissed artykuł znika z TTS playlist wydania
+- [x] articleCount/unreadCount w nagłówku wydania aktualizują się po dismiss
+- [x] Lista wydań (/editions) uwzględnia dismissed w articleCount/unreadCount
+- [x] Artykuły w Koszu automatycznie znikają po 15 dniach
+- [x] Prywatne artykuły (Gmail/LinkedIn) fizycznie usuwane z DB po 15 dniach
 
 **Szczegóły techniczne:**
-- Nowa tabela `dismissed_articles` (userId, articleId, dismissedAt)
+- Tabela `dismissed_articles` (userId, articleId, dismissedAt)
 - Endpoint: `POST /api/articles/[id]/dismiss`
 - Endpoint: `DELETE /api/articles/[id]/dismiss` (przywrócenie)
-- Strona `/trash` z listą odrzuconych artykułów
+- Strona `/trash` z listą odrzuconych artykułów (filtr 15-dniowy)
+- Cron: `GET /api/cron/cleanup-trash` (01:00 UTC daily)
 
 ---
 
@@ -439,8 +446,8 @@
 
 ### US14.3 - Połączenie LinkedIn (Voyager API)
 **Jako** użytkownik
-**Chcę** połączyć LinkedIn
-**Aby** widzieć posty ekspertów i tematyczne dyskusje w moim feedzie
+**Chcę** obserwować wybrane profile LinkedIn
+**Aby** otrzymywać ich najnowsze posty w moim feedzie
 
 **Szczegóły:**
 - Login/hasło → Voyager API (linkedin-api Python)
@@ -461,10 +468,10 @@
 
 ---
 
-### US14.4 - Filtrowanie postów LinkedIn
+### US14.4 - Zarządzanie obserwowanymi profilami LinkedIn
 **Jako** użytkownik
-**Chcę** filtrować posty LinkedIn po hashtagach i autorach
-**Aby** dostawać tylko wartościowe treści, nie cały feed
+**Chcę** zarządzać obserwowanymi profilami LinkedIn (dodawanie/usuwanie)
+**Aby** kontrolować źródła treści
 
 **Kryteria akceptacji:**
 - [ ] Input na hashtagi (multi-tag, np. #AI, #ML)
@@ -512,6 +519,19 @@
 - [ ] Inline progress synchronizacji (paski postępu, stats nowe/pominięte/błędy)
 - [ ] Notyfikacja gdy credentials wygasną (top banner + toast)
 - [ ] UI: mockupy `ui_connectors_dashboard_1.html`, `ui_notification_credentials_expired_1.html`
+
+---
+
+### US14.8 - Wyszukiwanie profili LinkedIn
+**Jako** użytkownik
+**Chcę** wyszukać profil LinkedIn po imieniu/nazwisku
+**Aby** dodać go do obserwowanych
+
+**Kryteria akceptacji:**
+- [ ] Pole wyszukiwania w LinkedIn Wizard
+- [ ] Wyniki wyszukiwania z imieniem, nazwiskiem, headline i linkiem do profilu
+- [ ] Możliwość dodania profilu do obserwowanych jednym kliknięciem
+- [ ] Wyszukiwanie przez Voyager API (Python scraper)
 
 ---
 
@@ -571,6 +591,7 @@
 - [ ] Zakładka "Wydania" w nawigacji
 - [ ] Lista wydań z datami (np. "29 grudnia 2025", "28 grudnia 2025")
 - [ ] Badge z liczbą nieprzeczytanych artykułów w każdym wydaniu
+- [x] articleCount i unreadCount na liście wydań uwzględniają dismissed artykuły
 - [ ] Kliknięcie wydania otwiera listę artykułów z tego dnia
 
 ---
@@ -607,16 +628,31 @@
 
 ---
 
-### US9.4 - TTS dla całego wydania
+### US9.4 - TTS playlist dla wydania
 **Jako** użytkownik
-**Chcę** odsłuchać audio z całego wydania
-**Aby** konsumować dzienne newsy podczas jazdy/spaceru
+**Chcę** odsłuchać artykuły z wydania jako playlistę z nawigacją
+**Aby** konsumować dzienne newsy z możliwością przeskakiwania między artykułami
 
 **Kryteria akceptacji:**
-- [x] Przycisk "Słuchaj wydania" na stronie wydania
-- [x] Audio generowane ze wszystkich artykułów wydania
-- [x] Artykuły grupowane po źródłach
+- [x] Kompaktowy player z przyciskami prev/play/next na stronie wydania
+- [x] Każdy artykuł to osobny track (źródło + tytuł + streszczenie/intro)
+- [x] Sekwencyjne generowanie: track N gra → track N+1 generuje się w tle
+- [x] Auto-advance do następnego tracku po zakończeniu
+- [x] Prev: restart tracku (>3s) lub powrót do poprzedniego (<3s)
+- [x] Cache wygenerowanych tracków (instant powrót do poprzednich)
+- [x] Info: tytuł artykułu, źródło, licznik (np. "3/12")
 - [x] Głos zgodny z preferencjami użytkownika
+- [x] Artykuł automatycznie oznaczany jako przeczytany po naturalnym zakończeniu odtwarzania
+- [x] Ręczne przeskoczenie (next/prev) NIE oznacza artykułu jako przeczytanego
+- [x] Badge NEW znika z karty artykułu po odsłuchaniu
+- [x] Licznik nieprzeczytanych w nagłówku wydania się aktualizuje
+- [ ] Koordynacja z card-level TTS (wzajemne wstrzymywanie)
+
+**Szczegóły techniczne:**
+- Reuse istniejącego `POST /api/tts` (max 5000 znaków per artykuł)
+- Endpoint `POST /api/editions/:id/tts` deprecated (monolityczne audio)
+- Audio cache per track w blob URL (revoke na unmount)
+- Prefetch one-ahead: generuj N+1 gdy N gra
 
 ---
 

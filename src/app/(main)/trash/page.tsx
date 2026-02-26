@@ -76,7 +76,10 @@ export default function TrashPage() {
         <div className="px-4 py-3">
           <h1 className="text-xl font-bold text-primary">Kosz</h1>
           <p className="text-sm text-muted">
-            Artykuly oznaczone jako "nie interesuje mnie"
+            Artykuly oznaczone jako &quot;nie interesuje mnie&quot;
+          </p>
+          <p className="text-xs text-muted mt-1">
+            Artykuly w koszu sa automatycznie usuwane po 15 dniach.
           </p>
         </div>
       </header>

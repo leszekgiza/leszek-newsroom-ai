@@ -44,6 +44,7 @@ export function ArticleCard({
   const [isHovered, setIsHovered] = useState(false);
   const [isLoadingTTS, setIsLoadingTTS] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [ttsError, setTtsError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const { isPlaying, currentArticleId, voice, play, pause, stop } = usePlayerStore();
@@ -100,6 +101,7 @@ export function ArticleCard({
     if (!textToRead) return;
 
     setIsLoadingTTS(true);
+    setTtsError(null);
 
     try {
       const response = await fetch("/api/tts", {
@@ -109,10 +111,15 @@ export function ArticleCard({
       });
 
       if (!response.ok) {
-        throw new Error("TTS failed");
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Nie udało się wygenerować audio");
       }
 
       const blob = await response.blob();
+      if (blob.type && !blob.type.startsWith("audio/")) {
+        throw new Error("Otrzymano nieprawidłowy format audio");
+      }
+
       const url = URL.createObjectURL(blob);
 
       // Cleanup old URL
@@ -124,6 +131,7 @@ export function ArticleCard({
       play(article.id);
     } catch (error) {
       console.error("TTS error:", error);
+      setTtsError(error instanceof Error ? error.message : "Błąd odtwarzania");
     } finally {
       setIsLoadingTTS(false);
     }
@@ -138,6 +146,11 @@ export function ArticleCard({
 
   const handleAudioEnded = () => {
     stop();
+  };
+
+  const handleAudioError = () => {
+    stop();
+    setTtsError("Nie udało się odtworzyć audio");
   };
 
   const formatDate = (dateString: string) => {
@@ -425,6 +438,11 @@ export function ArticleCard({
         </div>
       </div>
 
+      {/* TTS Error */}
+      {ttsError && (
+        <p className="text-xs text-red-500 mt-2 text-right">{ttsError}</p>
+      )}
+
       {/* Hidden audio element for TTS */}
       {audioUrl && (
         <audio
@@ -432,6 +450,7 @@ export function ArticleCard({
           src={audioUrl}
           onCanPlay={handleAudioCanPlay}
           onEnded={handleAudioEnded}
+          onError={handleAudioError}
         />
       )}
     </article>

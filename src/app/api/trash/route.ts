@@ -10,9 +10,15 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get dismissed articles
+    // Get dismissed articles (only last 15 days)
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 15);
+
     const dismissedArticles = await prisma.dismissedArticle.findMany({
-      where: { userId: session.userId },
+      where: {
+        userId: session.userId,
+        dismissedAt: { gte: cutoff },
+      },
       include: {
         article: {
           include: {

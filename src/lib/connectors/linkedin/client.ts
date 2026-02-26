@@ -50,12 +50,14 @@ export interface LinkedInAuthResult {
 export async function linkedInAuth(
   email?: string,
   password?: string,
-  liAtCookie?: string
+  liAtCookie?: string,
+  jsessionid?: string
 ): Promise<LinkedInAuthResult> {
   const res = await fetchWithRetry(`${getBaseUrl()}/linkedin/auth`, {
     email,
     password,
     li_at_cookie: liAtCookie,
+    jsessionid,
   });
 
   const data = await res.json();
@@ -98,6 +100,76 @@ export async function linkedInFetchPosts(
     max_posts: config.maxPosts ?? 30,
     hashtags: config.hashtags,
     include_reposts: config.includeReposts ?? false,
+  });
+
+  const data = await res.json();
+  return {
+    success: data.success,
+    posts: (data.posts || []).map((p: Record<string, unknown>) => ({
+      externalId: p.external_id,
+      title: p.title,
+      content: p.content,
+      url: p.url,
+      author: p.author,
+      publishedAt: p.published_at,
+    })),
+    fetchedCount: data.fetched_count || 0,
+    error: data.error,
+  };
+}
+
+// === Search Profiles ===
+
+export interface LinkedInProfileInfo {
+  publicId: string;
+  name: string;
+  headline?: string;
+  profileUrl: string;
+  photoUrl?: string;
+}
+
+export interface LinkedInSearchResult {
+  success: boolean;
+  profiles: LinkedInProfileInfo[];
+  error?: string;
+}
+
+export async function linkedInSearchProfiles(
+  sessionId: string,
+  keywords: string,
+  limit?: number
+): Promise<LinkedInSearchResult> {
+  const res = await fetchWithRetry(`${getBaseUrl()}/linkedin/search-profiles`, {
+    session_id: sessionId,
+    keywords,
+    limit: limit ?? 10,
+  });
+
+  const data = await res.json();
+  return {
+    success: data.success,
+    profiles: (data.profiles || []).map((p: Record<string, unknown>) => ({
+      publicId: p.public_id,
+      name: p.name,
+      headline: p.headline,
+      profileUrl: p.profile_url,
+      photoUrl: p.photo_url,
+    })),
+    error: data.error,
+  };
+}
+
+// === Fetch Profile Posts ===
+
+export async function linkedInFetchProfilePosts(
+  sessionId: string,
+  publicId: string,
+  maxPosts?: number
+): Promise<LinkedInFetchResult> {
+  const res = await fetchWithRetry(`${getBaseUrl()}/linkedin/profile-posts`, {
+    session_id: sessionId,
+    public_id: publicId,
+    max_posts: maxPosts ?? 10,
   });
 
   const data = await res.json();
@@ -163,6 +235,7 @@ export interface BrowserLoginStartResult {
   sessionId?: string;
   state: BrowserLoginState;
   liAt?: string;
+  jsessionid?: string;
   profileName?: string;
   screenshot?: string;
   error?: string;
@@ -189,6 +262,7 @@ export async function linkedInBrowserLoginStart(
       sessionId: data.session_id,
       state: data.state,
       liAt: data.li_at,
+      jsessionid: data.jsessionid,
       profileName: data.profile_name,
       screenshot: data.screenshot,
       error: data.error,
@@ -202,6 +276,7 @@ export interface BrowserLoginVerifyResult {
   success: boolean;
   state: BrowserLoginState;
   liAt?: string;
+  jsessionid?: string;
   profileName?: string;
   screenshot?: string;
   error?: string;
@@ -227,6 +302,7 @@ export async function linkedInBrowserLoginVerify(
       success: data.success,
       state: data.state,
       liAt: data.li_at,
+      jsessionid: data.jsessionid,
       profileName: data.profile_name,
       screenshot: data.screenshot,
       error: data.error,

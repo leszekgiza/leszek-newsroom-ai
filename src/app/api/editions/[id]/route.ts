@@ -31,6 +31,7 @@ export async function GET(
         id: a.id,
         title: a.title,
         intro: a.intro,
+        summary: a.summary,
         url: a.url,
         imageUrl: a.imageUrl,
         publishedAt: a.publishedAt?.toISOString() || null,

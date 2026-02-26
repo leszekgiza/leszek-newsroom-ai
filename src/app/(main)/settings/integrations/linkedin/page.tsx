@@ -3,14 +3,25 @@
 import { useEffect, useState } from "react";
 import { LinkedInWizard } from "@/components/connectors/LinkedInWizard";
 
+interface InitialData {
+  profileName?: string;
+  config?: { profiles?: { publicId: string; name: string; headline?: string; profileUrl: string }[]; maxPostsPerProfile?: number };
+}
+
 export default function LinkedInIntegrationPage() {
   const [status, setStatus] = useState<"loading" | "disconnected" | "connected">("loading");
+  const [initialData, setInitialData] = useState<InitialData>({});
 
   useEffect(() => {
     fetch("/api/connectors/linkedin/test", { method: "POST" })
       .then((res) => res.json())
       .then((data) => {
-        setStatus(data.success ? "connected" : "disconnected");
+        if (data.success) {
+          setInitialData({ profileName: data.profileName, config: data.config });
+          setStatus("connected");
+        } else {
+          setStatus("disconnected");
+        }
       })
       .catch(() => setStatus("disconnected"));
   }, []);
@@ -46,7 +57,11 @@ export default function LinkedInIntegrationPage() {
         )}
 
         {(status === "disconnected" || status === "connected") && (
-          <LinkedInWizard />
+          <LinkedInWizard
+            initialConnected={status === "connected"}
+            initialProfileName={initialData.profileName}
+            initialConfig={initialData.config}
+          />
         )}
       </main>
     </div>

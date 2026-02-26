@@ -76,30 +76,35 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
       } else {
         setArticles(newArticles);
 
-        // Calculate source filters only on initial load
-        const sourceMap = new Map<string, SourceFilterItem>();
-
-        for (const article of newArticles) {
-          const sourceId = article.source.id;
-          const existing = sourceMap.get(sourceId);
-
-          if (existing) {
-            existing.count++;
-          } else {
-            sourceMap.set(sourceId, {
-              id: sourceId,
-              name: article.source.name,
-              count: 1,
-            });
+        // Use server-provided source counts if available (covers ALL articles, not just first page)
+        if (data.sources && Array.isArray(data.sources)) {
+          const allSources: SourceFilterItem[] = [
+            { id: null, name: "Wszystkie", count: data.pagination?.total || newArticles.length },
+            ...data.sources.map((s: { id: string; name: string; count: number }) => ({
+              id: s.id,
+              name: s.name,
+              count: s.count,
+            })),
+          ];
+          setSources(allSources);
+        } else {
+          // Fallback: calculate from current page
+          const sourceMap = new Map<string, SourceFilterItem>();
+          for (const article of newArticles) {
+            const srcId = article.source.id;
+            const existing = sourceMap.get(srcId);
+            if (existing) {
+              existing.count++;
+            } else {
+              sourceMap.set(srcId, { id: srcId, name: article.source.name, count: 1 });
+            }
           }
+          const allSources: SourceFilterItem[] = [
+            { id: null, name: "Wszystkie", count: data.pagination?.total || newArticles.length },
+            ...Array.from(sourceMap.values()).sort((a, b) => b.count - a.count),
+          ];
+          setSources(allSources);
         }
-
-        const allSources: SourceFilterItem[] = [
-          { id: null, name: "Wszystkie", count: data.pagination?.total || newArticles.length },
-          ...Array.from(sourceMap.values()).sort((a, b) => b.count - a.count),
-        ];
-
-        setSources(allSources);
       }
 
       // Update pagination state
@@ -178,16 +183,28 @@ export function useArticles(options: UseArticlesOptions = {}): UseArticlesResult
         const dismissed = prev.find((a) => a.id === articleId);
         const newArticles = prev.filter((article) => article.id !== articleId);
 
-        // Update sources count
+        // Update sources count - match composite IDs
         if (dismissed) {
+          // Build the composite ID that matches this article
+          const rawSourceId = dismissed.source.id;
+          const articleAuthor = dismissed.author;
+          const expectedCompositeId = articleAuthor
+            ? `private:${rawSourceId}:${encodeURIComponent(articleAuthor)}`
+            : null;
+
           setSources((prevSources) =>
             prevSources.map((source) => {
               if (source.id === null) {
                 // "Wszystkie" - decrease total count
                 return { ...source, count: source.count - 1 };
               }
-              if (source.id === dismissed.source.id) {
-                // Specific source - decrease its count
+              // Match by composite ID, or by raw ID contained in composite ID
+              if (
+                (expectedCompositeId && source.id === expectedCompositeId) ||
+                source.id === `catalog:${rawSourceId}` ||
+                source.id === `private:${rawSourceId}:` ||
+                source.id === rawSourceId // legacy
+              ) {
                 return { ...source, count: source.count - 1 };
               }
               return source;

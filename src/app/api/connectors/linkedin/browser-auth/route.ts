@@ -33,14 +33,14 @@ export async function POST(request: Request) {
     if (result.success && result.state === "success" && result.liAt) {
       // Encrypt li_at cookie for storage
       const credentials = encrypt(
-        JSON.stringify({ liAt: result.liAt, email })
+        JSON.stringify({ liAt: result.liAt, jsessionid: result.jsessionid, email })
       );
 
       await prisma.privateSource.upsert({
         where: {
           userId_url: {
             userId: session.userId,
-            url: "linkedin://feed",
+            url: "linkedin://profiles",
           },
         },
         update: {
@@ -50,8 +50,8 @@ export async function POST(request: Request) {
         },
         create: {
           userId: session.userId,
-          name: "LinkedIn Feed",
-          url: "linkedin://feed",
+          name: "LinkedIn Profiles",
+          url: "linkedin://profiles",
           type: "LINKEDIN",
           credentials,
           status: "CONNECTED",

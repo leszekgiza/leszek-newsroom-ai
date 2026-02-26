@@ -93,11 +93,29 @@ export async function getUserEditions(
   articleCount: number;
   unreadCount: number;
 }>> {
-  return prisma.edition.findMany({
+  const editions = await prisma.edition.findMany({
     where: { userId },
     orderBy: { date: "desc" },
     take: limit,
+    include: {
+      articles: {
+        where: { dismissedBy: { none: { userId } } },
+        select: {
+          id: true,
+          readBy: { where: { userId }, select: { userId: true } },
+        },
+      },
+    },
   });
+
+  return editions.map((e) => ({
+    id: e.id,
+    date: e.date,
+    title: e.title,
+    summary: e.summary,
+    articleCount: e.articles.length,
+    unreadCount: e.articles.filter((a) => a.readBy.length === 0).length,
+  }));
 }
 
 /**
@@ -117,6 +135,7 @@ export async function getEditionWithArticles(
     id: string;
     title: string;
     intro: string | null;
+    summary: string | null;
     url: string;
     imageUrl: string | null;
     publishedAt: Date | null;
@@ -133,6 +152,11 @@ export async function getEditionWithArticles(
     },
     include: {
       articles: {
+        where: {
+          dismissedBy: {
+            none: { userId },
+          },
+        },
         orderBy: { publishedAt: "desc" },
         include: {
           catalogSource: {
@@ -158,10 +182,13 @@ export async function getEditionWithArticles(
 
   return {
     ...edition,
+    articleCount: edition.articles.length,
+    unreadCount: edition.articles.filter((a) => a.readBy.length === 0).length,
     articles: edition.articles.map((article) => ({
       id: article.id,
       title: article.title,
       intro: article.intro,
+      summary: article.summary,
       url: article.url,
       imageUrl: article.imageUrl,
       publishedAt: article.publishedAt,
@@ -200,6 +227,36 @@ export async function updateEditionUnreadCount(
     where: { id: editionId },
     data: { unreadCount },
   });
+}
+
+/**
+ * Update edition counts excluding dismissed articles for a user
+ */
+export async function updateEditionCounts(
+  editionId: string,
+  userId: string
+): Promise<{ articleCount: number; unreadCount: number }> {
+  const edition = await prisma.edition.findUnique({
+    where: { id: editionId },
+    include: {
+      articles: {
+        where: { dismissedBy: { none: { userId } } },
+        include: { readBy: { where: { userId } } },
+      },
+    },
+  });
+
+  if (!edition) return { articleCount: 0, unreadCount: 0 };
+
+  const articleCount = edition.articles.length;
+  const unreadCount = edition.articles.filter((a) => a.readBy.length === 0).length;
+
+  await prisma.edition.update({
+    where: { id: editionId },
+    data: { articleCount, unreadCount },
+  });
+
+  return { articleCount, unreadCount };
 }
 
 /**

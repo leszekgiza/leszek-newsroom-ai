@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       where: {
         userId_url: {
           userId: session.userId,
-          url: "linkedin://feed",
+          url: "linkedin://profiles",
         },
       },
       update: {
@@ -52,8 +52,8 @@ export async function POST(request: Request) {
       },
       create: {
         userId: session.userId,
-        name: "LinkedIn Feed",
-        url: "linkedin://feed",
+        name: "LinkedIn Profiles",
+        url: "linkedin://profiles",
         type: "LINKEDIN",
         credentials: authResult.credentials,
         status: "CONNECTED",

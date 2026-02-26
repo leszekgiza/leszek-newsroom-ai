@@ -28,6 +28,7 @@ export async function POST() {
       success: status.status === "CONNECTED" || status.status === "SYNCING",
       status: status.status,
       profileName: status.profileName,
+      config: source.config,
       error: status.error,
     });
   } catch (error) {

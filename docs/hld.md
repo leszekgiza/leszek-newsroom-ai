@@ -16,10 +16,10 @@ System agregacji treści z wielu źródeł internetowych z automatycznym generow
 - Generowanie 2-zdaniowych intro i pełnych streszczeń (LLM provider-agnostic, przykład: Claude)
 - Text-to-Speech dla streszczeń i wydań (TTS provider-agnostic, przykład: Edge TTS)
 - Wyszukiwanie full-text w języku polskim (PostgreSQL FTS)
-- Codzienne wydania (Editions) z TTS dla całego wydania
+- Codzienne wydania (Editions) z TTS playlist per artykuł (prev/next, prefetch)
 - PWA z offline support (manifest, service worker, installable)
 - SSE streaming dla postępu scrapowania
-- Source Integrations: Gmail (OAuth + 3 ścieżki importu nadawców), LinkedIn (Voyager API), X/Twitter (Twikit)
+- Source Integrations: Gmail (OAuth + 3 ścieżki importu nadawców), LinkedIn (Voyager API + obserwowane profile per-user), X/Twitter (Twikit)
 - Architektura dwujęzyczna: Gmail w Node.js, LinkedIn + X w Python microservice (scraper/)
 - Autentykacja użytkowników
 - **Planowane:** Text Q&A per article (OSS), Voice STT, Briefings, Multi-Article Q&A (Premium)
@@ -41,7 +41,7 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 │                    PRIVATE SOURCES (per-user)                    │
 │  • Strony z auth: strefainwestora.pl (user podaje credentials)  │
 │  • Gmail: OAuth + precyzyjny import (3 ścieżki, LLM matching)  │
-│  • LinkedIn: Voyager API (linkedin-api Python) + disclaimer     │
+│  • LinkedIn: Voyager API (linkedin-api Python) + profile tracking│
 │  • X/Twitter: Twikit (Python, async) + cookies auth             │
 │  • Scrapowane PER-USER, widoczne TYLKO dla właściciela          │
 └─────────────────────────────────────────────────────────────────┘
@@ -215,7 +215,7 @@ oficjalnych API - używamy nieoficjalnych bibliotek (Voyager API, Twikit).
 | Engine | Crawl4AI | Open source, LLM-ready output |
 | Runtime | Python 3.11+ (Docker) | Wymagane przez Crawl4AI, linkedin-api, twikit |
 | Browser | Playwright | JS rendering, login support (Crawl4AI) |
-| LinkedIn | linkedin-api (Voyager API) | Jedyna opcja dostępu do feeda (oficjalne API zamknięte 06/2023) |
+| LinkedIn | linkedin-api (Voyager API) | Obserwowane profile per-user (oficjalne API zamknięte 06/2023) |
 | X/Twitter | twikit (async) | Python async scraper, cookies/login auth, rate limit 600/15min |
 | Framework | FastAPI | Już używany przez Crawl4AI scraper |
 
@@ -291,7 +291,7 @@ oficjalnych API - używamy nieoficjalnych bibliotek (Voyager API, Twikit).
     │                       │                    │
     ▼                       ▼                    ▼
  Gmail: 60min         Decrypt             Gmail: googleapis (Node.js)
- LinkedIn: 120min     credentials         LinkedIn: HTTP → Python /linkedin/feed
+ LinkedIn: 120min     credentials         LinkedIn: HTTP → Python /linkedin/profile-posts
  X/Twitter: 180min    (AES-256-GCM)       X/Twitter: HTTP → Python /twitter/timeline
                                                 │
                                                 ▼
@@ -331,6 +331,32 @@ connected ──sync──▶ syncing ──success──▶ connected
     │              Audio stream / URL                  │
     ▼
  <audio> player
+```
+
+**Edition TTS Playlist Flow:**
+```
+┌─────────┐     ┌──────────────────┐     ┌─────────┐
+│ Edition │────▶│ EditionTTSPlayer │────▶│ /api/tts│ (per article)
+│  Page   │     │  (playlist)      │     │         │
+└─────────┘     └──────────────────┘     └─────────┘
+                  │ track 1: play ────────▶ synthesize
+                  │ track 2: prefetch ────▶ synthesize (background)
+                  │ track 3: pending
+                  ▼
+               <audio> player (prev/play/next)
+
+Gdy track kończy się naturalnie (onended), artykuł jest auto-oznaczany jako przeczytany
+via POST /api/articles/:id/read. Ręczne skip (next/prev) NIE oznacza jako przeczytany.
+Dismissed artykuły filtrowane z playlisty via `dismissedBy` relation w getEditionWithArticles().
+```
+
+**Trash Auto-Cleanup:**
+```
+Cron: GET /api/cron/cleanup-trash (01:00 UTC daily)
+  → DismissedArticle records starsze niż 15 dni:
+    - Catalog articles: record persist (permanently hidden, Article stays for other users)
+    - Private articles: Article DELETE z DB (cascade cleans junction records)
+  → /api/trash query: dismissedAt >= cutoff (only last 15 days shown)
 ```
 
 ---
@@ -478,7 +504,9 @@ connected ──sync──▶ syncing ──success──▶ connected
 **Decyzja:** Model Edition z relacją 1:N do Article, automatyczne tworzenie via cron job
 **Konsekwencje:**
 - Artykuły grupowane po dacie publikacji/pobrania
-- TTS dla całego wydania (concat streszczeń, grouped by source)
+- TTS playlist dla wydania — osobne audio per artykuł via POST /api/tts,
+  sekwencyjne generowanie z prefetch, nawigacja prev/next,
+  cache blob URL per track
 - Cron job `/api/cron/editions` do automatycznego tworzenia
 
 ### ADR-007: PWA (Progressive Web App)
@@ -506,7 +534,7 @@ connected ──sync──▶ syncing ──success──▶ connected
 **Decyzja:** Gmail connector w Node.js (blisko Next.js API routes), LinkedIn + X/Twitter w Python microservice (rozszerzenie istniejącego `scraper/`)
 **Konsekwencje:**
 - Gmail: `googleapis` + `google-auth-library` w `package.json`
-- LinkedIn: `linkedin-api` w `scraper/requirements.txt`, endpoint `POST /scrape/linkedin/feed`
+- LinkedIn: `linkedin-api` w `scraper/requirements.txt`, endpointy `POST /linkedin/search-profiles`, `POST /linkedin/profile-posts`
 - X/Twitter: `twikit` w `scraper/requirements.txt`, endpoint `POST /scrape/twitter/timeline`
 - Node.js backend komunikuje się z Python microservice przez HTTP (localhost:8000)
 - Wspólny `SourceConnector` interface w Node.js, LinkedIn/Twitter connectors delegują do Python

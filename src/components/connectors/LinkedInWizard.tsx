@@ -8,8 +8,7 @@ type Step =
   | "authenticating"
   | "2fa"
   | "captcha"
-  | "connected"
-  | "config";
+  | "connected";
 
 type ChallengeType =
   | "2fa_email"
@@ -17,10 +16,17 @@ type ChallengeType =
   | "2fa_app"
   | "2fa_unknown";
 
+interface LinkedInProfileInfo {
+  publicId: string;
+  name: string;
+  headline?: string;
+  profileUrl: string;
+  photoUrl?: string;
+}
+
 interface LinkedInConfig {
-  hashtags: string[];
-  maxPosts: number;
-  includeReposts: boolean;
+  profiles: LinkedInProfileInfo[];
+  maxPostsPerProfile: number;
 }
 
 const CHALLENGE_MESSAGES: Record<ChallengeType, string> = {
@@ -32,8 +38,21 @@ const CHALLENGE_MESSAGES: Record<ChallengeType, string> = {
 
 const SESSION_TTL_SECONDS = 300; // 5 min
 
-export function LinkedInWizard() {
-  const [step, setStep] = useState<Step>("disclaimer");
+interface LinkedInWizardProps {
+  initialConnected?: boolean;
+  initialProfileName?: string;
+  initialConfig?: {
+    profiles?: LinkedInProfileInfo[];
+    maxPostsPerProfile?: number;
+  };
+}
+
+export function LinkedInWizard({
+  initialConnected,
+  initialProfileName,
+  initialConfig,
+}: LinkedInWizardProps = {}) {
+  const [step, setStep] = useState<Step>(initialConnected ? "connected" : "disclaimer");
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
 
   // Auth
@@ -56,17 +75,23 @@ export function LinkedInWizard() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Connected state
-  const [profileName, setProfileName] = useState<string | null>(null);
-  const [postCount, setPostCount] = useState<number | null>(null);
+  const [profileName, setProfileName] = useState<string | null>(initialProfileName ?? null);
 
-  // Config
+  // Config - profile management
   const [config, setConfig] = useState<LinkedInConfig>({
-    hashtags: [],
-    maxPosts: 30,
-    includeReposts: false,
+    profiles: initialConfig?.profiles ?? [],
+    maxPostsPerProfile: initialConfig?.maxPostsPerProfile ?? 10,
   });
-  const [hashtagInput, setHashtagInput] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Search profiles
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<LinkedInProfileInfo[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+
+  // URL input
+  const [urlInput, setUrlInput] = useState("");
 
   // Disconnect
   const [disconnecting, setDisconnecting] = useState(false);
@@ -145,19 +170,6 @@ export function LinkedInWizard() {
       if (data.success) {
         setProfileName(data.profileName);
         setStep("connected");
-
-        // Test connection to get post count
-        try {
-          const testRes = await fetch("/api/connectors/linkedin/test", {
-            method: "POST",
-          });
-          const testData = await testRes.json();
-          if (testData.success) {
-            setPostCount(testData.postCount || null);
-          }
-        } catch {
-          // Non-critical
-        }
         return;
       }
 
@@ -234,22 +246,67 @@ export function LinkedInWizard() {
     }
   };
 
-  const handleAddHashtag = () => {
-    const tag = hashtagInput.trim().replace(/^#/, "");
-    if (tag && !config.hashtags.includes(tag)) {
-      setConfig((prev) => ({
-        ...prev,
-        hashtags: [...prev.hashtags, tag],
-      }));
+  const handleSearchProfiles = async () => {
+    if (!searchQuery.trim()) return;
+    setSearchLoading(true);
+    setSearchError(null);
+    setSearchResults([]);
+
+    try {
+      const res = await fetch("/api/connectors/linkedin/search-profiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keywords: searchQuery.trim(), limit: 10 }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Wyszukiwanie nie powiodło się");
+      }
+
+      setSearchResults(data.profiles || []);
+      if ((data.profiles || []).length === 0) {
+        setSearchError("Nie znaleziono profili");
+      }
+    } catch (err) {
+      setSearchError(
+        err instanceof Error ? err.message : "Wystąpił błąd"
+      );
+    } finally {
+      setSearchLoading(false);
     }
-    setHashtagInput("");
   };
 
-  const handleRemoveHashtag = (tag: string) => {
+  const handleAddProfile = (profile: LinkedInProfileInfo) => {
+    if (config.profiles.some((p) => p.publicId === profile.publicId)) return;
     setConfig((prev) => ({
       ...prev,
-      hashtags: prev.hashtags.filter((h) => h !== tag),
+      profiles: [...prev.profiles, profile],
     }));
+  };
+
+  const handleRemoveProfile = (publicId: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      profiles: prev.profiles.filter((p) => p.publicId !== publicId),
+    }));
+  };
+
+  const handleAddByUrl = () => {
+    const url = urlInput.trim();
+    const match = url.match(/linkedin\.com\/in\/([a-zA-Z0-9_-]+)/);
+    if (!match) return;
+    const publicId = match[1];
+    if (config.profiles.some((p) => p.publicId === publicId)) {
+      setUrlInput("");
+      return;
+    }
+    handleAddProfile({
+      publicId,
+      name: publicId,
+      profileUrl: `https://www.linkedin.com/in/${publicId}`,
+    });
+    setUrlInput("");
   };
 
   const handleSave = async () => {
@@ -305,7 +362,7 @@ export function LinkedInWizard() {
           Integracja LinkedIn
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Importuj posty z Twojego feeda LinkedIn
+          Obserwuj wybrane profile i importuj ich posty
         </p>
       </div>
 
@@ -735,114 +792,192 @@ export function LinkedInWizard() {
                 </p>
                 <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">
                   Zalogowano jako {profileName || "LinkedIn User"}.
-                  {postCount
-                    ? ` Pobrano ${postCount} postów z feeda.`
-                    : ""}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Config section */}
+          {/* Followed Profiles */}
           <div className="bg-card rounded-2xl border border-border p-4 space-y-4">
-            <h3 className="font-semibold text-foreground">Konfiguracja</h3>
+            <h3 className="font-semibold text-foreground">Obserwowane profile</h3>
 
-            {/* Hashtags */}
+            {config.profiles.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Nie obserwujesz jeszcze żadnych profili. Dodaj pierwszy!
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {config.profiles.map((profile) => (
+                  <div
+                    key={profile.publicId}
+                    className="flex items-center gap-3 p-3 bg-muted/10 rounded-xl"
+                  >
+                    <div className="w-9 h-9 bg-[#0A66C2]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {profile.name}
+                      </p>
+                      {profile.headline && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {profile.headline}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleRemoveProfile(profile.publicId)}
+                      className="text-muted-foreground hover:text-red-500 flex-shrink-0 p-1"
+                      title="Usuń profil"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add Profile */}
+          <div className="bg-card rounded-2xl border border-border p-4 space-y-4">
+            <h3 className="font-semibold text-foreground">Dodaj profil</h3>
+
+            {/* By URL */}
             <div>
               <label className="text-xs font-medium text-muted-foreground block mb-1.5">
-                Hashtagi (opcjonalne filtrowanie)
+                Wklej URL profilu LinkedIn
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="#AI, #tech..."
-                  value={hashtagInput}
-                  onChange={(e) => setHashtagInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddHashtag()}
+                  placeholder="https://www.linkedin.com/in/nazwa-profilu"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddByUrl()}
                   className="flex-1 px-4 py-2.5 bg-muted/10 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0A66C2]/20"
                 />
                 <button
-                  onClick={handleAddHashtag}
-                  disabled={!hashtagInput.trim()}
-                  className="px-4 py-2.5 bg-muted/10 border border-border rounded-xl text-sm hover:bg-muted/20 disabled:opacity-50"
+                  onClick={handleAddByUrl}
+                  disabled={!urlInput.trim() || !urlInput.includes("linkedin.com/in/")}
+                  className="px-4 py-2.5 bg-[#0A66C2] text-white rounded-xl text-sm hover:bg-blue-700 disabled:opacity-50"
                 >
-                  +
+                  Dodaj
                 </button>
               </div>
-              {config.hashtags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {config.hashtags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#0A66C2]/10 text-[#0A66C2] rounded-full text-xs font-medium"
-                    >
-                      #{tag}
-                      <button
-                        onClick={() => handleRemoveHashtag(tag)}
-                        className="hover:text-red-500"
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground">lub</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            {/* Search */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1.5">
+                Wyszukaj po imieniu i nazwisku
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="np. Satya Nadella"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearchProfiles()}
+                  className="flex-1 px-4 py-2.5 bg-muted/10 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0A66C2]/20"
+                />
+                <button
+                  onClick={handleSearchProfiles}
+                  disabled={searchLoading || !searchQuery.trim()}
+                  className="px-4 py-2.5 bg-muted/10 border border-border rounded-xl text-sm hover:bg-muted/20 disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {searchLoading ? (
+                    <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  )}
+                  Szukaj
+                </button>
+              </div>
+
+              {searchError && (
+                <p className="text-xs text-red-500 mt-2">{searchError}</p>
+              )}
+
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <div className="space-y-2 mt-3">
+                  {searchResults.map((profile) => {
+                    const alreadyAdded = config.profiles.some(
+                      (p) => p.publicId === profile.publicId
+                    );
+                    return (
+                      <div
+                        key={profile.publicId}
+                        className="flex items-center gap-3 p-3 bg-muted/5 border border-border rounded-xl"
                       >
-                        &times;
-                      </button>
-                    </span>
-                  ))}
+                        <div className="w-9 h-9 bg-[#0A66C2]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg className="w-4 h-4 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">
+                            {profile.name}
+                          </p>
+                          {profile.headline && (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {profile.headline}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleAddProfile(profile)}
+                          disabled={alreadyAdded}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0 ${
+                            alreadyAdded
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                              : "bg-[#0A66C2] text-white hover:bg-blue-700"
+                          }`}
+                        >
+                          {alreadyAdded ? "Dodano" : "Dodaj"}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Max posts */}
-            <div>
-              <label className="text-xs font-medium text-muted-foreground block mb-1.5">
-                Maksymalna liczba postów: {config.maxPosts}
-              </label>
-              <input
-                type="range"
-                min={10}
-                max={50}
-                value={config.maxPosts}
-                onChange={(e) =>
-                  setConfig((prev) => ({
-                    ...prev,
-                    maxPosts: Number(e.target.value),
-                  }))
-                }
-                className="w-full accent-[#0A66C2]"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>10</span>
-                <span>50</span>
-              </div>
-            </div>
-
-            {/* Include reposts */}
-            <div className="flex items-center justify-between py-2">
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  Udostępnione posty
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Importuj reposty (udostępnienia)
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setConfig((prev) => ({
-                    ...prev,
-                    includeReposts: !prev.includeReposts,
-                  }))
-                }
-                className={`w-12 h-7 rounded-full relative transition-colors ${
-                  config.includeReposts
-                    ? "bg-[#0A66C2]"
-                    : "bg-muted/30 border border-border"
-                }`}
-              >
-                <div
-                  className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all ${
-                    config.includeReposts ? "right-1" : "left-1"
-                  }`}
-                />
-              </button>
+          {/* Posts per profile slider */}
+          <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
+            <label className="text-xs font-medium text-muted-foreground block">
+              Postów per profil: {config.maxPostsPerProfile}
+            </label>
+            <input
+              type="range"
+              min={5}
+              max={50}
+              value={config.maxPostsPerProfile}
+              onChange={(e) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  maxPostsPerProfile: Number(e.target.value),
+                }))
+              }
+              className="w-full accent-[#0A66C2]"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>5</span>
+              <span>50</span>
             </div>
           </div>
 

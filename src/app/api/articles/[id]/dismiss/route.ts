@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { updateEditionCounts } from "@/lib/editionService";
 
 // POST - dismiss article (move to trash)
 export async function POST(
@@ -27,26 +29,46 @@ export async function POST(
       );
     }
 
-    // Add to dismissed
-    await prisma.dismissedArticle.upsert({
-      where: {
-        userId_articleId: {
+    // Add to dismissed (create + catch duplicate for robustness)
+    try {
+      await prisma.dismissedArticle.create({
+        data: {
           userId: session.userId,
           articleId: id,
         },
-      },
-      update: {
-        dismissedAt: new Date(),
-      },
-      create: {
-        userId: session.userId,
-        articleId: id,
-      },
-    });
+      });
+    } catch (e: unknown) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === "P2002"
+      ) {
+        // Already dismissed - update timestamp
+        await prisma.dismissedArticle.update({
+          where: {
+            userId_articleId: {
+              userId: session.userId,
+              articleId: id,
+            },
+          },
+          data: { dismissedAt: new Date() },
+        });
+      } else {
+        throw e;
+      }
+    }
 
-    return NextResponse.json({ dismissed: true });
+    let editionUpdate = null;
+    if (article.editionId) {
+      const counts = await updateEditionCounts(article.editionId, session.userId);
+      editionUpdate = { editionId: article.editionId, ...counts };
+    }
+
+    return NextResponse.json({ dismissed: true, edition: editionUpdate });
   } catch (error) {
-    console.error("Dismiss article error:", error);
+    console.error(
+      "Dismiss article error:",
+      error instanceof Error ? error.message : error
+    );
     return NextResponse.json(
       { error: "Wystapil blad" },
       { status: 500 }
@@ -67,6 +89,11 @@ export async function DELETE(
 
     const { id } = await params;
 
+    const article = await prisma.article.findUnique({
+      where: { id },
+      select: { editionId: true },
+    });
+
     await prisma.dismissedArticle.deleteMany({
       where: {
         userId: session.userId,
@@ -74,7 +101,13 @@ export async function DELETE(
       },
     });
 
-    return NextResponse.json({ dismissed: false });
+    let editionUpdate = null;
+    if (article?.editionId) {
+      const counts = await updateEditionCounts(article.editionId, session.userId);
+      editionUpdate = { editionId: article.editionId, ...counts };
+    }
+
+    return NextResponse.json({ dismissed: false, edition: editionUpdate });
   } catch (error) {
     console.error("Restore article error:", error);
     return NextResponse.json(

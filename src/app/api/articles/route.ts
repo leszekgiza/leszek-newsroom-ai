@@ -3,6 +3,30 @@ import { prisma, pool } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { searchArticles } from "@/lib/searchService";
 
+/** Extract display name from email-style author: "Name" <email> → Name */
+function extractDisplayName(author: string): string {
+  const match = author.match(/^"?(.+?)"?\s*<.+>$/);
+  return match ? match[1] : author;
+}
+
+/** Parse composite sourceId into filter components */
+function parseCompositeSourceId(sourceId: string): {
+  catalogSourceId?: string;
+  privateSourceId?: string;
+  author?: string;
+} {
+  if (sourceId.startsWith("private:")) {
+    const parts = sourceId.split(":");
+    const privSourceId = parts[1];
+    const author = decodeURIComponent(parts.slice(2).join(":"));
+    return { privateSourceId: privSourceId, ...(author ? { author } : {}) };
+  } else if (sourceId.startsWith("catalog:")) {
+    return { catalogSourceId: sourceId.substring(8) };
+  }
+  // Legacy: raw sourceId
+  return {};
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getCurrentUser();
@@ -69,12 +93,29 @@ export async function GET(request: NextRequest) {
     // ========== FTS Search Branch ==========
     // Use PostgreSQL Full-Text Search for queries >= 2 characters
     if (search && search.trim().length >= 2) {
+      // Parse composite sourceId for FTS
+      let ftsSourceFilter: string | null = null;
+      let ftsAuthorFilter: string | undefined;
+      if (sourceId) {
+        const parsed = parseCompositeSourceId(sourceId);
+        if (parsed.privateSourceId) {
+          ftsSourceFilter = parsed.privateSourceId;
+          ftsAuthorFilter = parsed.author;
+        } else if (parsed.catalogSourceId) {
+          ftsSourceFilter = parsed.catalogSourceId;
+        } else {
+          // Legacy raw ID
+          ftsSourceFilter = sourceId;
+        }
+      }
+
       const { articles: searchResults, total } = await searchArticles(pool, {
         query: search,
         subscribedSourceIds: activeSubscribedIds,
         privateSourceIds: privateSourceIds,
         dismissedArticleIds,
-        sourceFilter: sourceId,
+        sourceFilter: ftsSourceFilter,
+        author: ftsAuthorFilter,
         limit,
         offset,
       });
@@ -197,12 +238,23 @@ export async function GET(request: NextRequest) {
       ],
     };
 
-    // Filter by specific source if provided
+    // Filter by specific source if provided (supports composite IDs)
     if (sourceId) {
-      whereClause.OR = [
-        { catalogSourceId: sourceId },
-        { privateSourceId: sourceId },
-      ];
+      const parsed = parseCompositeSourceId(sourceId);
+      if (parsed.privateSourceId) {
+        whereClause.OR = [{ privateSourceId: parsed.privateSourceId }];
+        if (parsed.author) {
+          whereClause.author = parsed.author;
+        }
+      } else if (parsed.catalogSourceId) {
+        whereClause.OR = [{ catalogSourceId: parsed.catalogSourceId }];
+      } else {
+        // Legacy: raw sourceId
+        whereClause.OR = [
+          { catalogSourceId: sourceId },
+          { privateSourceId: sourceId },
+        ];
+      }
     }
 
     // Filter out dismissed articles
@@ -258,6 +310,105 @@ export async function GET(request: NextRequest) {
     // Get total count
     const totalCount = await prisma.article.count({ where: whereClause });
 
+    // Build source counts from ALL articles (not just current page)
+    // Only on first page load (offset === 0) to avoid extra queries on pagination
+    let sourceCounts: { id: string; name: string; logoUrl?: string | null; count: number }[] = [];
+    if (offset === 0 && !sourceId) {
+      // Count articles per source (undismissed only)
+      const dismissedFilter = dismissedArticleIds.length > 0
+        ? { NOT: { id: { in: dismissedArticleIds } } }
+        : {};
+
+      const [catalogCounts, privateCounts] = await Promise.all([
+        activeSubscribedIds.length > 0
+          ? prisma.article.groupBy({
+              by: ["catalogSourceId"],
+              where: {
+                catalogSourceId: { in: activeSubscribedIds },
+                ...dismissedFilter,
+              },
+              _count: true,
+            })
+          : [],
+        // Group private sources by (privateSourceId, author) for per-author entries
+        privateSourceIds.length > 0
+          ? prisma.article.groupBy({
+              by: ["privateSourceId", "author"],
+              where: {
+                privateSourceId: { in: privateSourceIds },
+                ...dismissedFilter,
+              },
+              _count: true,
+            })
+          : [],
+      ]);
+
+      // Fetch source names
+      const catalogIds = catalogCounts
+        .map((c) => c.catalogSourceId)
+        .filter((id): id is string => id !== null);
+      const privIds = privateCounts
+        .map((c) => c.privateSourceId)
+        .filter((id): id is string => id !== null);
+
+      const [catalogSources, privateSrcData] = await Promise.all([
+        catalogIds.length > 0
+          ? prisma.catalogSource.findMany({
+              where: { id: { in: catalogIds } },
+              select: { id: true, name: true, logoUrl: true },
+            })
+          : [],
+        privIds.length > 0
+          ? prisma.privateSource.findMany({
+              where: { id: { in: [...new Set(privIds)] } },
+              select: { id: true, name: true },
+            })
+          : [],
+      ]);
+
+      const catalogMap = new Map(catalogSources.map((s) => [s.id, s]));
+      const privateMap = new Map(privateSrcData.map((s) => [s.id, s]));
+
+      // Catalog sources: one entry per source (unchanged)
+      for (const c of catalogCounts) {
+        const src = catalogMap.get(c.catalogSourceId!);
+        if (src) {
+          sourceCounts.push({
+            id: `catalog:${src.id}`,
+            name: src.name,
+            logoUrl: src.logoUrl,
+            count: c._count,
+          });
+        }
+      }
+
+      // Private sources: one entry per (source, author) pair
+      for (const c of privateCounts) {
+        const src = privateMap.get(c.privateSourceId!);
+        if (!src) continue;
+
+        const author = c.author;
+        if (author) {
+          // Per-author entry with composite ID
+          const displayName = extractDisplayName(author);
+          sourceCounts.push({
+            id: `private:${src.id}:${encodeURIComponent(author)}`,
+            name: displayName,
+            count: c._count,
+          });
+        } else {
+          // NULL author - group under source name
+          sourceCounts.push({
+            id: `private:${src.id}:`,
+            name: src.name,
+            count: c._count,
+          });
+        }
+      }
+
+      sourceCounts.sort((a, b) => b.count - a.count);
+    }
+
     return NextResponse.json({
       articles: transformedArticles,
       pagination: {
@@ -266,6 +417,7 @@ export async function GET(request: NextRequest) {
         offset,
         hasMore: offset + articles.length < totalCount,
       },
+      ...(sourceCounts.length > 0 ? { sources: sourceCounts } : {}),
     });
   } catch (error) {
     console.error("Get articles error:", error);

@@ -12,6 +12,7 @@ interface EditionArticle {
   id: string;
   title: string;
   intro: string | null;
+  summary: string | null;
   url: string;
   imageUrl: string | null;
   publishedAt: string | null;
@@ -87,6 +88,26 @@ export default function EditionDetailPage({
       }
     } catch (error) {
       console.error("Toggle save error:", error);
+    }
+  };
+
+  const dismissArticle = async (articleId: string) => {
+    try {
+      const response = await fetch(`/api/articles/${articleId}/dismiss`, { method: "POST" });
+      if (!response.ok) return;
+      const data = await response.json();
+
+      setEdition((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          articleCount: data.edition?.articleCount ?? prev.articleCount - 1,
+          unreadCount: data.edition?.unreadCount ?? Math.max(0, prev.unreadCount - 1),
+          articles: prev.articles.filter((a) => a.id !== articleId),
+        };
+      });
+    } catch (error) {
+      console.error("Dismiss article error:", error);
     }
   };
 
@@ -209,8 +230,8 @@ export default function EditionDetailPage({
                 {/* TTS Player for entire edition */}
                 <div className="mt-4">
                   <EditionTTSPlayer
-                    editionId={edition.id}
-                    articleCount={edition.articleCount}
+                    articles={edition.articles}
+                    onArticleListened={markAsRead}
                   />
                 </div>
 
@@ -231,6 +252,7 @@ export default function EditionDetailPage({
                     onOpenSummary={openSummaryModal}
                     onToggleSave={toggleSave}
                     onMarkAsRead={markAsRead}
+                    onDismiss={dismissArticle}
                   />
                 ))}
               </div>

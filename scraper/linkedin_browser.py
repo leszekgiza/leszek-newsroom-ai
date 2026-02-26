@@ -42,6 +42,7 @@ class BrowserLoginStartResponse(BaseModel):
     session_id: Optional[str] = None
     state: str  # success, 2fa_email, 2fa_sms, 2fa_app, 2fa_unknown, captcha, failed
     li_at: Optional[str] = None
+    jsessionid: Optional[str] = None
     profile_name: Optional[str] = None
     screenshot: Optional[str] = None  # base64
     error: Optional[str] = None
@@ -56,6 +57,7 @@ class BrowserLoginVerifyResponse(BaseModel):
     success: bool
     state: str
     li_at: Optional[str] = None
+    jsessionid: Optional[str] = None
     profile_name: Optional[str] = None
     screenshot: Optional[str] = None
     error: Optional[str] = None
@@ -191,21 +193,28 @@ async def _detect_state(page: Page) -> Tuple[str, Optional[str]]:
     return "failed", f"Unexpected page: {page.url}"
 
 
-async def _extract_li_at(context: BrowserContext) -> Optional[str]:
-    """Extract li_at cookie from browser context."""
+async def _extract_cookies(context: BrowserContext) -> Tuple[Optional[str], Optional[str]]:
+    """Extract li_at and JSESSIONID cookies from browser context."""
     cookies = await context.cookies("https://www.linkedin.com")
+    li_at = None
+    jsessionid = None
     for cookie in cookies:
         if cookie["name"] == "li_at":
-            return cookie["value"]
-    return None
+            li_at = cookie["value"]
+        elif cookie["name"] == "JSESSIONID":
+            jsessionid = cookie["value"]
+    return li_at, jsessionid
 
 
-async def _get_profile_name(li_at: str) -> Optional[str]:
+async def _get_profile_name(li_at: str, jsessionid: Optional[str] = None) -> Optional[str]:
     """Get profile name using linkedin-api with the li_at cookie."""
     try:
         from linkedin_api import Linkedin
+        auth_cookies = {"li_at": li_at}
+        if jsessionid:
+            auth_cookies["JSESSIONID"] = jsessionid
         api = await asyncio.to_thread(
-            Linkedin, "", "", cookies={"li_at": li_at}
+            Linkedin, "", "", cookies=auth_cookies
         )
         profile = await asyncio.to_thread(api.get_user_profile)
         first = profile.get("firstName", "")
@@ -306,8 +315,8 @@ async def browser_login_start(request: BrowserLoginStartRequest):
             state, error_msg = await _detect_state(page)
 
             if state == "success":
-                li_at = await _extract_li_at(context)
-                profile_name = await _get_profile_name(li_at) if li_at else None
+                li_at, jsessionid = await _extract_cookies(context)
+                profile_name = await _get_profile_name(li_at, jsessionid) if li_at else None
 
                 # Close browser - no longer needed
                 await page.close()
@@ -318,6 +327,7 @@ async def browser_login_start(request: BrowserLoginStartRequest):
                     success=True,
                     state="success",
                     li_at=li_at,
+                    jsessionid=jsessionid,
                     profile_name=profile_name,
                 )
 
@@ -450,8 +460,8 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
         state, error_msg = await _detect_state(page)
 
         if state == "success":
-            li_at = await _extract_li_at(context)
-            profile_name = await _get_profile_name(li_at) if li_at else None
+            li_at, jsessionid = await _extract_cookies(context)
+            profile_name = await _get_profile_name(li_at, jsessionid) if li_at else None
 
             # Close session
             await _close_session(request.session_id)
@@ -460,6 +470,7 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
                 success=True,
                 state="success",
                 li_at=li_at,
+                jsessionid=jsessionid,
                 profile_name=profile_name,
             )
 

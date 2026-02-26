@@ -4,6 +4,7 @@ import { Suspense, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { BriefingBanner } from "@/components/briefing/BriefingBanner";
 import { ArticleList } from "@/components/articles/ArticleList";
 import { SourceFilter } from "@/components/articles/SourceFilter";
 import { EditionTabs } from "@/components/articles/EditionTabs";
@@ -99,6 +100,9 @@ function HomePageContent() {
       <div className="lg:hidden">
         <SearchBar />
       </div>
+
+      {/* Briefing Banner */}
+      <BriefingBanner />
 
       {/* Edition Tabs - zakladki z datami */}
       <div className="lg:px-8 lg:py-2 lg:border-b lg:border-border/50 lg:bg-card/95 lg:backdrop-blur-sm lg:sticky lg:top-[73px] lg:z-30">

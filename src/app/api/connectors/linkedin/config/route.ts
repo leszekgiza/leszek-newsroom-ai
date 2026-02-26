@@ -12,12 +12,11 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { hashtags, maxPosts, includeReposts } = body;
+    const { profiles, maxPostsPerProfile } = body;
 
     const config = {
-      hashtags: hashtags || [],
-      maxPosts: maxPosts ?? 30,
-      includeReposts: includeReposts ?? false,
+      profiles: profiles || [],
+      maxPostsPerProfile: maxPostsPerProfile ?? 10,
     };
 
     const connector = await getConnector("LINKEDIN");

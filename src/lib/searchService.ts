@@ -23,6 +23,7 @@ export interface SearchOptions {
   privateSourceIds: string[];
   dismissedArticleIds: string[];
   sourceFilter?: string | null;
+  author?: string;
   limit?: number;
   offset?: number;
 }
@@ -49,6 +50,7 @@ export async function searchArticles(
     privateSourceIds,
     dismissedArticleIds,
     sourceFilter,
+    author,
     limit = 50,
     offset = 0,
   } = options;
@@ -105,9 +107,32 @@ export async function searchArticles(
   }
   const sourceFilter_sql = sourceConditions.join(" OR ");
 
+  // Build params dynamically with correct $N numbering
+  // $1=prefixQuery, $2=catalogIds, $3=privateIds, $4=limit, $5=offset, then optional
+  const params: (string | string[] | number)[] = [
+    prefixQuery,
+    catalogIds,
+    privateIds,
+    limit,
+    offset,
+  ];
+  let nextParam = 6;
+
   // Build dismissed filter
-  const dismissedFilter =
-    dismissedArticleIds.length > 0 ? "AND a.id != ALL($6::text[])" : "";
+  let dismissedFilter = "";
+  if (dismissedArticleIds.length > 0) {
+    dismissedFilter = `AND a.id != ALL($${nextParam}::text[])`;
+    params.push(dismissedArticleIds);
+    nextParam++;
+  }
+
+  // Build author filter
+  let authorFilter = "";
+  if (author) {
+    authorFilter = `AND a.author = $${nextParam}`;
+    params.push(author);
+    nextParam++;
+  }
 
   // Build the search query
   const searchQuery = `
@@ -136,6 +161,7 @@ export async function searchArticles(
         a.search_vector @@ to_tsquery('polish_simple', $1)
         AND (${sourceFilter_sql})
         ${dismissedFilter}
+        ${authorFilter}
     )
     SELECT
       *,
@@ -144,18 +170,6 @@ export async function searchArticles(
     ORDER BY rank DESC, published_at DESC NULLS LAST
     LIMIT $4 OFFSET $5
   `;
-
-  const params: (string | string[] | number)[] = [
-    prefixQuery,
-    catalogIds,
-    privateIds,
-    limit,
-    offset,
-  ];
-
-  if (dismissedArticleIds.length > 0) {
-    params.push(dismissedArticleIds);
-  }
 
   try {
     const result = await pool.query(searchQuery, params);

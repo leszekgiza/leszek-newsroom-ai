@@ -25,6 +25,39 @@
 
 ## Sprint Backlog (Priorytet: MUST/SHOULD)
 
+### Sprint TTS-PLAYLIST: Edition Playlist Player
+**Cel:** Zamiana monolitycznego TTS wydania na playlist per-artykuł
+**Story:** US9.4 (zaktualizowane)
+**Priorytet:** MUST (najwyższy)
+**Stan:** 🚧 IN PROGRESS
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| TTSP.1 | Dokumentacja | Aktualizacja requirements, user-stories, hld, lld, backlog | ✅ DONE | S |
+| TTSP.2 | Summary w danych edycji | Dodanie summary do getEditionWithArticles, API route, page interface | ✅ DONE | S |
+| TTSP.3 | EditionTTSPlayer rewrite | Playlist: per-article generation, cache, prefetch, prev/next, auto-advance | ✅ DONE | M |
+| TTSP.4 | Testy manualne | Play, next, prev, auto-advance, prefetch, error, conflict z card TTS | 📋 TODO | S |
+| TTSP.5 | Deprecated: old edition TTS API | Oznaczenie POST /api/editions/:id/tts jako deprecated | ✅ DONE | S |
+| TTSP.6 | Auto-mark as read po odsłuchaniu | onended → markAsRead(articleId), aktualizacja badge NEW i unreadCount | ✅ DONE | S |
+
+### Sprint DISMISS-EDITIONS: Dismiss z wydań + auto-cleanup Kosza
+**Cel:** Dismiss artykułów z wydań, filtrowanie w TTS playlist, auto-cleanup po 15 dniach
+**Story:** US3.4 (zaktualizowane)
+**Priorytet:** SHOULD
+**Stan:** ✅ DONE
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| DISM.1 | Dokumentacja | requirements, user-stories, hld, lld, backlog | ✅ DONE | S |
+| DISM.2 | Filter dismissed w getEditionWithArticles | Prisma dismissedBy.none filter + dynamiczne counts | ✅ DONE | S |
+| DISM.3 | updateEditionCounts() | Nowa funkcja w editionService — przelicza counts z excluded dismissed | ✅ DONE | S |
+| DISM.4 | Dismiss endpoint — edition counts | POST/DELETE dismiss aktualizują edition articleCount/unreadCount | ✅ DONE | S |
+| DISM.5 | Edition page — dismiss handler | dismissArticle() + onDismiss prop w ArticleCard | ✅ DONE | S |
+| DISM.6 | Trash 15-day filter + cleanup cron | trashService.ts, /api/cron/cleanup-trash, filtr w /api/trash | ✅ DONE | M |
+| DISM.7 | Trash page — banner 15 dni | Info "Artykuly w koszu sa automatycznie usuwane po 15 dniach" | ✅ DONE | S |
+
+---
+
 ## Strategic Backlog (Open Source + Premium) - TODO
 
 ### S0. Points 1-3 (Documentation + PWA/Q&A + OSS/Premium split)
@@ -112,19 +145,22 @@
 **Deliverable:** Strona Settings/Integrations z dashboardem connectorów, auto-sync, notyfikacje o wygasłych credentials.
 
 #### Sprint SI-4: LinkedIn Connector (~2 tyg.)
-**Cel:** Pełny connector LinkedIn (Voyager API, Python microservice)
-**Story:** US14.3, US14.4
-**Stan:** 🔧 CODE WRITTEN - Kod napisany (tsc/lint/build OK), wymaga testów funkcjonalnych z prawdziwymi credentials.
+**Cel:** Pełny connector LinkedIn (Voyager API, Python microservice) - model obserwowanych profili
+**Story:** US14.3, US14.4, US14.8
+**Stan:** 🔧 CODE WRITTEN - Kod napisany (tsc/lint/build OK), wymaga testów funkcjonalnych z prawdziwymi credentials. Nowe zadania LNKD.6-8 do zrobienia.
 
 | ID | Zadanie | Opis | Status | Estimate | Zależy od |
 |----|---------|------|--------|----------|-----------|
 | LNKD.1 | LinkedIn auth (Voyager API) | linkedin-api (Python) login/hasło → Voyager session. Fallback: manual cookie li_at. Disclaimer o braku oficjalnego API i ryzyku bana | 🔧 CODE WRITTEN | L | CONN.2 |
-| LNKD.2 | LinkedIn feed scraper | Python endpoint: `POST /linkedin/posts`. Voyager API get_feed_posts(). Session cache w pamięci | 🔧 CODE WRITTEN | L | LNKD.1 |
+| LNKD.2 | LinkedIn profile posts scraper | Python endpoint: `POST /linkedin/profile-posts`. Voyager API get_profile_posts(). Pobieranie postów per obserwowany profil | 🔧 CODE WRITTEN | L | LNKD.1 |
 | LNKD.3 | LinkedIn post parser | JSON → markdown, author name, date, hashtags, repost detection | 🔧 CODE WRITTEN | M | LNKD.2 |
-| LNKD.4 | LinkedIn connector | fetchItems, config (hashtags filter, max postów, exclude reposts), API routes (auth/test/config/disconnect) | 🔧 CODE WRITTEN | M | LNKD.3 |
+| LNKD.4 | LinkedIn connector | fetchItems, config (obserwowane profile, max postów per profil), API routes (auth/test/config/disconnect) | 🔧 CODE WRITTEN | M | LNKD.3 |
 | LNKD.5 | UI: LinkedIn Setup Wizard | Login + disclaimer (akceptacja wymagana) + cookie fallback + test połączenia. Mockup: `ui_linkedin_wizard_v2_1.html` | 🔧 CODE WRITTEN | M | LNKD.1 |
+| LNKD.6 | Search profiles endpoint (Python + API route) | Python: `POST /linkedin/search-profiles` + Next.js: `POST /api/connectors/linkedin/search-profiles`. Wyszukiwanie profili LinkedIn po imieniu/nazwisku | 📋 TODO | M | LNKD.1 |
+| LNKD.7 | Profile posts endpoint (Python + zmiana connector) | Python: `POST /linkedin/profile-posts` per-profile. Zmiana connectora z feed na per-profile fetching | 📋 TODO | M | LNKD.2 |
+| LNKD.8 | UI profile management (LinkedInWizard) | Wyszukiwanie profili, lista obserwowanych, dodawanie/usuwanie profili w LinkedInWizard | 📋 TODO | M | LNKD.5, LNKD.6 |
 
-**Deliverable:** Użytkownik łączy LinkedIn, widzi posty z feeda jako artykuły z AI streszczeniami.
+**Deliverable:** Użytkownik łączy LinkedIn, dodaje obserwowane profile, widzi ich posty jako artykuły z AI streszczeniami.
 
 #### Sprint SI-5: X/Twitter Connector (~2 tyg.)
 **Cel:** Pełny connector X/Twitter (Twikit, Python microservice)
@@ -167,7 +203,8 @@
 | E9.6 | Widok kalendarza/lista dat | US9.2 | 🔮 FUTURE | M |
 | E9.7 | Cron job - tworzenie wydania o północy | US9.3 | ✅ DONE | M |
 | E9.8 | Ustawienie: domyślny widok (Feed/Wydanie) | US9.3 | ✅ DONE | S |
-| E9.9 | TTS dla całego wydania | US9.4 | ✅ DONE | M |
+| E9.9 | ~~TTS monolityczne dla wydania~~ | US9.4 | ⬆️ REPLACED by E9.10 | M |
+| E9.10 | TTS playlist player — osobne audio per artykuł, prev/next, prefetch | US9.4 | 🚧 IN PROGRESS | M |
 
 ### 2. Wyszukiwanie PostgreSQL FTS [MUST] ✅ DONE
 **Cel:** Pełnotekstowe wyszukiwanie z obsługą języka polskiego

@@ -65,10 +65,15 @@ export function TTSPlayer({ text, articleId }: TTSPlayerProps) {
       });
 
       if (!response.ok) {
-        throw new Error("Nie udało się wygenerować audio");
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Nie udało się wygenerować audio");
       }
 
       const blob = await response.blob();
+      if (blob.type && !blob.type.startsWith("audio/")) {
+        throw new Error("Otrzymano nieprawidłowy format audio");
+      }
+
       const url = URL.createObjectURL(blob);
 
       if (audioUrl) {
@@ -98,6 +103,15 @@ export function TTSPlayer({ text, articleId }: TTSPlayerProps) {
 
   const handleEnded = () => {
     stop();
+  };
+
+  const handleAudioError = () => {
+    stop();
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
+    setError("Nie udało się odtworzyć audio");
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,7 +198,15 @@ export function TTSPlayer({ text, articleId }: TTSPlayerProps) {
       </div>
 
       {error && (
-        <p className="text-xs text-highlight mt-2">{error}</p>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-highlight">{error}</p>
+          <button
+            onClick={handlePlayPause}
+            className="text-xs text-accent hover:underline"
+          >
+            Spróbuj ponownie
+          </button>
+        </div>
       )}
 
       {/* Hidden audio element */}
@@ -195,6 +217,7 @@ export function TTSPlayer({ text, articleId }: TTSPlayerProps) {
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}
+          onError={handleAudioError}
         />
       )}
 

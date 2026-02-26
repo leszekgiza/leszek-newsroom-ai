@@ -1,3 +1,9 @@
+/**
+ * @deprecated Replaced by playlist player that calls POST /api/tts per article.
+ * This endpoint generated one monolithic audio from all edition articles.
+ * Kept for backward compatibility but no longer used by the UI.
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

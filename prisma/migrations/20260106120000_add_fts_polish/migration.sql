@@ -25,12 +25,13 @@ ALTER TABLE "articles" ADD COLUMN "search_vector" tsvector;
 CREATE INDEX "idx_articles_search_vector" ON "articles" USING GIN("search_vector");
 
 -- 5. Create function to update search_vector with weighted fields
--- Weights: A (highest) = title, B = intro, C (lowest) = summary
+-- Weights: A (highest) = title + author, B = intro, C (lowest) = summary
 CREATE OR REPLACE FUNCTION articles_search_vector_update()
 RETURNS trigger AS $$
 BEGIN
   NEW.search_vector :=
     setweight(to_tsvector('polish_simple', COALESCE(NEW.title, '')), 'A') ||
+    setweight(to_tsvector('polish_simple', COALESCE(NEW.author, '')), 'A') ||
     setweight(to_tsvector('polish_simple', COALESCE(NEW.intro, '')), 'B') ||
     setweight(to_tsvector('polish_simple', COALESCE(NEW.summary, '')), 'C');
   RETURN NEW;
@@ -39,7 +40,7 @@ $$ LANGUAGE plpgsql;
 
 -- 6. Create trigger for automatic updates on INSERT or UPDATE
 CREATE TRIGGER articles_search_vector_trigger
-  BEFORE INSERT OR UPDATE OF title, intro, summary
+  BEFORE INSERT OR UPDATE OF title, intro, summary, author
   ON "articles"
   FOR EACH ROW
   EXECUTE FUNCTION articles_search_vector_update();
@@ -47,5 +48,6 @@ CREATE TRIGGER articles_search_vector_trigger
 -- 7. Backfill existing articles with search vectors
 UPDATE "articles" SET search_vector =
   setweight(to_tsvector('polish_simple', COALESCE(title, '')), 'A') ||
+  setweight(to_tsvector('polish_simple', COALESCE(author, '')), 'A') ||
   setweight(to_tsvector('polish_simple', COALESCE(intro, '')), 'B') ||
   setweight(to_tsvector('polish_simple', COALESCE(summary, '')), 'C');
