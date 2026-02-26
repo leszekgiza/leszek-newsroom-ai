@@ -190,6 +190,10 @@ export async function POST(request: NextRequest) {
         result.articlesNew++;
         console.log(`[SCRAPE] SAVED OK: ${articleData.title?.slice(0, 40)}`);
       } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          console.log(`[SCRAPE] SKIP (duplicate): ${articleInfo.title?.slice(0, 40)}`);
+          continue;
+        }
         console.log(`[SCRAPE] ERROR: ${error instanceof Error ? error.message : "Unknown error"}`);
         result.articlesFailed++;
         result.errors.push(
@@ -288,18 +292,26 @@ async function handleConnectorSync(source: {
         where: { url: item.url },
       });
       if (!existing) {
-        await prisma.article.create({
-          data: {
-            url: item.url,
-            title: item.title,
-            intro: null,
-            summary: null,
-            author: item.author,
-            publishedAt: item.publishedAt,
-            privateSourceId: source.id,
-          },
-        });
-        newCount++;
+        try {
+          await prisma.article.create({
+            data: {
+              url: item.url,
+              title: item.title,
+              intro: null,
+              summary: null,
+              author: item.author,
+              publishedAt: item.publishedAt,
+              privateSourceId: source.id,
+            },
+          });
+          newCount++;
+        } catch (err) {
+          if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+            console.log(`[CONNECTOR] SKIP (duplicate): ${item.title?.slice(0, 40)}`);
+          } else {
+            throw err;
+          }
+        }
       }
     }
 

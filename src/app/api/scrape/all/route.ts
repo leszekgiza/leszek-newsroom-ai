@@ -183,6 +183,11 @@ export async function GET() {
                 newCount++;
                 send({ type: "article_new", sourceId: source.id, articleTitle: articleData.title });
               } catch (err) {
+                if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+                  skipCount++;
+                  send({ type: "article_skip", sourceId: source.id, articleTitle: articleInfo.title });
+                  continue;
+                }
                 errorCount++;
                 send({ type: "article_error", sourceId: source.id, articleTitle: articleInfo.title, error: err instanceof Error ? err.message : "Nieznany blad" });
               }
@@ -282,21 +287,30 @@ async function syncConnectorSource(
         continue;
       }
 
-      const createdArticle = await prisma.article.create({
-        data: {
-          url: item.url,
-          title: item.title,
-          intro: null,
-          summary: null,
-          author: item.author,
-          publishedAt: item.publishedAt,
-          privateSourceId: sourceId,
-        },
-      });
+      try {
+        const createdArticle = await prisma.article.create({
+          data: {
+            url: item.url,
+            title: item.title,
+            intro: null,
+            summary: null,
+            author: item.author,
+            publishedAt: item.publishedAt,
+            privateSourceId: sourceId,
+          },
+        });
 
-      await addArticleToEdition(createdArticle.id, userId);
-      newCount++;
-      send({ type: "article_new", sourceId, articleTitle: item.title });
+        await addArticleToEdition(createdArticle.id, userId);
+        newCount++;
+        send({ type: "article_new", sourceId, articleTitle: item.title });
+      } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+          skipCount++;
+          send({ type: "article_skip", sourceId, articleTitle: item.title });
+        } else {
+          throw err;
+        }
+      }
     }
 
     // Update sync metadata

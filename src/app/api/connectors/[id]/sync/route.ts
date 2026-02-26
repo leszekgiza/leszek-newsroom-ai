@@ -58,18 +58,26 @@ export async function POST(
           where: { url: item.url },
         });
         if (!existing) {
-          await prisma.article.create({
-            data: {
-              url: item.url,
-              title: item.title,
-              intro: null,
-              summary: null,
-              author: item.author,
-              publishedAt: item.publishedAt,
-              privateSourceId: source.id,
-            },
-          });
-          newCount++;
+          try {
+            await prisma.article.create({
+              data: {
+                url: item.url,
+                title: item.title,
+                intro: null,
+                summary: null,
+                author: item.author,
+                publishedAt: item.publishedAt,
+                privateSourceId: source.id,
+              },
+            });
+            newCount++;
+          } catch (err) {
+            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+              // Duplicate URL — skip silently (race condition)
+            } else {
+              throw err;
+            }
+          }
         }
       }
 
