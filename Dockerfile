@@ -31,6 +31,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
+# Dummy DATABASE_URL for build-time (Next.js collects page data during build)
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
+
 RUN npm run build
 
 # Stage 3: Runner
