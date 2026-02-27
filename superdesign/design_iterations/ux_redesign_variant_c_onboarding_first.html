@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsroom AI — Variant C: Onboarding-First (Empty State)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; }
+
+        /* === ICON SIDEBAR === */
+        .icon-sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0; width: 64px;
+            background: #fff; border-right: 1px solid #eee;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 16px 0; z-index: 40;
+        }
+        .icon-sidebar .logo {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: #6366f1; color: #fff; display: flex;
+            align-items: center; justify-content: center;
+            font-weight: 700; font-size: 16px; margin-bottom: 24px;
+        }
+        .sidebar-icon {
+            width: 42px; height: 42px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #ccc; cursor: pointer;
+            transition: all 0.15s; margin-bottom: 4px; position: relative;
+        }
+        .sidebar-icon:hover { background: #f5f5f5; color: #888; }
+        .sidebar-icon.active { background: #f0f0ff; color: #6366f1; }
+        .sidebar-icon.disabled { opacity: 0.4; cursor: default; }
+        .sidebar-icon .tooltip {
+            display: none; position: absolute; left: 56px; top: 50%;
+            transform: translateY(-50%); background: #1a1a1a; color: #fff;
+            padding: 4px 10px; border-radius: 6px; font-size: 12px;
+            white-space: nowrap; z-index: 100;
+        }
+        .sidebar-icon:hover .tooltip { display: block; }
+        .sidebar-spacer { flex: 1; }
+
+        /* === MAIN === */
+        .main {
+            margin-left: 64px; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center;
+        }
+
+        /* === ONBOARDING CENTER === */
+        .onboarding {
+            max-width: 640px; width: 100%; padding: 40px;
+            text-align: center;
+        }
+        .onboarding-icon { font-size: 48px; margin-bottom: 16px; }
+        .onboarding h1 {
+            font-size: 32px; font-weight: 700; margin-bottom: 8px;
+        }
+        .onboarding h1 span { color: #6366f1; }
+        .onboarding .subtitle {
+            font-size: 16px; color: #888; margin-bottom: 40px; line-height: 1.6;
+        }
+
+        /* === CHAT-LIKE COMMAND === */
+        .chat-container {
+            background: #fff; border: 1.5px solid #e0e0e0; border-radius: 20px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .chat-messages {
+            padding: 24px; text-align: left; min-height: 180px;
+        }
+        .chat-message {
+            display: flex; gap: 10px; margin-bottom: 16px;
+        }
+        .chat-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+        .chat-avatar.ai { background: #ede9fe; color: #6366f1; }
+        .chat-avatar.user { background: #e5e5e5; color: #555; }
+        .chat-bubble {
+            background: #f8f8f8; border-radius: 12px; padding: 12px 16px;
+            font-size: 14px; line-height: 1.6; color: #444; max-width: 480px;
+        }
+        .chat-bubble.ai { background: #f8f7ff; }
+        .chat-bubble a { color: #6366f1; text-decoration: none; font-weight: 500; }
+        .chat-bubble a:hover { text-decoration: underline; }
+        .chat-bubble .step {
+            display: flex; align-items: flex-start; gap: 8px; margin: 8px 0;
+        }
+        .chat-bubble .step-num {
+            background: #6366f1; color: #fff; width: 22px; height: 22px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 600; flex-shrink: 0; margin-top: 1px;
+        }
+        .chat-bubble .step-text { font-size: 14px; }
+
+        .chat-input-area {
+            border-top: 1px solid #f0f0f0; padding: 16px 20px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .chat-input {
+            flex: 1; border: none; outline: none; font-size: 15px;
+            font-family: inherit; color: #1a1a1a; background: transparent;
+        }
+        .chat-input::placeholder { color: #ccc; }
+        .chat-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid #e5e5e5; background: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: #888; transition: all 0.15s;
+        }
+        .chat-btn:hover { color: #6366f1; border-color: #c7c8f9; }
+        .chat-send {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: none; background: #6366f1; color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+
+        /* === SUGGESTIONS === */
+        .suggestions {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            justify-content: center; margin-top: 24px;
+        }
+        .suggestion {
+            padding: 8px 16px; border-radius: 20px; background: #fff;
+            border: 1px solid #e5e5e5; font-size: 13px; color: #888;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .suggestion:hover { border-color: #c7c8f9; color: #6366f1; background: #fafaff; }
+        .suggestion .icon { margin-right: 4px; }
+
+        /* === PROGRESS INDICATOR === */
+        .onboarding-progress {
+            margin-top: 40px; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+        }
+        .progress-step {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .progress-dot {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 2px solid #e5e5e5; display: flex; align-items: center;
+            justify-content: center; font-size: 12px; font-weight: 600;
+            color: #ccc;
+        }
+        .progress-dot.active { border-color: #6366f1; color: #6366f1; background: #f8f7ff; }
+        .progress-dot.done { border-color: #22c55e; color: #22c55e; background: #f0fdf4; }
+        .progress-line { width: 40px; height: 2px; background: #e5e5e5; }
+        .progress-line.done { background: #22c55e; }
+        .progress-label { font-size: 11px; color: #bbb; margin-top: 4px; }
+
+        .responsive-note {
+            position: fixed; top: 16px; right: 16px;
+            background: #1a1a1a; color: #fff; padding: 10px 16px;
+            border-radius: 10px; font-size: 12px; opacity: 0.9;
+        }
+
+        /* === VARIANT C: WITH SOURCES (filled state) === */
+        .filled-state {
+            margin-top: 48px; max-width: 640px; width: 100%; text-align: left;
+        }
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: 14px; font-weight: 600; color: #999;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .section-link { font-size: 13px; color: #6366f1; cursor: pointer; }
+
+        .source-chips {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px;
+        }
+        .source-chip {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 14px; border-radius: 10px; background: #fff;
+            border: 1px solid #e8e8e8; font-size: 13px; color: #555;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .source-chip:hover { border-color: #c7c8f9; }
+        .source-chip .favicon {
+            width: 18px; height: 18px; border-radius: 4px;
+            background: #e5e5e5; display: flex; align-items: center;
+            justify-content: center; font-size: 10px;
+        }
+        .source-chip .source-count { color: #bbb; font-size: 11px; }
+
+        .mini-article {
+            display: flex; gap: 12px; padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .mini-article:last-child { border-bottom: none; }
+        .mini-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #6366f1; margin-top: 6px; flex-shrink: 0;
+        }
+        .mini-dot.read { background: #e5e5e5; }
+        .mini-content { flex: 1; }
+        .mini-source { font-size: 11px; color: #6366f1; font-weight: 600; text-transform: uppercase; }
+        .mini-title { font-size: 14px; font-weight: 500; margin-top: 2px; }
+        .mini-time { font-size: 12px; color: #bbb; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <!-- ICON SIDEBAR -->
+    <aside class="icon-sidebar">
+        <div class="logo">N</div>
+        <div class="sidebar-icon active">
+            🏠
+            <span class="tooltip">Home</span>
+        </div>
+        <div class="sidebar-icon disabled">
+            📰
+            <span class="tooltip">Wydania (dodaj źródło aby zacząć)</span>
+        </div>
+        <div class="sidebar-icon disabled">
+            🔖
+            <span class="tooltip">Zapisane</span>
+        </div>
+        <div class="sidebar-icon disabled">
+            🌐
+            <span class="tooltip">Źródła</span>
+        </div>
+        <div class="sidebar-spacer"></div>
+        <div class="sidebar-icon">
+            ⚙️
+            <span class="tooltip">Ustawienia</span>
+        </div>
+    </aside>
+
+    <!-- MAIN: ONBOARDING STATE -->
+    <main class="main">
+        <div class="onboarding">
+            <div class="onboarding-icon">📰</div>
+            <h1>Witaj w Newsroom <span>AI</span></h1>
+            <p class="subtitle">
+                Twój osobisty agregator newsów z AI streszczeniami i TTS.<br>
+                Zacznij od dodania pierwszego źródła.
+            </p>
+
+            <!-- CHAT INTERFACE -->
+            <div class="chat-container">
+                <div class="chat-messages">
+                    <div class="chat-message">
+                        <div class="chat-avatar ai">AI</div>
+                        <div class="chat-bubble ai">
+                            Cześć! Jestem Twoim asystentem Newsroom AI. Mogę Ci pomóc:
+                            <div class="step"><span class="step-num">1</span><span class="step-text">Dodaj blog lub stronę — wklej URL</span></div>
+                            <div class="step"><span class="step-num">2</span><span class="step-text">Podłącz <a href="#">Gmail</a>, <a href="#">LinkedIn</a> lub <a href="#">Twitter</a></span></div>
+                            <div class="step"><span class="step-num">3</span><span class="step-text">Odsłuchaj dzisiejsze wydanie jak podcast</span></div>
+                            Wklej URL bloga, który chcesz obserwować, a ja zacznę zbierać artykuły.
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input class="chat-input" placeholder="Wklej URL np. https://simonwillison.net lub zadaj pytanie..." />
+                    <button class="chat-btn">🎤</button>
+                    <button class="chat-send">↵</button>
+                </div>
+            </div>
+
+            <div class="suggestions">
+                <span class="suggestion"><span class="icon">🔗</span> simonwillison.net</span>
+                <span class="suggestion"><span class="icon">🔗</span> oneusefulthing.org</span>
+                <span class="suggestion"><span class="icon">📧</span> Podłącz Gmail</span>
+                <span class="suggestion"><span class="icon">❓</span> Co potrafisz?</span>
+            </div>
+
+            <!-- ONBOARDING PROGRESS -->
+            <div class="onboarding-progress">
+                <div class="progress-step">
+                    <div class="progress-dot active">1</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="progress-dot">2</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="progress-dot">3</div>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:center; gap:48px; margin-top:6px;">
+                <span class="progress-label">Dodaj źródło</span>
+                <span class="progress-label">Przeglądaj wydanie</span>
+                <span class="progress-label">Odsłuchaj</span>
+            </div>
+
+            <!-- FILLED STATE PREVIEW (shows after adding sources) -->
+            <div class="filled-state" style="margin-top:64px;">
+                <div style="text-align:center; margin-bottom:24px; padding:16px; background:#f8f7ff; border-radius:12px; border:1px dashed #c7c8f9;">
+                    <span style="font-size:12px; color:#6366f1; font-weight:500;">👇 Tak wygląda ekran PO dodaniu źródeł</span>
+                </div>
+
+                <div class="section-header">
+                    <span class="section-title">Twoje źródła (3)</span>
+                    <span class="section-link">Zarządzaj →</span>
+                </div>
+                <div class="source-chips">
+                    <div class="source-chip">
+                        <div class="favicon">SW</div>
+                        Simon Willison
+                        <span class="source-count">·12</span>
+                    </div>
+                    <div class="source-chip">
+                        <div class="favicon">EM</div>
+                        Ethan Mollick
+                        <span class="source-count">·8</span>
+                    </div>
+                    <div class="source-chip">
+                        <div class="favicon">BE</div>
+                        Benedict Evans
+                        <span class="source-count">·5</span>
+                    </div>
+                    <div class="source-chip" style="border-style:dashed; color:#bbb;">
+                        + Dodaj
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <span class="section-title">Dzisiejsze wydanie · 27 lut</span>
+                    <span class="section-link">🎧 Odsłuchaj</span>
+                </div>
+                <div>
+                    <div class="mini-article">
+                        <div class="mini-dot"></div>
+                        <div class="mini-content">
+                            <div class="mini-source">Simon Willison</div>
+                            <div class="mini-title">Building AI agents that actually work in production</div>
+                            <div class="mini-time">27 lut · 5 min</div>
+                        </div>
+                    </div>
+                    <div class="mini-article">
+                        <div class="mini-dot"></div>
+                        <div class="mini-content">
+                            <div class="mini-source">Ethan Mollick</div>
+                            <div class="mini-title">The organizational implications of AI that can reason</div>
+                            <div class="mini-time">27 lut · 8 min</div>
+                        </div>
+                    </div>
+                    <div class="mini-article">
+                        <div class="mini-dot read"></div>
+                        <div class="mini-content">
+                            <div class="mini-source">Benedict Evans</div>
+                            <div class="mini-title">The great AI pricing shakeout</div>
+                            <div class="mini-time">26 lut · 6 min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="responsive-note">
+        Makieta C: Onboarding-First — empty state + filled preview
+    </div>
+</body>
+</html>

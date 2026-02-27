@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsroom AI — Variant A: Conversational Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0; width: 260px;
+            background: #fff; border-right: 1px solid #e5e5e5;
+            display: flex; flex-direction: column; z-index: 40;
+        }
+        .sidebar-logo {
+            padding: 20px 20px 16px; font-size: 18px; font-weight: 700;
+            color: #1a1a1a; border-bottom: 1px solid #f0f0f0;
+        }
+        .sidebar-logo span { color: #6366f1; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section { margin-bottom: 16px; }
+        .nav-section-title {
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            color: #999; padding: 4px 12px 8px; letter-spacing: 0.5px;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            font-size: 14px; color: #555; transition: all 0.15s;
+        }
+        .nav-item:hover { background: #f5f5f5; color: #1a1a1a; }
+        .nav-item.active { background: #f0f0ff; color: #6366f1; font-weight: 500; }
+        .nav-item .icon { width: 20px; text-align: center; font-size: 16px; }
+        .nav-item .badge {
+            margin-left: auto; background: #6366f1; color: #fff;
+            font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 600;
+        }
+        .nav-item .badge.warn { background: #f59e0b; }
+        .nav-item .status {
+            margin-left: auto; width: 8px; height: 8px; border-radius: 50%;
+        }
+        .nav-item .status.connected { background: #22c55e; }
+        .nav-item .status.error { background: #ef4444; }
+        .nav-item .status.inactive { background: #d4d4d4; }
+
+        .sidebar-user {
+            padding: 16px; border-top: 1px solid #f0f0f0;
+            display: flex; align-items: center; gap: 10px; font-size: 13px; color: #777;
+        }
+        .sidebar-user .avatar {
+            width: 32px; height: 32px; border-radius: 50%; background: #e5e5e5;
+            display: flex; align-items: center; justify-content: center; font-size: 14px;
+        }
+
+        /* === MAIN CONTENT === */
+        .main { margin-left: 260px; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* === HERO / COMMAND BOX === */
+        .hero {
+            padding: 48px 40px 32px; text-align: center;
+            background: linear-gradient(180deg, #f8f8ff 0%, #fafafa 100%);
+        }
+        .hero h1 {
+            font-size: 24px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px;
+        }
+        .hero p { font-size: 14px; color: #888; margin-bottom: 24px; }
+
+        .command-box {
+            max-width: 680px; margin: 0 auto;
+            background: #fff; border: 1.5px solid #e0e0e0; border-radius: 16px;
+            padding: 16px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .command-box:focus-within {
+            border-color: #6366f1; box-shadow: 0 2px 20px rgba(99,102,241,0.1);
+        }
+        .command-input {
+            width: 100%; border: none; outline: none; font-size: 16px;
+            color: #1a1a1a; background: transparent; resize: none;
+            font-family: inherit; min-height: 24px;
+        }
+        .command-input::placeholder { color: #bbb; }
+        .command-actions {
+            display: flex; align-items: center; gap: 8px; margin-top: 12px;
+            padding-top: 12px; border-top: 1px solid #f0f0f0;
+        }
+        .cmd-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e5e5;
+            background: #fafafa; font-size: 12px; color: #666; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .cmd-btn:hover { background: #f0f0ff; border-color: #c7c8f9; color: #6366f1; }
+        .cmd-btn .icon { font-size: 14px; }
+        .cmd-mic {
+            margin-left: auto; width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid #e5e5e5; background: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: all 0.15s;
+        }
+        .cmd-mic:hover { background: #6366f1; color: #fff; border-color: #6366f1; }
+        .cmd-send {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: none; background: #6366f1; color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: all 0.15s;
+        }
+        .cmd-send:hover { background: #4f46e5; }
+
+        .quick-hints {
+            display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+            margin-top: 16px; max-width: 680px; margin-left: auto; margin-right: auto;
+        }
+        .hint {
+            padding: 6px 14px; border-radius: 20px; background: #fff;
+            border: 1px solid #e5e5e5; font-size: 12px; color: #888;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .hint:hover { border-color: #c7c8f9; color: #6366f1; background: #f8f8ff; }
+
+        /* === TABS === */
+        .content-area { flex: 1; padding: 0 40px 40px; }
+        .tabs {
+            display: flex; gap: 0; border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 24px; padding-top: 8px;
+        }
+        .tab {
+            padding: 12px 20px; font-size: 14px; font-weight: 500;
+            color: #999; cursor: pointer; border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+        .tab:hover { color: #555; }
+        .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+        .tab .count {
+            margin-left: 6px; font-size: 11px; background: #f0f0f0;
+            padding: 1px 7px; border-radius: 10px; color: #888;
+        }
+        .tab.active .count { background: #ede9fe; color: #6366f1; }
+
+        /* === EDITION STRIP === */
+        .edition-strip {
+            display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .edition-chip {
+            padding: 8px 16px; border-radius: 10px; background: #fff;
+            border: 1px solid #e5e5e5; font-size: 13px; white-space: nowrap;
+            cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 8px;
+        }
+        .edition-chip:hover { border-color: #c7c8f9; }
+        .edition-chip.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+        .edition-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; }
+        .edition-chip.active .dot { background: #fff; }
+
+        /* === ARTICLE CARDS === */
+        .articles { display: flex; flex-direction: column; gap: 12px; }
+        .article-card {
+            background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+            padding: 18px 20px; cursor: pointer; transition: all 0.15s;
+            display: flex; gap: 16px; align-items: flex-start;
+        }
+        .article-card:hover { border-color: #d0d0d0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .article-source {
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            color: #6366f1; letter-spacing: 0.3px; margin-bottom: 4px;
+        }
+        .article-title { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; line-height: 1.4; }
+        .article-intro { font-size: 13px; color: #777; line-height: 1.5; }
+        .article-meta {
+            display: flex; align-items: center; gap: 12px; margin-top: 10px;
+            font-size: 12px; color: #aaa;
+        }
+        .article-meta .badge-new {
+            background: #dbeafe; color: #3b82f6; font-size: 10px;
+            padding: 2px 8px; border-radius: 6px; font-weight: 600;
+        }
+        .article-actions {
+            display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+            align-items: center; padding-top: 2px;
+        }
+        .article-action-btn {
+            width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e8e8e8;
+            background: #fff; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; font-size: 14px;
+            color: #aaa; transition: all 0.15s;
+        }
+        .article-action-btn:hover { background: #f5f5ff; color: #6366f1; border-color: #c7c8f9; }
+
+        .article-content { flex: 1; }
+
+        /* === ANNOTATIONS === */
+        .annotation {
+            position: absolute; background: #fef3c7; border: 2px solid #f59e0b;
+            border-radius: 8px; padding: 8px 12px; font-size: 12px;
+            color: #92400e; max-width: 200px; z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .annotation::before {
+            content: '💡'; margin-right: 4px;
+        }
+        .annotation-arrow {
+            position: absolute; width: 0; height: 0;
+        }
+
+        /* === RESPONSIVE HINT === */
+        .responsive-note {
+            position: fixed; bottom: 16px; right: 16px;
+            background: #1a1a1a; color: #fff; padding: 10px 16px;
+            border-radius: 10px; font-size: 12px; opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">Newsroom <span>AI</span></div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Nawigacja</div>
+                <div class="nav-item active">
+                    <span class="icon">🏠</span> Home
+                </div>
+                <div class="nav-item">
+                    <span class="icon">📰</span> Wydania
+                    <span class="badge">3</span>
+                </div>
+                <div class="nav-item">
+                    <span class="icon">🔖</span> Zapisane
+                </div>
+                <div class="nav-item">
+                    <span class="icon">🗑️</span> Kosz
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Źródła</div>
+                <div class="nav-item">
+                    <span class="icon">🌐</span> Zarządzaj źródłami
+                    <span class="badge">12</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Integracje</div>
+                <div class="nav-item">
+                    <span class="icon">📧</span> Gmail
+                    <span class="status connected"></span>
+                </div>
+                <div class="nav-item">
+                    <span class="icon">💼</span> LinkedIn
+                    <span class="status inactive"></span>
+                </div>
+                <div class="nav-item">
+                    <span class="icon">🐦</span> X / Twitter
+                    <span class="status inactive"></span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Ustawienia</div>
+                <div class="nav-item">
+                    <span class="icon">⚙️</span> Preferencje
+                </div>
+            </div>
+        </nav>
+        <div class="sidebar-user">
+            <div class="avatar">LG</div>
+            <div>
+                <div style="font-weight:500;color:#333;">Leszek</div>
+                <div style="font-size:11px;">leszek@example.com</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <!-- HERO / COMMAND BOX -->
+        <section class="hero">
+            <h1>Dzień dobry, Leszek 👋</h1>
+            <p>Masz <strong>14 nowych artykułów</strong> z dzisiejszego wydania. Czego szukasz?</p>
+
+            <div class="command-box">
+                <textarea class="command-input" placeholder="Wklej URL bloga, zadaj pytanie, lub powiedz czego szukasz..." rows="1"></textarea>
+                <div class="command-actions">
+                    <button class="cmd-btn"><span class="icon">🔗</span> Dodaj URL</button>
+                    <button class="cmd-btn"><span class="icon">🔍</span> Szukaj</button>
+                    <button class="cmd-btn"><span class="icon">💬</span> Zapytaj AI</button>
+                    <button class="cmd-mic">🎤</button>
+                    <button class="cmd-send">→</button>
+                </div>
+            </div>
+
+            <div class="quick-hints">
+                <span class="hint">🎧 Przeczytaj mi dzisiejsze wydanie</span>
+                <span class="hint">📰 Co nowego o AI?</span>
+                <span class="hint">🔗 https://simonwillison.net</span>
+                <span class="hint">📧 Dodaj newslettery z Gmaila</span>
+            </div>
+        </section>
+
+        <!-- CONTENT -->
+        <div class="content-area">
+            <div class="tabs">
+                <div class="tab active">Wydanie dnia <span class="count">14</span></div>
+                <div class="tab">Feed <span class="count">47</span></div>
+                <div class="tab">Briefing</div>
+            </div>
+
+            <!-- EDITION DATE STRIP -->
+            <div class="edition-strip">
+                <div class="edition-chip active"><span class="dot"></span> Dziś, 27 lut</div>
+                <div class="edition-chip">26 lut</div>
+                <div class="edition-chip">25 lut</div>
+                <div class="edition-chip">24 lut</div>
+                <div class="edition-chip">23 lut</div>
+            </div>
+
+            <!-- ARTICLES -->
+            <div class="articles">
+                <div class="article-card">
+                    <div class="article-content">
+                        <div class="article-source">Simon Willison</div>
+                        <div class="article-title">Building AI agents that actually work in production</div>
+                        <div class="article-intro">Willison dzieli się doświadczeniami z budowania agentów AI w produkcji. Kluczowy wniosek: prostota bije złożoność, a dobre logowanie jest ważniejsze niż „sprytne" prompty.</div>
+                        <div class="article-meta">
+                            <span class="badge-new">NEW</span>
+                            <span>27 lut 2026</span>
+                            <span>·</span>
+                            <span>5 min czytania</span>
+                        </div>
+                    </div>
+                    <div class="article-actions">
+                        <button class="article-action-btn" title="Odsłuchaj">🔊</button>
+                        <button class="article-action-btn" title="Zapisz">🔖</button>
+                        <button class="article-action-btn" title="Odrzuć">✕</button>
+                    </div>
+                </div>
+
+                <div class="article-card">
+                    <div class="article-content">
+                        <div class="article-source">Ethan Mollick</div>
+                        <div class="article-title">The organizational implications of AI that can reason</div>
+                        <div class="article-intro">Mollick analizuje jak modele z reasoning capabilities zmieniają struktury organizacyjne. Firmy, które najszybciej adaptują AI, reorganizują zespoły wokół „human-AI loops".</div>
+                        <div class="article-meta">
+                            <span class="badge-new">NEW</span>
+                            <span>27 lut 2026</span>
+                            <span>·</span>
+                            <span>8 min czytania</span>
+                        </div>
+                    </div>
+                    <div class="article-actions">
+                        <button class="article-action-btn" title="Odsłuchaj">🔊</button>
+                        <button class="article-action-btn" title="Zapisz">🔖</button>
+                        <button class="article-action-btn" title="Odrzuć">✕</button>
+                    </div>
+                </div>
+
+                <div class="article-card">
+                    <div class="article-content">
+                        <div class="article-source">Benedict Evans</div>
+                        <div class="article-title">The great AI pricing shakeout</div>
+                        <div class="article-intro">Evans pokazuje jak dramatycznie spadają ceny inference w 2026 roku. Implikacje: to co rok temu kosztowało $100, teraz kosztuje $2 — i to zmienia kto może budować AI produkty.</div>
+                        <div class="article-meta">
+                            <span>26 lut 2026</span>
+                            <span>·</span>
+                            <span>6 min czytania</span>
+                        </div>
+                    </div>
+                    <div class="article-actions">
+                        <button class="article-action-btn" title="Odsłuchaj">🔊</button>
+                        <button class="article-action-btn" title="Zapisz">🔖</button>
+                        <button class="article-action-btn" title="Odrzuć">✕</button>
+                    </div>
+                </div>
+
+                <div class="article-card">
+                    <div class="article-content">
+                        <div class="article-source">Hugging Face Blog</div>
+                        <div class="article-title">SmolLM3: A small model that punches above its weight</div>
+                        <div class="article-intro">Nowy model 3B parametrów od Hugging Face osiąga wyniki porównywalne z 8B modelami. Kluczowa innowacja: architektura „progressive distillation" z większych modeli.</div>
+                        <div class="article-meta">
+                            <span>26 lut 2026</span>
+                            <span>·</span>
+                            <span>4 min czytania</span>
+                        </div>
+                    </div>
+                    <div class="article-actions">
+                        <button class="article-action-btn" title="Odsłuchaj">🔊</button>
+                        <button class="article-action-btn" title="Zapisz">🔖</button>
+                        <button class="article-action-btn" title="Odrzuć">✕</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="responsive-note">
+        Makieta A: Conversational Hub — desktop view
+    </div>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Newsroom AI — Variant A v2: Mobile</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #fafafa; color: #1a1a1a;
+            max-width: 390px; margin: 0 auto;
+            min-height: 100vh; position: relative;
+            border-left: 1px solid #e5e5e5; border-right: 1px solid #e5e5e5;
+        }
+
+        /* === TOP NAVBAR === */
+        .top-nav {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+            border-bottom: 1px solid #f0f0f0;
+            padding: 12px 16px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .top-nav .logo { font-size: 16px; font-weight: 700; }
+        .top-nav .logo span { color: #6366f1; }
+        .top-nav-actions { display: flex; gap: 8px; align-items: center; }
+        .top-nav-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid #e5e5e5; background: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: #666; transition: all 0.15s;
+        }
+        .top-nav-btn:hover { background: #f5f5ff; color: #6366f1; }
+        .top-nav-btn.sync { background: #6366f1; color: #fff; border: none; }
+        .top-nav-btn.sync:active { background: #4f46e5; }
+
+        /* === GREETING === */
+        .greeting {
+            padding: 16px 16px 8px;
+        }
+        .greeting h2 {
+            font-size: 18px; font-weight: 600; color: #1a1a1a;
+        }
+        .greeting .stats {
+            font-size: 13px; color: #888; margin-top: 4px;
+        }
+        .greeting .stats strong { color: #6366f1; }
+
+        /* === COMMAND BOX (compact mobile) === */
+        .command-section { padding: 8px 16px 12px; }
+        .command-box {
+            background: #fff; border: 1.5px solid #e0e0e0; border-radius: 14px;
+            padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: all 0.2s;
+        }
+        .command-box:focus-within {
+            border-color: #6366f1; box-shadow: 0 2px 16px rgba(99,102,241,0.1);
+        }
+        .command-top {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .command-input {
+            flex: 1; border: none; outline: none; font-size: 15px;
+            color: #1a1a1a; background: transparent; font-family: inherit;
+        }
+        .command-input::placeholder { color: #ccc; }
+        .cmd-icon {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 1px solid #e5e5e5; background: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: #888; flex-shrink: 0;
+        }
+        .cmd-icon:hover { color: #6366f1; border-color: #c7c8f9; }
+        .cmd-send {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: none; background: #6366f1; color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+
+        /* Quick hints - horizontal scroll */
+        .quick-hints {
+            display: flex; gap: 6px; overflow-x: auto; padding: 8px 16px 4px;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        }
+        .quick-hints::-webkit-scrollbar { display: none; }
+        .hint {
+            padding: 6px 12px; border-radius: 16px; background: #fff;
+            border: 1px solid #e8e8e8; font-size: 12px; color: #888;
+            cursor: pointer; white-space: nowrap; flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .hint:active { background: #f0f0ff; border-color: #c7c8f9; color: #6366f1; }
+
+        /* === TABS === */
+        .tabs {
+            display: flex; border-bottom: 1px solid #e5e5e5;
+            padding: 0 16px; margin-top: 8px;
+            position: sticky; top: 60px; z-index: 40;
+            background: rgba(250,250,250,0.95); backdrop-filter: blur(12px);
+        }
+        .tab {
+            padding: 10px 16px; font-size: 13px; font-weight: 500;
+            color: #999; cursor: pointer; border-bottom: 2px solid transparent;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+        .tab .count { font-size: 10px; color: #bbb; margin-left: 4px; }
+        .tab.active .count { color: #6366f1; }
+
+        /* === EDITION STRIP === */
+        .edition-strip {
+            display: flex; gap: 6px; padding: 12px 16px 8px;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .edition-strip::-webkit-scrollbar { display: none; }
+        .edition-chip {
+            padding: 6px 14px; border-radius: 8px; background: #fff;
+            border: 1px solid #e5e5e5; font-size: 12px; white-space: nowrap;
+            cursor: pointer; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+        }
+        .edition-chip.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+        .edition-chip .dot { width: 5px; height: 5px; border-radius: 50%; background: #6366f1; }
+        .edition-chip.active .dot { background: #fff; }
+
+        /* === ARTICLE CARDS (mobile) === */
+        .articles { padding: 4px 16px 100px; display: flex; flex-direction: column; gap: 10px; }
+        .article-card {
+            background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+            padding: 14px 16px; transition: all 0.15s;
+        }
+        .article-card:active { background: #fafaff; }
+        .article-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .article-source {
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            color: #6366f1; letter-spacing: 0.3px;
+        }
+        .article-card-actions {
+            display: flex; gap: 4px; flex-shrink: 0; margin-left: 8px;
+        }
+        .art-btn {
+            width: 30px; height: 30px; border-radius: 8px; border: 1px solid #eee;
+            background: #fff; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; font-size: 12px;
+            color: #bbb;
+        }
+        .art-btn:active { background: #f0f0ff; color: #6366f1; }
+        .article-title {
+            font-size: 15px; font-weight: 600; color: #1a1a1a;
+            margin-top: 6px; line-height: 1.35;
+        }
+        .article-intro {
+            font-size: 13px; color: #777; line-height: 1.5; margin-top: 6px;
+        }
+        .article-meta {
+            display: flex; align-items: center; gap: 8px; margin-top: 8px;
+            font-size: 11px; color: #bbb;
+        }
+        .badge-new {
+            background: #dbeafe; color: #3b82f6; font-size: 10px;
+            padding: 2px 7px; border-radius: 6px; font-weight: 600;
+        }
+
+        /* === BOTTOM NAV === */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 390px; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid #f0f0f0;
+            display: flex; justify-content: space-around;
+            padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+            z-index: 50;
+        }
+        .bottom-nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 2px; padding: 4px 12px; cursor: pointer;
+            font-size: 10px; color: #999; transition: all 0.15s;
+        }
+        .bottom-nav-item.active { color: #6366f1; }
+        .bottom-nav-item .nav-icon { font-size: 20px; }
+        .bottom-nav-item .nav-badge {
+            position: absolute; top: -2px; right: -4px;
+            background: #6366f1; color: #fff; font-size: 9px;
+            padding: 1px 5px; border-radius: 8px; font-weight: 600;
+        }
+        .bottom-nav-item .nav-icon-wrap { position: relative; }
+
+        /* === TTS MINI PLAYER (shows above bottom nav when playing) === */
+        .tts-mini {
+            position: fixed; bottom: 58px; left: 50%; transform: translateX(-50%);
+            width: 390px; background: #fff; border-top: 1px solid #eee;
+            padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+            z-index: 45; box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+        }
+        .tts-mini-play {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: #6366f1; color: #fff; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; cursor: pointer; flex-shrink: 0;
+        }
+        .tts-mini-info { flex: 1; overflow: hidden; }
+        .tts-mini-title {
+            font-size: 13px; font-weight: 500;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .tts-mini-source { font-size: 11px; color: #999; }
+        .tts-mini-progress { width: 100%; height: 3px; background: #eee; border-radius: 2px; margin-top: 4px; }
+        .tts-mini-progress-fill { width: 35%; height: 100%; background: #6366f1; border-radius: 2px; }
+        .tts-mini-controls { display: flex; gap: 4px; flex-shrink: 0; }
+        .tts-ctrl {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 1px solid #eee; background: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: #666;
+        }
+
+        .label-note {
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+            width: 390px; background: #1a1a1a; color: #fff;
+            text-align: center; padding: 6px; font-size: 11px; z-index: 100;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="label-note">Makieta A v2: Mobile (390px) — iPhone 14 / Pixel</div>
+
+    <!-- TOP NAVBAR -->
+    <nav class="top-nav" style="margin-top:28px;">
+        <div class="logo">Newsroom <span>AI</span></div>
+        <div class="top-nav-actions">
+            <button class="top-nav-btn sync" title="Pobierz nowe">🔄</button>
+            <button class="top-nav-btn" title="Menu użytkownika">👤</button>
+        </div>
+    </nav>
+
+    <!-- GREETING -->
+    <div class="greeting">
+        <h2>Dzień dobry, Leszek 👋</h2>
+        <div class="stats">Masz <strong>14 nowych</strong> artykułów · Sync: 8:30</div>
+    </div>
+
+    <!-- COMMAND BOX (compact) -->
+    <div class="command-section">
+        <div class="command-box">
+            <div class="command-top">
+                <input class="command-input" placeholder="URL, szukaj, lub pytanie..." />
+                <button class="cmd-icon">🎤</button>
+                <button class="cmd-send">→</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK HINTS (horizontal scroll) -->
+    <div class="quick-hints">
+        <span class="hint">🎧 Odsłuchaj wydanie</span>
+        <span class="hint">📰 Co nowego?</span>
+        <span class="hint">🔗 Dodaj URL</span>
+        <span class="hint">💬 Zapytaj AI</span>
+        <span class="hint">📧 Gmail</span>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <div class="tab active">Wydanie <span class="count">14</span></div>
+        <div class="tab">Feed <span class="count">47</span></div>
+        <div class="tab">Briefing</div>
+    </div>
+
+    <!-- EDITION STRIP -->
+    <div class="edition-strip">
+        <div class="edition-chip active"><span class="dot"></span> Dziś</div>
+        <div class="edition-chip">26 lut</div>
+        <div class="edition-chip">25 lut</div>
+        <div class="edition-chip">24 lut</div>
+        <div class="edition-chip">23 lut</div>
+    </div>
+
+    <!-- ARTICLES -->
+    <div class="articles">
+        <div class="article-card">
+            <div class="article-top">
+                <div class="article-source">Simon Willison</div>
+                <div class="article-card-actions">
+                    <button class="art-btn">🔊</button>
+                    <button class="art-btn">🔖</button>
+                    <button class="art-btn">✕</button>
+                </div>
+            </div>
+            <div class="article-title">Building AI agents that actually work in production</div>
+            <div class="article-intro">Willison dzieli się doświadczeniami z budowania agentów AI w produkcji. Prostota bije złożoność.</div>
+            <div class="article-meta">
+                <span class="badge-new">NEW</span>
+                <span>27 lut</span>
+                <span>·</span>
+                <span>5 min</span>
+            </div>
+        </div>
+
+        <div class="article-card">
+            <div class="article-top">
+                <div class="article-source">Ethan Mollick</div>
+                <div class="article-card-actions">
+                    <button class="art-btn">🔊</button>
+                    <button class="art-btn">🔖</button>
+                    <button class="art-btn">✕</button>
+                </div>
+            </div>
+            <div class="article-title">The organizational implications of AI that can reason</div>
+            <div class="article-intro">Mollick analizuje jak modele z reasoning capabilities zmieniają struktury organizacyjne firm.</div>
+            <div class="article-meta">
+                <span class="badge-new">NEW</span>
+                <span>27 lut</span>
+                <span>·</span>
+                <span>8 min</span>
+            </div>
+        </div>
+
+        <div class="article-card">
+            <div class="article-top">
+                <div class="article-source">Benedict Evans</div>
+                <div class="article-card-actions">
+                    <button class="art-btn">🔊</button>
+                    <button class="art-btn">🔖</button>
+                    <button class="art-btn">✕</button>
+                </div>
+            </div>
+            <div class="article-title">The great AI pricing shakeout</div>
+            <div class="article-intro">Dramatyczny spadek cen inference w 2026 — to co kosztowało $100, teraz kosztuje $2.</div>
+            <div class="article-meta">
+                <span>26 lut</span>
+                <span>·</span>
+                <span>6 min</span>
+            </div>
+        </div>
+
+        <div class="article-card">
+            <div class="article-top">
+                <div class="article-source">Hugging Face Blog</div>
+                <div class="article-card-actions">
+                    <button class="art-btn">🔊</button>
+                    <button class="art-btn">🔖</button>
+                    <button class="art-btn">✕</button>
+                </div>
+            </div>
+            <div class="article-title">SmolLM3: A small model that punches above its weight</div>
+            <div class="article-intro">Model 3B parametrów z wynikami porównywalnymi do 8B. Progressive distillation.</div>
+            <div class="article-meta">
+                <span>26 lut</span>
+                <span>·</span>
+                <span>4 min</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TTS MINI PLAYER (visible when playing) -->
+    <div class="tts-mini">
+        <button class="tts-mini-play">▶</button>
+        <div class="tts-mini-info">
+            <div class="tts-mini-title">Building AI agents that actually work...</div>
+            <div class="tts-mini-source">Simon Willison · 1/14</div>
+            <div class="tts-mini-progress"><div class="tts-mini-progress-fill"></div></div>
+        </div>
+        <div class="tts-mini-controls">
+            <button class="tts-ctrl">⏮</button>
+            <button class="tts-ctrl">⏭</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item active">
+            <div class="nav-icon-wrap">
+                <span class="nav-icon">🏠</span>
+            </div>
+            <span>Home</span>
+        </div>
+        <div class="bottom-nav-item">
+            <div class="nav-icon-wrap">
+                <span class="nav-icon">🔖</span>
+            </div>
+            <span>Zapisane</span>
+        </div>
+        <div class="bottom-nav-item">
+            <div class="nav-icon-wrap">
+                <span class="nav-icon">📰</span>
+                <span class="nav-badge">3</span>
+            </div>
+            <span>Wydania</span>
+        </div>
+        <div class="bottom-nav-item">
+            <div class="nav-icon-wrap">
+                <span class="nav-icon">⚙️</span>
+            </div>
+            <span>Ustawienia</span>
+        </div>
+    </nav>
+</body>
+</html>
