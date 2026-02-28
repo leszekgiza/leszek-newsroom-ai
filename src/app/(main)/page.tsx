@@ -2,9 +2,10 @@
 
 import { Suspense, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { SearchBar } from "@/components/layout/SearchBar";
-import { DesktopHeader } from "@/components/layout/DesktopHeader";
-import { BriefingBanner } from "@/components/briefing/BriefingBanner";
+import { HeroGreeting } from "@/components/home/HeroGreeting";
+import { CommandBox } from "@/components/home/CommandBox";
+import { QuickHints } from "@/components/home/QuickHints";
+import { SyncProgressModal } from "@/components/sync/SyncProgressModal";
 import { ArticleList } from "@/components/articles/ArticleList";
 import { SourceFilter } from "@/components/articles/SourceFilter";
 import { EditionTabs } from "@/components/articles/EditionTabs";
@@ -28,6 +29,8 @@ function HomePageContent() {
     selectedArticleId,
     openSummaryModal,
     closeSummaryModal,
+    showSyncModal,
+    setShowSyncModal,
   } = useUIStore();
 
   // Sync URL params to store on mount
@@ -93,16 +96,27 @@ function HomePageContent() {
 
   return (
     <>
-      {/* Desktop Header - only visible on lg: */}
-      <DesktopHeader />
-
-      {/* Mobile Search - hidden on lg: */}
-      <div className="lg:hidden">
-        <SearchBar />
-      </div>
-
-      {/* Briefing Banner */}
-      <BriefingBanner />
+      {/* Hero Section */}
+      <section className="lg:max-w-3xl lg:mx-auto">
+        <HeroGreeting
+          newCount={totalCount}
+          lastSyncAt={null}
+          onSync={() => setShowSyncModal(true)}
+          isSyncing={showSyncModal}
+        />
+        <CommandBox
+          onAddSource={(url) => {
+            router.push(`/settings/sources?addUrl=${encodeURIComponent(url)}`);
+          }}
+        />
+        <QuickHints
+          onFillInput={(text) => {
+            if (text.startsWith("http")) {
+              router.push(`/settings/sources?addUrl=${encodeURIComponent(text)}`);
+            }
+          }}
+        />
+      </section>
 
       {/* Edition Tabs - zakladki z datami */}
       <div className="lg:px-8 lg:py-2 lg:border-b lg:border-border/50 lg:bg-card/95 lg:backdrop-blur-sm lg:sticky lg:top-[73px] lg:z-30">
@@ -143,6 +157,13 @@ function HomePageContent() {
         isOpen={isSummaryModalOpen}
         onClose={closeSummaryModal}
         onToggleSave={toggleSave}
+      />
+
+      {/* Sync Modal */}
+      <SyncProgressModal
+        isOpen={showSyncModal}
+        onClose={() => setShowSyncModal(false)}
+        onComplete={() => setShowSyncModal(false)}
       />
     </>
   );
