@@ -25,9 +25,11 @@ describe("QuickHints", () => {
     vi.clearAllMocks();
     mockUseUIStore.mockReturnValue({
       setActiveEditionDate: mockSetActiveEditionDate,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     mockUseRouter.mockReturnValue({
       push: mockPush,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 

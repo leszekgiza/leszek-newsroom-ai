@@ -29,9 +29,11 @@ describe("CommandBox", () => {
     vi.clearAllMocks();
     mockUseUIStore.mockReturnValue({
       setSearchQuery: mockSetSearchQuery,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     mockUseRouter.mockReturnValue({
       push: mockPush,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 

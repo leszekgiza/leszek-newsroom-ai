@@ -32,10 +32,12 @@ function setupMocks(isAuthenticated = true) {
     isLoading: false,
     setUser: vi.fn(),
     logout: vi.fn(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockUseUIStore.mockReturnValue({
     setShowSyncModal: mockSetShowSyncModal,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 }
 
