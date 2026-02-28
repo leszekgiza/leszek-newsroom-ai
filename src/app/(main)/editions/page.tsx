@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { DesktopHeader } from "@/components/layout/DesktopHeader";
+
 import { cn } from "@/lib/utils";
 
 interface Edition {
@@ -60,8 +60,6 @@ export default function EditionsPage() {
 
   return (
     <>
-      <DesktopHeader />
-
       <div className="p-4 lg:p-8">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold text-primary mb-6">Wydania</h1>
