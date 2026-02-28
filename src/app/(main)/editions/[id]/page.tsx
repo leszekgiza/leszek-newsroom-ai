@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { DesktopHeader } from "@/components/layout/DesktopHeader";
+
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { SummaryModal } from "@/components/summary/SummaryModal";
 import { EditionTTSPlayer } from "@/components/editions/EditionTTSPlayer";
@@ -161,8 +161,6 @@ export default function EditionDetailPage({
 
   return (
     <>
-      <DesktopHeader />
-
       <div className="p-4 lg:p-8">
         <div className="max-w-3xl mx-auto">
           {/* Back link */}

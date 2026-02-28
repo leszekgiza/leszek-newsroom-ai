@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 
@@ -43,6 +44,7 @@ export default function RootLayout({
     <html lang="pl" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         {children}
+        <Toaster position="top-center" richColors />
         <ServiceWorkerRegister />
       </body>
     </html>
