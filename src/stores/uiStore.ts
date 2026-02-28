@@ -9,8 +9,10 @@ interface UIState {
   searchQuery: string;
   activeSourceFilter: string | null;
   activeEditionDate: string | null; // YYYY-MM-DD lub null (wszystkie)
+  showSyncModal: boolean;
 
   setTheme: (theme: Theme) => void;
+  setShowSyncModal: (show: boolean) => void;
   openSummaryModal: (articleId: string) => void;
   closeSummaryModal: () => void;
   setSearchQuery: (query: string) => void;
@@ -25,8 +27,10 @@ export const useUIStore = create<UIState>((set) => ({
   searchQuery: "",
   activeSourceFilter: null,
   activeEditionDate: null,
+  showSyncModal: false,
 
   setTheme: (theme) => set({ theme }),
+  setShowSyncModal: (show) => set({ showSyncModal: show }),
   openSummaryModal: (articleId) =>
     set({ isSummaryModalOpen: true, selectedArticleId: articleId }),
   closeSummaryModal: () =>
