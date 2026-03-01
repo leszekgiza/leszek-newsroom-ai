@@ -402,16 +402,36 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
         )
 
     try:
+        # Wait for the verification page to fully render before looking for inputs
+        await asyncio.sleep(1)
+
         # Find and fill the verification code input (try multiple selectors)
         code_selectors = [
             'input#input__email_verification_pin',
             'input#input__phone_verification_pin',
             'input[name="pin"]',
             'input[name="verificationCode"]',
+            'input[id*="verification"][id*="pin"]',
+            'input[id*="verification"]',
+            'input[id*="pin"]',
+            'input[aria-label*="verification" i]',
+            'input[aria-label*="code" i]',
+            'input[aria-label*="pin" i]',
+            'input[type="tel"]',
+            'input[type="number"]',
             'input[type="text"]',
         ]
 
         filled = False
+
+        # First try waiting for any of the specific selectors to appear
+        combined_selector = ", ".join(code_selectors[:6])
+        try:
+            await page.wait_for_selector(combined_selector, timeout=8000)
+        except Exception:
+            # Timeout — page may still have a generic input, continue checking
+            pass
+
         for selector in code_selectors:
             try:
                 el = await page.query_selector(selector)
@@ -423,12 +443,30 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
                 continue
 
         if not filled:
+            # Last resort: look for any visible input inside a form
+            try:
+                el = await page.query_selector('form input:not([type="hidden"]):not([type="submit"])')
+                if el and await el.is_visible():
+                    await el.fill(request.code)
+                    filled = True
+            except Exception:
+                pass
+
+        if not filled:
             screenshot = await _take_screenshot_b64(page)
+            # Log page content for debugging
+            try:
+                page_html = await page.content()
+                input_count = page_html.lower().count("<input")
+                form_count = page_html.lower().count("<form")
+            except Exception:
+                input_count = -1
+                form_count = -1
             return BrowserLoginVerifyResponse(
                 success=False,
                 state="failed",
                 screenshot=screenshot,
-                error="Could not find verification code input",
+                error=f"Could not find verification code input (page has {input_count} inputs, {form_count} forms, url: {page.url})",
             )
 
         await asyncio.sleep(0.5)
