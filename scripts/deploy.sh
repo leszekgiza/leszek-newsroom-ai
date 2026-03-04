@@ -11,6 +11,13 @@ LOG_DIR="/opt/newsroom/logs"
 
 cd "$APP_DIR"
 
+# Load env vars for docker-compose interpolation (${DB_USER}, etc.)
+if [ -f .env.production ]; then
+  set -a
+  source .env.production
+  set +a
+fi
+
 echo "=== Newsroom AI Deploy ==="
 echo "$(date '+%Y-%m-%d %H:%M:%S') Starting deployment..."
 
