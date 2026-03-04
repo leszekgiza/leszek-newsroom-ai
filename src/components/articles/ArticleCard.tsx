@@ -193,6 +193,7 @@ export function ArticleCard({
             <div className="flex items-center gap-1.5">
               <div className="w-5 h-5 rounded-full bg-surface flex items-center justify-center overflow-hidden flex-shrink-0">
                 {article.source.logoUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={article.source.logoUrl}
                     alt={article.source.name}

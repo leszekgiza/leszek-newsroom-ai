@@ -44,7 +44,8 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - trigger edition creation (for cron job or manual trigger)
-export async function POST(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function POST(_request: NextRequest) {
   try {
     const session = await getCurrentUser();
 

@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-import { cn } from "@/lib/utils";
-
 interface Edition {
   id: string;
   date: string;

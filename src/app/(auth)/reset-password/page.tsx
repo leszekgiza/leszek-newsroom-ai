@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
@@ -33,9 +35,9 @@ export default function ResetPasswordPage() {
         </form>
 
         <p className="text-center text-muted mt-6">
-          <a href="/login" className="text-accent hover:underline">
+          <Link href="/login" className="text-accent hover:underline">
             Wróć do logowania
-          </a>
+          </Link>
         </p>
       </div>
     </div>

@@ -96,6 +96,7 @@ export function SummaryModal({
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-full bg-surface flex items-center justify-center">
                 {article.source.logoUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={article.source.logoUrl}
                     alt={article.source.name}

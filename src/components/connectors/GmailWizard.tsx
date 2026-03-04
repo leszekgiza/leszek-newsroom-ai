@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import { GmailSenderPreview } from "./GmailSenderPreview";
 import { GmailSenderList, type SenderItem } from "./GmailSenderList";
 
@@ -555,12 +556,12 @@ export function GmailWizard() {
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-2">
-        <a
+        <Link
           href="/settings/integrations"
           className="flex-1 py-3.5 bg-muted/10 text-foreground border border-border font-medium rounded-xl hover:bg-muted/20 transition-colors text-center"
         >
           Anuluj
-        </a>
+        </Link>
         <button
           onClick={handleSave}
           disabled={saving || totalSelected === 0}

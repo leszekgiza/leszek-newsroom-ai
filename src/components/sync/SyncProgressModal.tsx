@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { X, RefreshCw, Check, AlertCircle, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { X, RefreshCw, Check, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 interface ProgressEvent {
   type: "start" | "source_start" | "article_check" | "article_new" | "article_skip" | "article_error" | "source_done" | "done" | "error";

@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Get source based on type
     let source;
-    let isPrivate = sourceType === "private";
+    const isPrivate = sourceType === "private";
 
     if (isPrivate) {
       source = await prisma.privateSource.findFirst({

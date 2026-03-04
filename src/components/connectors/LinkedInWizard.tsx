@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 
 type Step =
   | "disclaimer"
@@ -733,6 +734,7 @@ export function LinkedInWizard({
 
           {captchaScreenshot && (
             <div className="rounded-xl overflow-hidden border border-border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`data:image/png;base64,${captchaScreenshot}`}
                 alt="CAPTCHA screenshot"
@@ -1006,12 +1008,12 @@ export function LinkedInWizard({
         step !== "authenticating" &&
         step !== "2fa" && (
           <div className="flex gap-3">
-            <a
+            <Link
               href="/settings/integrations"
               className="flex-1 py-3.5 bg-muted/10 text-foreground border border-border font-medium rounded-xl hover:bg-muted/20 transition-colors text-center"
             >
               Anuluj
-            </a>
+            </Link>
           </div>
         )}
     </div>

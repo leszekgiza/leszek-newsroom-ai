@@ -34,6 +34,7 @@ export function SourceWizard({
   onClose,
   sourceId,
   sourceName,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   sourceUrl,
   onComplete,
 }: SourceWizardProps) {

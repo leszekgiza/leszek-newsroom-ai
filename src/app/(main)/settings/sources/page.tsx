@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { SourceWizard } from "@/components/sources/SourceWizard";
@@ -252,7 +253,7 @@ export default function SourcesSettingsPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
         <div className="px-4 py-3 flex items-center gap-3">
-          <a href="/settings" className="text-primary">
+          <Link href="/settings" className="text-primary">
             <svg
               className="w-6 h-6"
               fill="none"
@@ -266,7 +267,7 @@ export default function SourcesSettingsPage() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-          </a>
+          </Link>
           <h1 className="text-xl font-bold text-primary">Źródła</h1>
         </div>
       </header>

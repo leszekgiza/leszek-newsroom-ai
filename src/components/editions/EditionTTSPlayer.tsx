@@ -144,7 +144,7 @@ export function EditionTTSPlayer({ articles, onArticleListened }: EditionTTSPlay
         try {
           await audioRef.current.play();
           setIsPlaying(true);
-        } catch (err) {
+        } catch {
           if (!controller.signal.aborted) {
             setError("Nie udało się odtworzyć audio");
           }
@@ -300,14 +300,15 @@ export function EditionTTSPlayer({ articles, onArticleListened }: EditionTTSPlay
 
   // Cleanup on unmount
   useEffect(() => {
+    const audioCache = audioCacheRef.current;
     return () => {
       abortControllerRef.current?.abort();
       prefetchAbortRef.current?.abort();
       // Revoke all cached blob URLs
-      for (const url of audioCacheRef.current.values()) {
+      for (const url of audioCache.values()) {
         URL.revokeObjectURL(url);
       }
-      audioCacheRef.current.clear();
+      audioCache.clear();
     };
   }, []);
 

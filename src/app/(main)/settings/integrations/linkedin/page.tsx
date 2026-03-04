@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { LinkedInWizard } from "@/components/connectors/LinkedInWizard";
 
 interface InitialData {
@@ -30,7 +31,7 @@ export default function LinkedInIntegrationPage() {
     <div className="max-w-2xl mx-auto min-h-screen bg-card pb-24 px-4 sm:px-6">
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border -mx-4 sm:-mx-6 px-4 sm:px-6">
         <div className="py-3 flex items-center gap-3">
-          <a href="/settings/integrations" className="text-primary">
+          <Link href="/settings/integrations" className="text-primary">
             <svg
               className="w-6 h-6"
               fill="none"
@@ -44,7 +45,7 @@ export default function LinkedInIntegrationPage() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-          </a>
+          </Link>
           <h1 className="text-xl font-bold text-primary">Dodaj LinkedIn</h1>
         </div>
       </header>

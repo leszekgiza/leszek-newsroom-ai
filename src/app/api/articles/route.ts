@@ -312,7 +312,7 @@ export async function GET(request: NextRequest) {
 
     // Build source counts from ALL articles (not just current page)
     // Only on first page load (offset === 0) to avoid extra queries on pagination
-    let sourceCounts: { id: string; name: string; logoUrl?: string | null; count: number }[] = [];
+    const sourceCounts: { id: string; name: string; logoUrl?: string | null; count: number }[] = [];
     if (offset === 0 && !sourceId) {
       // Count articles per source (undismissed only)
       const dismissedFilter = dismissedArticleIds.length > 0

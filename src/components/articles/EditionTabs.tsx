@@ -22,7 +22,6 @@ export function EditionTabs({
 }: EditionTabsProps) {
   // Oblicz łączną liczbę artykułów dla "Wszystkie"
   const totalCount = editions.reduce((sum, ed) => sum + ed.count, 0);
-  const totalUnread = editions.reduce((sum, ed) => sum + ed.unreadCount, 0);
 
   return (
     <div className="px-4 py-3 flex gap-2 overflow-x-auto scrollbar-hide border-b border-border bg-card/50">
