@@ -34,6 +34,10 @@ ENV NODE_OPTIONS="--max-old-space-size=2048"
 # Dummy DATABASE_URL for build-time (Next.js collects page data during build)
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
 
+# NEXT_PUBLIC_* vars must be available at build time for Next.js inlining
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
+ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
+
 RUN npm run build
 
 # Stage 3: Runner
