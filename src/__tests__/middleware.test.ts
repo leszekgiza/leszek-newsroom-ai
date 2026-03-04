@@ -70,16 +70,16 @@ describe("getMiddlewareAction", () => {
     expect(action.type).toBe("passthrough");
   });
 
-  it("rewrites / to /[locale] for unauthenticated users", async () => {
+  it("redirects / to /[locale] for unauthenticated users", async () => {
     const action = await getMiddlewareAction("/", null, "en-US,en;q=0.9");
-    expect(action.type).toBe("rewrite");
-    expect((action as MiddlewareAction & { locale: string }).locale).toBe("en");
+    expect(action.type).toBe("redirect");
+    expect((action as MiddlewareAction & { url: string }).url).toBe("/en");
   });
 
-  it("rewrites / to /pl for unauthenticated users with no Accept-Language", async () => {
+  it("redirects / to /pl for unauthenticated users with no Accept-Language", async () => {
     const action = await getMiddlewareAction("/", null, "");
-    expect(action.type).toBe("rewrite");
-    expect((action as MiddlewareAction & { locale: string }).locale).toBe("pl");
+    expect(action.type).toBe("redirect");
+    expect((action as MiddlewareAction & { url: string }).url).toBe("/pl");
   });
 
   it("passes through / for authenticated users", async () => {
@@ -130,6 +130,6 @@ describe("getMiddlewareAction", () => {
   it("treats expired token as unauthenticated", async () => {
     mockedJwtVerify.mockRejectedValueOnce(new Error("token expired"));
     const action = await getMiddlewareAction("/", "expired-token", "pl");
-    expect(action.type).toBe("rewrite");
+    expect(action.type).toBe("redirect");
   });
 });

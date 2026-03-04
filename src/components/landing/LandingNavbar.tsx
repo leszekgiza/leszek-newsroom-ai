@@ -20,6 +20,7 @@ export function LandingNavbar({ t, locale }: LandingNavbarProps) {
 
   return (
     <nav
+      aria-label="Main navigation"
       className={`fixed top-0 z-50 w-full transition-all duration-300 ${
         scrolled ? "py-3" : "py-5"
       }`}

@@ -1,0 +1,21 @@
+# Newsroom AI
+
+> AI-powered news aggregator with summaries and text-to-speech
+
+- URL: https://news.innocy.ai
+- GitHub: https://github.com/leszekgiza/leszek-newsroom-ai
+- License: AGPL-3.0
+
+## Features
+
+- Multi-source news aggregation (RSS, web scraping, newsletters)
+- AI-generated summaries (bring your own API keys)
+- Text-to-speech for listening to articles
+- 7 languages: Polish, English, German, French, Spanish, Italian, Arabic
+- Open source with BYO keys model
+- PWA support for mobile
+
+## Links
+
+- Full description: https://news.innocy.ai/llms-full.txt
+- Documentation: https://github.com/leszekgiza/leszek-newsroom-ai#readme

@@ -1,5 +1,6 @@
 import { Outfit, DM_Sans } from "next/font/google";
 import { isRtlLocale } from "@/i18n/config";
+import { GoogleAnalytics } from "@/components/landing/GoogleAnalytics";
 
 const outfit = Outfit({
   subsets: ["latin", "latin-ext"],
@@ -34,6 +35,7 @@ export default async function LandingLayout({
         minHeight: "100vh",
       }}
     >
+      <GoogleAnalytics />
       {children}
     </div>
   );

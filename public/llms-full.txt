@@ -1,0 +1,59 @@
+# Newsroom AI — Full Description
+
+## What is Newsroom AI?
+
+Newsroom AI is an open-source, AI-powered news aggregator designed to save time by summarizing articles and enabling audio playback via text-to-speech. It supports multiple content sources including RSS feeds, web scraping, and email newsletters.
+
+The project follows a "Bring Your Own Keys" (BYO) model — users provide their own API keys for AI providers (e.g., Anthropic Claude, OpenAI) and TTS services.
+
+## Key Features
+
+### Content Aggregation
+- RSS feed subscriptions
+- Web scraping via Crawl4AI microservice
+- Gmail newsletter integration (OAuth2)
+
+### AI Processing
+- Article summarization using LLMs
+- Provider-agnostic: supports Anthropic, OpenAI, and more
+- Configurable models and parameters
+
+### Audio
+- Text-to-speech for article summaries
+- Edge TTS support (free, no API key needed)
+
+### User Experience
+- Progressive Web App (PWA) with offline support
+- 7 languages: Polish, English, German, French, Spanish, Italian, Arabic
+- RTL support for Arabic
+- Daily news briefings (editions)
+
+## Tech Stack
+
+- **Frontend:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS
+- **Backend:** Next.js API Routes, Prisma ORM, PostgreSQL
+- **Scraper:** Python Crawl4AI microservice (Docker)
+- **AI:** Provider-agnostic (Anthropic, OpenAI, etc.)
+- **TTS:** Edge TTS
+- **Deployment:** Docker Compose, Caddy reverse proxy
+
+## Localization
+
+Available in 7 languages:
+- Polish (pl) — default
+- English (en)
+- German (de)
+- French (fr)
+- Spanish (es)
+- Italian (it)
+- Arabic (ar) — RTL supported
+
+## License
+
+AGPL-3.0 — Free to use, modify, and distribute with the same license.
+
+## Links
+
+- Website: https://news.innocy.ai
+- GitHub: https://github.com/leszekgiza/leszek-newsroom-ai
+- Short description: https://news.innocy.ai/llms.txt

@@ -7,7 +7,6 @@ const JWT_SECRET = new TextEncoder().encode(
 
 export type MiddlewareAction =
   | { type: "passthrough" }
-  | { type: "rewrite"; locale: string }
   | { type: "redirect"; url: string };
 
 export function parseAcceptLanguage(
@@ -84,7 +83,7 @@ export async function getMiddlewareAction(
       return { type: "passthrough" };
     }
     const locale = parseAcceptLanguage(acceptLanguage);
-    return { type: "rewrite", locale };
+    return { type: "redirect", url: `/${locale}` };
   }
 
   return { type: "passthrough" };

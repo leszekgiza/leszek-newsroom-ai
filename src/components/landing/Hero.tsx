@@ -20,32 +20,34 @@ export function Hero({ t }: HeroProps) {
           "radial-gradient(ellipse at 50% 0%, var(--lp-bg-secondary) 0%, var(--lp-bg-primary) 70%)",
       }}
     >
-      {/* Badge */}
-      <span
-        className="lp-glass mb-6 inline-block rounded-full px-4 py-1.5 text-xs font-medium tracking-wide"
-        style={{ color: "var(--lp-secondary)" }}
-      >
-        {t.badge}
-      </span>
+      <header>
+        {/* Badge */}
+        <span
+          className="lp-glass mb-6 inline-block rounded-full px-4 py-1.5 text-xs font-medium tracking-wide"
+          style={{ color: "var(--lp-secondary)" }}
+        >
+          {t.badge}
+        </span>
 
-      {/* Headline */}
-      <h1
-        className="mx-auto max-w-4xl text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl xl:text-7xl"
-        style={{
-          fontFamily: "var(--font-outfit), sans-serif",
-          color: "var(--lp-text)",
-        }}
-      >
-        {t.headline}
-      </h1>
+        {/* Headline */}
+        <h1
+          className="mx-auto max-w-4xl text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl xl:text-7xl"
+          style={{
+            fontFamily: "var(--font-outfit), sans-serif",
+            color: "var(--lp-text)",
+          }}
+        >
+          {t.headline}
+        </h1>
 
-      {/* Subheadline */}
-      <p
-        className="mx-auto mt-6 max-w-2xl text-base leading-relaxed md:text-lg"
-        style={{ color: "var(--lp-text-secondary)" }}
-      >
-        {t.subheadline}
-      </p>
+        {/* Subheadline */}
+        <p
+          className="mx-auto mt-6 max-w-2xl text-base leading-relaxed md:text-lg"
+          style={{ color: "var(--lp-text-secondary)" }}
+        >
+          {t.subheadline}
+        </p>
+      </header>
 
       {/* CTAs */}
       <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row">

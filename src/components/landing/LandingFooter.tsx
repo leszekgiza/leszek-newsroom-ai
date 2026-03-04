@@ -11,6 +11,7 @@ interface LandingFooterProps {
 export function LandingFooter({ t }: LandingFooterProps) {
   return (
     <footer
+      aria-label="Site footer"
       className="border-t px-5 py-10 md:px-8"
       style={{ borderColor: "var(--lp-border)" }}
     >
@@ -23,7 +24,7 @@ export function LandingFooter({ t }: LandingFooterProps) {
             {t.copyright}
           </p>
 
-          <div className="flex items-center gap-6">
+          <nav aria-label="Footer navigation" className="flex items-center gap-6">
             <a
               href="https://github.com/leszekgiza/leszek-newsroom-ai"
               target="_blank"
@@ -42,7 +43,7 @@ export function LandingFooter({ t }: LandingFooterProps) {
             >
               {t.docs}
             </a>
-          </div>
+          </nav>
         </div>
 
         <p

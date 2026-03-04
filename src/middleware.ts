@@ -14,15 +14,10 @@ export async function middleware(request: NextRequest) {
   );
 
   switch (action.type) {
-    case "rewrite": {
-      const url = request.nextUrl.clone();
-      url.pathname = `/${action.locale}`;
-      return NextResponse.rewrite(url);
-    }
     case "redirect": {
       const url = request.nextUrl.clone();
       url.pathname = action.url;
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(url, 301);
     }
     case "passthrough":
     default:
@@ -41,6 +36,6 @@ export const config = {
      * - manifest.webmanifest
      * - sw.js
      */
-    "/((?!_next/static|_next/image|favicon\\.ico|icons/|manifest\\.webmanifest|sw\\.js).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|icons/|manifest\\.webmanifest|sw\\.js|robots\\.txt|sitemap\\.xml|llms\\.txt|llms-full\\.txt).*)",
   ],
 };
