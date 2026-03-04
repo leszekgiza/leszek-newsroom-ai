@@ -549,6 +549,52 @@
 
 ---
 
+## Epic 15: Landing Page (Public)
+
+### US15.1 - Landing page dla nowych użytkowników
+**Jako** nowy (niezalogowany) użytkownik
+**Chcę** zobaczyć stronę wyjaśniającą czym jest Newsroom AI
+**Aby** zrozumieć wartość produktu i zdecydować o rejestracji
+
+**Kryteria akceptacji:**
+- [ ] Niezalogowany użytkownik na `/` widzi landing page (rewrite do `/pl`)
+- [ ] Zalogowany użytkownik na `/` widzi feed (bez zmian)
+- [ ] Hero z headline, subheadline i CTA
+- [ ] Sekcje: Problem, Features, How It Works, Open Source, Premium Teaser, Footer
+- [ ] Responsywność: mobile (375px), tablet (768px), desktop (1440px)
+- [ ] Scroll reveal animacje
+
+---
+
+### US15.2 - Wielojęzyczna landing page
+**Jako** użytkownik niepolskojęzyczny
+**Chcę** widzieć landing page w moim języku
+**Aby** zrozumieć produkt bez bariery językowej
+
+**Kryteria akceptacji:**
+- [ ] Obsługiwane języki: PL, EN, DE, FR, ES, IT, AR
+- [ ] URL pattern: `/pl`, `/en`, `/de`, `/fr`, `/es`, `/it`, `/ar`
+- [ ] Automatyczna detekcja locale z Accept-Language
+- [ ] Language switcher w navbar
+- [ ] RTL layout dla arabskiego (`dir="rtl"`)
+- [ ] Zalogowani na `/pl`, `/en` itd. → redirect do `/`
+
+---
+
+### US15.3 - Premium waitlist signup
+**Jako** zainteresowany użytkownik
+**Chcę** zapisać się na listę oczekujących Premium
+**Aby** być powiadomionym o uruchomieniu wersji Premium
+
+**Kryteria akceptacji:**
+- [ ] Formularz email w sekcji Premium Teaser
+- [ ] Walidacja email po stronie klienta i serwera
+- [ ] Duplikaty → friendly message "Już jesteś na liście!"
+- [ ] Rate limiting: max 5 req/min per IP
+- [ ] Dane zapisane w tabeli `waitlist_signups`
+
+---
+
 ## Epic 8: Zaawansowane (COULD)
 
 ### US8.1 - Offline reading
@@ -693,6 +739,7 @@
 ---
 
 ## Epic 11: Voice Input / STT (Premium)
+> Szczegóły implementacji: `docs/premium/`
 
 ### US11.1 - Push-to-talk
 **Jako** użytkownik premium
@@ -709,6 +756,7 @@
 ---
 
 ## Epic 12: Topic-Clustered Briefings (Premium)
+> Szczegóły implementacji: `docs/premium/`
 
 ### US12.1 - Briefing z artykułów
 **Jako** użytkownik premium
@@ -725,6 +773,7 @@
 ---
 
 ## Epic 13: Multi-Article Q&A (Premium)
+> Szczegóły implementacji: `docs/premium/`
 
 ### US13.1 - Q&A across multiple artykułów
 **Jako** użytkownik premium

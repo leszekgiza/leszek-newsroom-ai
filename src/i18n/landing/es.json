@@ -1,0 +1,102 @@
+{
+  "hero": {
+    "badge": "Open Source · Gratis · Self-hosted",
+    "headline": "20 fuentes. 5 minutos. Solo lo importante.",
+    "subheadline": "Newsroom AI selecciona el contenido más importante de tus fuentes, lo resume a lo esencial y te lo lee como un podcast. Horas de scrolling → minutos de escucha.",
+    "cta": "Empezar gratis →",
+    "github": "Ver en GitHub"
+  },
+  "problem": {
+    "headline": "El 80% de los profesionales se sienten abrumados por la información.",
+    "items": [
+      {
+        "title": "Demasiadas fuentes",
+        "description": "Decenas de blogs, newsletters y portales. Es imposible leerlo todo."
+      },
+      {
+        "title": "Ruido informativo",
+        "description": "El 90% del contenido es reciclado o clickbait. Los artículos valiosos se pierden en el ruido."
+      },
+      {
+        "title": "Sin tiempo",
+        "description": "Pasas horas scrolleando en lugar de centrarte en lo que realmente importa."
+      }
+    ]
+  },
+  "features": {
+    "headline": "Menos ruido. Más valor.",
+    "items": [
+      {
+        "title": "La IA extrae lo esencial",
+        "description": "Cada artículo resumido en 2 frases de intro y un resumen completo con los insights clave."
+      },
+      {
+        "title": "Escucha en vez de leer",
+        "description": "Text-to-Speech lee los resúmenes como un podcast. En camino, paseando, con el café."
+      },
+      {
+        "title": "Tus fuentes, cero ruido",
+        "description": "Tú eliges qué seguir. Sin algoritmos, sin anuncios, sin clickbait."
+      },
+      {
+        "title": "Open Source, tus reglas",
+        "description": "AGPL-3.0, self-hosted, BYO keys. Control total sobre tus datos y costes."
+      }
+    ]
+  },
+  "howItWorks": {
+    "headline": "¿Cómo funciona?",
+    "steps": [
+      {
+        "title": "Elige tus fuentes",
+        "description": "Añade blogs, portales y newsletters que quieras seguir."
+      },
+      {
+        "title": "La IA resume lo esencial",
+        "description": "El algoritmo extrae la información más importante de cada artículo."
+      },
+      {
+        "title": "Escucha o lee",
+        "description": "Navega por los resúmenes o activa el TTS y escucha como un podcast."
+      }
+    ]
+  },
+  "oss": {
+    "headline": "Gratis. Abierto. Bajo tu control.",
+    "bullets": [
+      "Licencia AGPL-3.0 — código abierto para siempre",
+      "BYO keys — elige tu propio proveedor de IA y TTS",
+      "Self-hosted — tus datos se quedan contigo",
+      "Sin vendor lock-in — cambia de proveedor cuando quieras"
+    ],
+    "githubCta": "Repositorio GitHub",
+    "docsCta": "Documentación"
+  },
+  "premium": {
+    "headline": "Próximamente: Newsroom AI",
+    "subheadline": "Cero configuración, automatización total. Deja tu email — te avisaremos en el lanzamiento.",
+    "features": [
+      "Hosting en la nube — sin necesidad de self-hosting",
+      "Gmail, LinkedIn, Twitter — conectores listos",
+      "Briefing por voz — podcast de tus fuentes",
+      "Q&A con múltiples artículos"
+    ],
+    "cta": "Unirse a la lista de espera",
+    "emailPlaceholder": "tu@email.es",
+    "privacy": "Sin spam. Solo notificación de lanzamiento.",
+    "success": "¡Gracias! Te avisaremos en el lanzamiento.",
+    "alreadySignedUp": "¡Ya estás en la lista! Te avisaremos en el lanzamiento.",
+    "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  "nav": {
+    "login": "Iniciar sesión",
+    "cta": "Empezar gratis"
+  },
+  "footer": {
+    "copyright": "© 2026 Newsroom AI. AGPL-3.0.",
+    "github": "GitHub",
+    "docs": "Documentación",
+    "privacy": "Privacidad",
+    "madeWith": "Hecho con ❤️ para personas abrumadas por la información"
+  }
+}

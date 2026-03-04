@@ -1,0 +1,102 @@
+{
+  "hero": {
+    "badge": "Open Source · Free · Self-hosted",
+    "headline": "20 sources. 5 minutes. Only what matters.",
+    "subheadline": "Newsroom AI picks the most important content from your sources, distills it to the essence, and reads it to you like a podcast. Hours of scrolling → minutes of listening.",
+    "cta": "Start for free →",
+    "github": "View on GitHub"
+  },
+  "problem": {
+    "headline": "80% of professionals feel overwhelmed by information.",
+    "items": [
+      {
+        "title": "Too many sources",
+        "description": "Dozens of blogs, newsletters, and portals. It's impossible to read it all."
+      },
+      {
+        "title": "Information noise",
+        "description": "90% of content is recycled or clickbait. Valuable articles drown in the noise."
+      },
+      {
+        "title": "No time",
+        "description": "You scroll for hours instead of focusing on what truly matters."
+      }
+    ]
+  },
+  "features": {
+    "headline": "Less noise. More value.",
+    "items": [
+      {
+        "title": "AI extracts the essence",
+        "description": "Every article summarized into a 2-sentence intro and full summary with key insights."
+      },
+      {
+        "title": "Listen instead of read",
+        "description": "Text-to-Speech reads summaries like a podcast. On the go, on a walk, over coffee."
+      },
+      {
+        "title": "Your sources, zero noise",
+        "description": "You choose what to follow. No algorithms, no ads, no clickbait."
+      },
+      {
+        "title": "Open Source, your rules",
+        "description": "AGPL-3.0, self-hosted, BYO keys. Full control over your data and costs."
+      }
+    ]
+  },
+  "howItWorks": {
+    "headline": "How does it work?",
+    "steps": [
+      {
+        "title": "Choose your sources",
+        "description": "Add blogs, portals, and newsletters you want to follow."
+      },
+      {
+        "title": "AI distills the essence",
+        "description": "The algorithm extracts the most important information from each article."
+      },
+      {
+        "title": "Listen or read",
+        "description": "Browse summaries or turn on TTS and listen like a podcast."
+      }
+    ]
+  },
+  "oss": {
+    "headline": "Free. Open. Under your control.",
+    "bullets": [
+      "AGPL-3.0 license — code open forever",
+      "BYO keys — choose your own AI and TTS provider",
+      "Self-hosted — your data stays with you",
+      "Zero vendor lock-in — switch providers anytime"
+    ],
+    "githubCta": "GitHub repo",
+    "docsCta": "Documentation"
+  },
+  "premium": {
+    "headline": "Coming soon: Newsroom AI",
+    "subheadline": "Zero configuration, full automation. Leave your email — we'll notify you at launch.",
+    "features": [
+      "Cloud hosting — no self-hosting needed",
+      "Gmail, LinkedIn, Twitter — ready-made connectors",
+      "Voice briefing — podcast from your sources",
+      "Q&A across multiple articles"
+    ],
+    "cta": "Join the waitlist",
+    "emailPlaceholder": "your@email.com",
+    "privacy": "No spam. Launch notification only.",
+    "success": "Thank you! We'll notify you at launch.",
+    "alreadySignedUp": "You're already on the list! We'll notify you at launch.",
+    "error": "Something went wrong. Please try again."
+  },
+  "nav": {
+    "login": "Log in",
+    "cta": "Start for free"
+  },
+  "footer": {
+    "copyright": "© 2026 Newsroom AI. AGPL-3.0.",
+    "github": "GitHub",
+    "docs": "Documentation",
+    "privacy": "Privacy",
+    "madeWith": "Made with ❤️ for people overwhelmed by information"
+  }
+}

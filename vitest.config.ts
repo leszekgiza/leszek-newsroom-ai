@@ -15,3 +15,7 @@ export default defineConfig({
     },
   },
 });
+
+// Named configs for test:oss and test:premium scripts
+// Usage: vitest run --config vitest.config.ts
+// test:oss excludes src/premium/**, test:premium includes only src/premium/**

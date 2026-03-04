@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newsroom AI — Twoje newsy, streszczone przez AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       CSS Custom Properties
+       ======================================== */
+    :root {
+      --color-bg: #ffffff;
+      --color-bg-alt: #f9fafb;
+      --color-text: #111827;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-accent: #4f46e5;
+      --color-accent-hover: #4338ca;
+      --color-accent-light: #eef2ff;
+      --color-secondary: #10b981;
+      --color-secondary-light: #ecfdf5;
+      --color-border: #e5e7eb;
+      --color-border-light: #f3f4f6;
+      --color-shadow: rgba(0, 0, 0, 0.04);
+      --color-shadow-md: rgba(0, 0, 0, 0.06);
+
+      --font-heading: 'Sora', sans-serif;
+      --font-body: 'Source Sans 3', sans-serif;
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      --space-3xl: 64px;
+      --space-4xl: 96px;
+      --space-5xl: 128px;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+
+      --max-width: 1200px;
+      --transition: 0.2s ease;
+    }
+
+    /* ========================================
+       Reset & Base
+       ======================================== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      line-height: 1.6;
+      font-size: 17px;
+      overflow-x: hidden;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      line-height: 1.2;
+      font-weight: 600;
+    }
+
+    /* ========================================
+       Utility
+       ======================================== */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--space-lg);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 500;
+      padding: 12px 28px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--color-accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--color-accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--color-text);
+      border: 1.5px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-text);
+      background: var(--color-bg-alt);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-accent);
+      padding: 12px 20px;
+    }
+
+    .btn-ghost:hover {
+      background: var(--color-accent-light);
+    }
+
+    /* ========================================
+       Fade-up animation on scroll
+       ======================================== */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ========================================
+       1. Navbar
+       ======================================== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+
+    .navbar-logo {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .navbar-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-accent);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .navbar-logo-icon svg {
+      width: 18px;
+      height: 18px;
+      color: #ffffff;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .lang-switcher {
+      position: relative;
+    }
+
+    .lang-switcher-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .lang-switcher-btn:hover {
+      border-color: var(--color-text-muted);
+      color: var(--color-text);
+    }
+
+    .lang-switcher-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .lang-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px var(--color-shadow-md);
+      padding: 6px;
+      min-width: 120px;
+      display: none;
+      z-index: 110;
+    }
+
+    .lang-dropdown.open {
+      display: block;
+    }
+
+    .lang-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 12px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      background: none;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .lang-option:hover {
+      background: var(--color-bg-alt);
+      color: var(--color-text);
+    }
+
+    .lang-option.active {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .nav-link {
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      transition: color var(--transition);
+    }
+
+    .nav-link:hover {
+      color: var(--color-text);
+    }
+
+    .nav-cta {
+      font-size: 14px;
+      padding: 10px 22px;
+    }
+
+    /* Mobile hamburger */
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .mobile-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--color-text);
+      margin: 5px 0;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* ========================================
+       2. Hero — Split Layout
+       ======================================== */
+    .hero {
+      padding-top: 160px;
+      padding-bottom: var(--space-5xl);
+      background: var(--color-bg);
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3xl);
+      align-items: center;
+    }
+
+    .hero-content {
+      max-width: 540px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--color-secondary);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero-title {
+      font-size: 52px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--color-text);
+      margin-bottom: var(--space-lg);
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--color-accent), var(--color-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 19px;
+      line-height: 1.7;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-2xl);
+      max-width: 460px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .hero-social-proof {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-2xl);
+      padding-top: var(--space-2xl);
+      border-top: 1px solid var(--color-border-light);
+    }
+
+    .hero-social-proof span {
+      font-size: 14px;
+      color: var(--color-text-muted);
+    }
+
+    .hero-social-proof strong {
+      color: var(--color-text-secondary);
+      font-weight: 600;
+    }
+
+    /* App mockup on right side */
+    .hero-visual {
+      position: relative;
+    }
+
+    .app-mockup {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      max-width: 520px;
+      margin-left: auto;
+    }
+
+    .app-mockup-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      background: var(--color-bg-alt);
+    }
+
+    .app-mockup-dots {
+      display: flex;
+      gap: 7px;
+    }
+
+    .app-mockup-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-border);
+    }
+
+    .app-mockup-dots span:first-child { background: #fca5a5; }
+    .app-mockup-dots span:nth-child(2) { background: #fcd34d; }
+    .app-mockup-dots span:last-child { background: #6ee7b7; }
+
+    .app-mockup-title {
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .app-mockup-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .app-mockup-search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg-alt);
+    }
+
+    .app-mockup-search svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+
+    .app-mockup-search span {
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
+    .article-card {
+      display: flex;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-md);
+      background: var(--color-bg);
+      transition: all var(--transition);
+    }
+
+    .article-card:hover {
+      border-color: var(--color-border);
+      box-shadow: 0 2px 8px var(--color-shadow);
+    }
+
+    .article-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+
+    .article-card-icon.orange { background: #fff7ed; }
+    .article-card-icon.blue { background: #eff6ff; }
+    .article-card-icon.green { background: #ecfdf5; }
+    .article-card-icon.purple { background: #f5f3ff; }
+
+    .article-card-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .article-card-source {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      margin-bottom: 3px;
+    }
+
+    .article-card-title {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 5px;
+      line-height: 1.35;
+    }
+
+    .article-card-summary {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .article-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .article-card-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: var(--color-accent-light);
+      color: var(--color-accent);
+    }
+
+    .article-card-tag.green {
+      background: var(--color-secondary-light);
+      color: var(--color-secondary);
+    }
+
+    .article-card-time {
+      font-size: 11px;
+      color: var(--color-text-muted);
+    }
+
+    .article-card-play {
+      margin-left: auto;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .article-card-play:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    }
+
+    .article-card-play svg {
+      width: 12px;
+      height: 12px;
+      color: #ffffff;
+      margin-left: 1px;
+    }
+
+    /* floating decoration */
+    .hero-visual::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, var(--color-accent-light) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: -1;
+    }
+
+    .hero-visual::after {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      left: -30px;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, var(--color-secondary-light) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: -1;
+    }
+
+    /* ========================================
+       3. Problem
+       ======================================== */
+    .problem {
+      padding: var(--space-5xl) 0;
+      background: var(--color-bg-alt);
+    }
+
+    .problem-header {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto var(--space-3xl);
+    }
+
+    .section-label {
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-accent);
+      margin-bottom: var(--space-md);
+    }
+
+    .problem-header h2 {
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: var(--space-md);
+      letter-spacing: -0.01em;
+    }
+
+    .problem-header p {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+
+    .pain-points {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-lg);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .pain-card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-light);
+      border-left: 3px solid var(--color-accent);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg) var(--space-xl);
+      box-shadow: 0 1px 3px var(--color-shadow);
+      transition: all var(--transition);
+    }
+
+    .pain-card:hover {
+      box-shadow: 0 4px 16px var(--color-shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .pain-card:nth-child(2) {
+      border-left-color: var(--color-secondary);
+    }
+
+    .pain-card:nth-child(3) {
+      border-left-color: #f59e0b;
+    }
+
+    .pain-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: var(--color-accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-md);
+    }
+
+    .pain-card:nth-child(2) .pain-card-icon {
+      background: var(--color-secondary-light);
+    }
+
+    .pain-card:nth-child(3) .pain-card-icon {
+      background: #fffbeb;
+    }
+
+    .pain-card-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .pain-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+
+    .pain-card p {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       4. Features
+       ======================================== */
+    .features {
+      padding: var(--space-5xl) 0;
+      background: var(--color-bg);
+    }
+
+    .features-header {
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto var(--space-3xl);
+    }
+
+    .features-header h2 {
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-md);
+    }
+
+    .features-header p {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-xl);
+    }
+
+    .feature-card {
+      text-align: center;
+      padding: var(--space-2xl) var(--space-lg);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-lg);
+      background: var(--color-bg);
+      transition: all var(--transition);
+    }
+
+    .feature-card:hover {
+      border-color: var(--color-border);
+      box-shadow: 0 8px 24px var(--color-shadow);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-lg);
+    }
+
+    .feature-icon.indigo { background: var(--color-accent-light); }
+    .feature-icon.green { background: var(--color-secondary-light); }
+    .feature-icon.amber { background: #fffbeb; }
+    .feature-icon.slate { background: #f1f5f9; }
+
+    .feature-icon svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+
+    .feature-card p {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       5. How it Works
+       ======================================== */
+    .how-it-works {
+      padding: var(--space-5xl) 0;
+      background: var(--color-bg-alt);
+    }
+
+    .how-header {
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto var(--space-3xl);
+    }
+
+    .how-header h2 {
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-md);
+    }
+
+    .how-header p {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+    }
+
+    .steps {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      padding: 0 var(--space-lg);
+    }
+
+    .step-number {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      color: #ffffff;
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-lg);
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    }
+
+    /* Dashed line connecting circles */
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: calc(50% + 36px);
+      right: calc(-50% + 36px);
+      height: 2px;
+      border-top: 2px dashed var(--color-border);
+      z-index: 1;
+    }
+
+    .step h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+
+    .step p {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      max-width: 240px;
+      margin: 0 auto;
+    }
+
+    /* ========================================
+       6. Open Source
+       ======================================== */
+    .open-source {
+      padding: var(--space-5xl) 0;
+      background: var(--color-bg);
+    }
+
+    .oss-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3xl);
+      align-items: center;
+    }
+
+    .oss-content h2 {
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-lg);
+    }
+
+    .oss-content > p {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+      margin-bottom: var(--space-xl);
+    }
+
+    .oss-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .oss-list li {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      font-size: 16px;
+      color: var(--color-text-secondary);
+    }
+
+    .oss-list li svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-secondary);
+      flex-shrink: 0;
+    }
+
+    .oss-ctas {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .oss-visual {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .tech-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 100px;
+      background: var(--color-bg);
+      color: var(--color-text-secondary);
+      transition: all var(--transition);
+    }
+
+    .tech-badge:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+    }
+
+    .code-block {
+      background: #1e1e2e;
+      border-radius: var(--radius-md);
+      padding: var(--space-xl);
+      overflow: hidden;
+    }
+
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: var(--space-md);
+    }
+
+    .code-block-header span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .code-block-header span:nth-child(1) { background: #f38ba8; }
+    .code-block-header span:nth-child(2) { background: #f9e2af; }
+    .code-block-header span:nth-child(3) { background: #a6e3a1; }
+
+    .code-block pre {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #cdd6f4;
+      overflow-x: auto;
+    }
+
+    .code-block .comment { color: #6c7086; }
+    .code-block .keyword { color: #cba6f7; }
+    .code-block .string { color: #a6e3a1; }
+    .code-block .function { color: #89b4fa; }
+
+    /* ========================================
+       7. Premium Teaser
+       ======================================== */
+    .premium {
+      padding: var(--space-5xl) 0;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #ede9fe 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(79, 70, 229, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .premium-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .premium-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-accent);
+      background: rgba(255, 255, 255, 0.7);
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: var(--space-lg);
+      border: 1px solid rgba(79, 70, 229, 0.15);
+    }
+
+    .premium h2 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-md);
+    }
+
+    .premium > .container > .premium-inner > p {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-2xl);
+      line-height: 1.7;
+    }
+
+    .premium-features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-md);
+      text-align: left;
+      margin-bottom: var(--space-2xl);
+    }
+
+    .premium-feature {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(79, 70, 229, 0.08);
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      color: var(--color-text);
+    }
+
+    .premium-feature svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-accent);
+      flex-shrink: 0;
+    }
+
+    .email-signup {
+      display: flex;
+      gap: var(--space-sm);
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .email-signup input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--color-text);
+      background: var(--color-bg);
+      outline: none;
+      transition: all var(--transition);
+    }
+
+    .email-signup input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .email-signup input:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .email-signup .btn-primary {
+      flex-shrink: 0;
+    }
+
+    .email-note {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin-top: var(--space-md);
+    }
+
+    /* ========================================
+       8. Footer
+       ======================================== */
+    .footer {
+      padding: var(--space-3xl) 0;
+      background: var(--color-bg);
+      border-top: 1px solid var(--color-border-light);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-lg);
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+    }
+
+    .footer-logo {
+      font-family: var(--font-heading);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-text);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .footer-logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--color-accent);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer-logo-icon svg {
+      width: 14px;
+      height: 14px;
+      color: #ffffff;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: var(--space-lg);
+    }
+
+    .footer-links a {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      transition: color var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: var(--color-text);
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: var(--space-md);
+    }
+
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      transition: all var(--transition);
+    }
+
+    .footer-social a:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+    }
+
+    .footer-social a svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .footer-license {
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
+    /* ========================================
+       Responsive
+       ======================================== */
+
+    /* Tablet */
+    @media (max-width: 1024px) {
+      .hero-title {
+        font-size: 42px;
+      }
+
+      .hero-grid {
+        gap: var(--space-2xl);
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pain-points {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pain-points .pain-card:last-child {
+        grid-column: 1 / -1;
+        max-width: 50%;
+        margin: 0 auto;
+      }
+    }
+
+    /* Small tablet / large phone */
+    @media (max-width: 768px) {
+      :root {
+        --space-5xl: 80px;
+      }
+
+      .navbar-right .nav-link,
+      .navbar-right .lang-switcher {
+        display: none;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+
+      .hero {
+        padding-top: 120px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2xl);
+      }
+
+      .hero-content {
+        max-width: 100%;
+        text-align: center;
+      }
+
+      .hero-title {
+        font-size: 36px;
+      }
+
+      .hero-subtitle {
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-ctas {
+        justify-content: center;
+      }
+
+      .hero-social-proof {
+        justify-content: center;
+      }
+
+      .app-mockup {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      .pain-points {
+        grid-template-columns: 1fr;
+      }
+
+      .pain-points .pain-card:last-child {
+        max-width: 100%;
+      }
+
+      .problem-header h2,
+      .features-header h2,
+      .how-header h2,
+      .oss-content h2,
+      .premium h2 {
+        font-size: 30px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .steps {
+        flex-direction: column;
+        gap: var(--space-2xl);
+        align-items: center;
+      }
+
+      .step:not(:last-child)::after {
+        top: auto;
+        left: 50%;
+        right: auto;
+        bottom: calc(-1 * var(--space-2xl) / 2 - 1px);
+        width: 2px;
+        height: var(--space-2xl);
+        border-top: none;
+        border-left: 2px dashed var(--color-border);
+        transform: translateX(-50%);
+      }
+
+      .oss-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2xl);
+      }
+
+      .premium-features {
+        grid-template-columns: 1fr;
+      }
+
+      .email-signup {
+        flex-direction: column;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .footer-left {
+        flex-direction: column;
+      }
+    }
+
+    /* Phone */
+    @media (max-width: 480px) {
+      body {
+        font-size: 16px;
+      }
+
+      .hero-title {
+        font-size: 30px;
+      }
+
+      .hero-ctas {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .hero-ctas .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .oss-ctas {
+        flex-direction: column;
+      }
+
+      .oss-ctas .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================
+       1. NAVBAR
+       ============================================ -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="#" class="navbar-logo">
+        <span class="navbar-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+            <path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>
+          </svg>
+        </span>
+        Newsroom AI
+      </a>
+
+      <div class="navbar-right">
+        <div class="lang-switcher">
+          <button class="lang-switcher-btn" id="langBtn" aria-label="Wybierz jezyk">
+            PL
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <div class="lang-dropdown" id="langDropdown">
+            <button class="lang-option active" data-lang="PL">Polski</button>
+            <button class="lang-option" data-lang="EN">English</button>
+            <button class="lang-option" data-lang="DE">Deutsch</button>
+            <button class="lang-option" data-lang="FR">Francais</button>
+            <button class="lang-option" data-lang="ES">Espanol</button>
+            <button class="lang-option" data-lang="IT">Italiano</button>
+            <button class="lang-option" data-lang="AR">العربية</button>
+          </div>
+        </div>
+
+        <a href="#" class="nav-link">Zaloguj sie</a>
+        <a href="#" class="btn btn-primary nav-cta">Zacznij za darmo</a>
+
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================
+       2. HERO — Split Layout
+       ============================================ -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <!-- Left: Content -->
+        <div class="hero-content fade-up">
+          <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            Open Source &middot; Darmowy &middot; Self-hosted
+          </div>
+          <h1 class="hero-title">
+            20 zrodel. 5 minut.<br>
+            <span class="highlight">Tylko to, co wazne.</span>
+          </h1>
+          <p class="hero-subtitle">
+            Newsroom AI wybiera najwazniejsze tresci z Twoich zrodel, streszcza je do esencji i czyta Ci je jak podcast. Godziny scrollowania &rarr; minuty sluchania.
+          </p>
+          <div class="hero-ctas">
+            <a href="#" class="btn btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              Zacznij za darmo &rarr;
+            </a>
+            <a href="https://github.com/leszekgiza/leszek-newsroom-ai" class="btn btn-secondary" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+              Zobacz na GitHub
+            </a>
+          </div>
+          <div class="hero-social-proof">
+            <span>AGPL-3.0 &middot; <strong>BYO Keys</strong> &middot; Self-host</span>
+          </div>
+        </div>
+
+        <!-- Right: App Mockup -->
+        <div class="hero-visual fade-up" style="transition-delay: 0.15s">
+          <div class="app-mockup">
+            <div class="app-mockup-toolbar">
+              <div class="app-mockup-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="app-mockup-title">Newsroom AI</span>
+              <div style="width: 48px;"></div>
+            </div>
+            <div class="app-mockup-body">
+              <div class="app-mockup-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <span>Szukaj artykulow...</span>
+              </div>
+
+              <div class="article-card">
+                <div class="article-card-icon orange">&#x1F4F0;</div>
+                <div class="article-card-content">
+                  <div class="article-card-source">TechCrunch</div>
+                  <div class="article-card-title">OpenAI prezentuje nowy model GPT-5 z rozumowaniem</div>
+                  <div class="article-card-summary">Nowy model wykazuje znaczny postep w rozumowaniu logicznym i jest dostepny przez API.</div>
+                  <div class="article-card-meta">
+                    <span class="article-card-tag">AI</span>
+                    <span class="article-card-time">2 godz. temu</span>
+                    <div class="article-card-play">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="article-card">
+                <div class="article-card-icon blue">&#x1F310;</div>
+                <div class="article-card-content">
+                  <div class="article-card-source">Ars Technica</div>
+                  <div class="article-card-title">EU przyjmuje nowe regulacje dotyczace prywatnosci</div>
+                  <div class="article-card-summary">Nowe przepisy wymuszaja wiekszna przejrzystosc w gromadzeniu danych przez firmy tech.</div>
+                  <div class="article-card-meta">
+                    <span class="article-card-tag green">Prawo</span>
+                    <span class="article-card-time">5 godz. temu</span>
+                    <div class="article-card-play">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="article-card">
+                <div class="article-card-icon green">&#x1F4B0;</div>
+                <div class="article-card-content">
+                  <div class="article-card-source">Bloomberg</div>
+                  <div class="article-card-title">Rynki reaguja na decyzje ECB o stopach procentowych</div>
+                  <div class="article-card-summary">Europejski Bank Centralny utrzymal stopy, ale sygnalizuje mozliwe obnizki w Q2.</div>
+                  <div class="article-card-meta">
+                    <span class="article-card-tag">Finanse</span>
+                    <span class="article-card-time">8 godz. temu</span>
+                    <div class="article-card-play">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       3. PROBLEM
+       ============================================ -->
+  <section class="problem">
+    <div class="container">
+      <div class="problem-header fade-up">
+        <div class="section-label">Problem</div>
+        <h2>80% profesjonalistow czuje przytloczenie informacjami.</h2>
+      </div>
+      <div class="pain-points">
+        <div class="pain-card fade-up">
+          <div class="pain-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3>Nadmiar zrodel</h3>
+          <p>Sledzisz 20+ zrodel. Blogi, newslettery, LinkedIn, X... Kazde wymaga osobnego sprawdzenia.</p>
+        </div>
+        <div class="pain-card fade-up" style="transition-delay: 0.1s">
+          <div class="pain-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>
+            </svg>
+          </div>
+          <h3>Szum informacyjny</h3>
+          <p>Wiekszosc artykulow to clickbaity, powtorki i tresci niskiej jakosci. Wartosc ginie w tlumie.</p>
+        </div>
+        <div class="pain-card fade-up" style="transition-delay: 0.2s">
+          <div class="pain-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+          <h3>Brak czasu</h3>
+          <p>Nawet jesli znajdziesz wartosciowy artykul — nie masz 10 minut, zeby go przeczytac.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       4. FEATURES
+       ============================================ -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header fade-up">
+        <div class="section-label">Funkcje</div>
+        <h2>Mniej szumu. Wiecej wartosci.</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-up">
+          <div class="feature-icon indigo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/>
+            </svg>
+          </div>
+          <h3>AI wyciaga esencje</h3>
+          <p>2 zdania zamiast 10 minut czytania. Decydujesz w sekunde, czy warto siegnac glebiej.</p>
+        </div>
+        <div class="feature-card fade-up" style="transition-delay: 0.1s">
+          <div class="feature-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+            </svg>
+          </div>
+          <h3>Sluchaj zamiast czytaj</h3>
+          <p>TTS playlist zamienia Twoje newsy w podcast. 20 artykulow w 15 minut podczas dojazdu do pracy.</p>
+        </div>
+        <div class="feature-card fade-up" style="transition-delay: 0.2s">
+          <div class="feature-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          </div>
+          <h3>Twoje zrodla, zero szumu</h3>
+          <p>Ty wybierasz zrodla. AI filtruje duplikaty i banalnosci. Zostajesz z esencja.</p>
+        </div>
+        <div class="feature-card fade-up" style="transition-delay: 0.3s">
+          <div class="feature-icon slate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </div>
+          <h3>Open Source, Twoje zasady</h3>
+          <p>Self-hostuj na swoim serwerze. Uzywaj swojego klucza AI. Zero sledzenia, zero vendor lock-in.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       5. HOW IT WORKS
+       ============================================ -->
+  <section class="how-it-works">
+    <div class="container">
+      <div class="how-header fade-up">
+        <div class="section-label">Jak to dziala</div>
+        <h2>Jak to dziala?</h2>
+      </div>
+      <div class="steps fade-up">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Wybierz zrodla</h3>
+          <p>Dodaj blogi, newslettery, profile — tylko to, co dla Ciebie wazne.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>AI streszcza do esencji</h3>
+          <p>Kazdy artykul &rarr; 2-zdaniowe intro. Godziny czytania &rarr; minuty przegladania.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Sluchaj lub czytaj</h3>
+          <p>TTS playlist w drodze do pracy. Lub szybki przeglad na ekranie.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       6. OPEN SOURCE
+       ============================================ -->
+  <section class="open-source" id="open-source">
+    <div class="container">
+      <div class="oss-grid">
+        <div class="oss-content fade-up">
+          <div class="section-label">Open Source</div>
+          <h2>Darmowy. Otwarty. Pod Twoja kontrola.</h2>
+          <ul class="oss-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              AGPL-3.0 — pelny dostep do kodu zrodlowego
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              BYO keys — Ty decydujesz o providerze AI i TTS
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Self-host — Twoje dane na Twoim serwerze
+            </li>
+          </ul>
+          <div class="oss-ctas">
+            <a href="https://github.com/leszekgiza/leszek-newsroom-ai" class="btn btn-primary" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+              &#11088; GitHub
+            </a>
+            <a href="#" class="btn btn-secondary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+              &#128214; Dokumentacja
+            </a>
+          </div>
+        </div>
+
+        <div class="oss-visual fade-up" style="transition-delay: 0.15s">
+          <div class="code-block">
+            <div class="code-block-header">
+              <span></span><span></span><span></span>
+            </div>
+            <pre><span class="comment"># Szybki start</span>
+<span class="function">git</span> clone https://github.com/leszekgiza/leszek-newsroom-ai.git
+<span class="keyword">cd</span> leszek-newsroom-ai
+
+<span class="comment"># Konfiguracja</span>
+<span class="function">cp</span> .env.example .env
+<span class="comment"># Dodaj swoje klucze API do .env</span>
+
+<span class="comment"># Uruchomienie</span>
+<span class="function">npm</span> install
+<span class="function">npm</span> run db:migrate
+<span class="function">npm</span> run dev</pre>
+          </div>
+
+          <div style="padding-top: 4px;">
+            <div class="section-label" style="margin-bottom: 12px;">Tech Stack</div>
+            <div class="tech-badges">
+              <span class="tech-badge">Next.js 14</span>
+              <span class="tech-badge">TypeScript</span>
+              <span class="tech-badge">PostgreSQL</span>
+              <span class="tech-badge">Prisma</span>
+              <span class="tech-badge">Tailwind CSS</span>
+              <span class="tech-badge">Python</span>
+              <span class="tech-badge">Crawl4AI</span>
+              <span class="tech-badge">Docker</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       7. PREMIUM TEASER
+       ============================================ -->
+  <section class="premium" id="premium">
+    <div class="container">
+      <div class="premium-inner fade-up">
+        <div class="premium-badge">Wkrotce</div>
+        <h2>Wkrotce: zero konfiguracji, pelna automatyka.</h2>
+        <p>Newsroom AI Premium — dla tych, ktorzy chca zeby po prostu dzialalo.</p>
+
+        <div class="premium-features">
+          <div class="premium-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Automatyczne pobieranie newsow co noc
+          </div>
+          <div class="premium-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Gmail, LinkedIn, X — zarzadzane konektory
+          </div>
+          <div class="premium-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            Voice Q&amp;A — zapytaj artykul o cokolwiek
+          </div>
+          <div class="premium-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            Hosting + klucze w cenie — zero konfiguracji
+          </div>
+        </div>
+
+        <form class="email-signup" onsubmit="event.preventDefault(); this.querySelector('input').value='Zapisano!'; this.querySelector('input').disabled=true;">
+          <input type="email" placeholder="Twoj adres e-mail" required>
+          <button type="submit" class="btn btn-primary">Daj znac, gdy bedzie gotowe &rarr;</button>
+        </form>
+        <p class="email-note">Bez spamu. Tylko powiadomienie o starcie.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       8. FOOTER
+       ============================================ -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <a href="#" class="footer-logo">
+          <span class="footer-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+              <path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>
+            </svg>
+          </span>
+          Newsroom AI
+        </a>
+        <nav class="footer-links">
+          <a href="#features">Funkcje</a>
+          <a href="#open-source">Open Source</a>
+          <a href="#premium">Premium</a>
+          <a href="https://github.com/leszekgiza/leszek-newsroom-ai" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+
+      <div class="footer-right">
+        <div class="footer-social">
+          <a href="https://github.com/leszekgiza/leszek-newsroom-ai" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+          </a>
+          <a href="#" aria-label="Twitter / X">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16h-4.267z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>
+          </a>
+        </div>
+        <span class="footer-license">&copy; 2024&ndash;2026 Newsroom AI &middot; AGPL-3.0</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================
+       Scripts
+       ============================================ -->
+  <script>
+    // ---- Language switcher ----
+    (function() {
+      var btn = document.getElementById('langBtn');
+      var dropdown = document.getElementById('langDropdown');
+      var options = dropdown.querySelectorAll('.lang-option');
+
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+      });
+
+      options.forEach(function(opt) {
+        opt.addEventListener('click', function() {
+          options.forEach(function(o) { o.classList.remove('active'); });
+          opt.classList.add('active');
+          btn.childNodes[0].textContent = opt.getAttribute('data-lang') + ' ';
+          dropdown.classList.remove('open');
+        });
+      });
+
+      document.addEventListener('click', function() {
+        dropdown.classList.remove('open');
+      });
+    })();
+
+    // ---- Scroll fade-up observer ----
+    (function() {
+      var els = document.querySelectorAll('.fade-up');
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.12,
+          rootMargin: '0px 0px -40px 0px'
+        });
+        els.forEach(function(el) { observer.observe(el); });
+      } else {
+        // Fallback: show all
+        els.forEach(function(el) { el.classList.add('visible'); });
+      }
+    })();
+
+    // ---- Smooth scroll for anchor links ----
+    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+      a.addEventListener('click', function(e) {
+        var target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

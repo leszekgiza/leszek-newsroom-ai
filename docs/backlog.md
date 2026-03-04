@@ -70,7 +70,7 @@
 | S0.2 | PWA MVP backlog | Manifest, offline cache, install prompt, media session, mobile UX | DONE | M |
 | S0.3 | Q&A backlog (single article) | RAG/QA do pojedynczego artykulu + UI czatu | DONE | L |
 | S0.0 | Authenticated sources plan (first step) | Logowanie, Gmail, LinkedIn: discovery + MVP plan + ryzyka/ToS | DONE | M |
-| S0.4 | OSS/Premium repo split plan | Propozycja struktury repo + granice licencji i integracji | TODO | M |
+| S0.4 | OSS/Premium repo split plan | Propozycja struktury repo + granice licencji i integracji | ✅ DONE | M |
 
 ### PWA MVP (Mobile-first) - TODO
 **Cel:** Instalowalna PWA + podstawowe offline + audio w tle
@@ -246,6 +246,21 @@
 | T1.2 | Zapisywanie preferencji głosu w DB | US2.3 | ✅ DONE | S |
 | T1.3 | TTS działający w tle na mobile (Media Session API) | US2.3 | 📋 TODO | L |
 
+### Landing Page + i18n [MUST] 🚧 IN PROGRESS
+**Cel:** Landing page dla niezalogowanych z wielojęzycznością i waitlist signup
+**Story:** US15.1, US15.2, US15.3
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| LP.1 | Dokumentacja | requirements, user-stories, hld, backlog, oss-premium-split | 🚧 IN PROGRESS | S |
+| LP.2 | i18n config + translations (PL, EN) | config.ts, JSON files, helper | 📋 TODO | M |
+| LP.3 | Middleware auth-aware routing | session check, locale rewrite, redirect logic | 📋 TODO | M |
+| LP.4 | Landing layout + page | [locale]/(landing)/layout.tsx + page.tsx, CSS tokens | 📋 TODO | M |
+| LP.5 | Landing components (11) | Navbar, Hero, Problem, Features, HowItWorks, OSS, Premium, Footer, etc. | 📋 TODO | L |
+| LP.6 | Tłumaczenia (DE/FR/ES/IT/AR) | Generowanie + RTL test | 📋 TODO | M |
+| LP.7 | Waitlist API + Prisma migration | POST /api/landing/waitlist, tabela waitlist_signups | 📋 TODO | M |
+| LP.8 | Weryfikacja | lint, tsc, manual test | 📋 TODO | S |
+
 ### 6. Dark/Light Mode [SHOULD] 📋 TODO
 **Cel:** Przełączanie między ciemnym a jasnym motywem
 
@@ -280,8 +295,9 @@
 | QA.5 | Cost guards (limity tokenów/wiadomości) | US10.2 | 📋 TODO | M |
 | QA.6 | BYO keys validation | US10.2 | 📋 TODO | S |
 
-### 9. Voice STT (Premium) 📋 TODO
+### 9. Voice STT (Premium) 🔮 FUTURE
 **Cel:** Push-to-talk voice input do Q&A
+> Szczegółowy backlog: `docs/premium/backlog-premium.md`
 
 | ID | Zadanie | Story | Status | Estimate |
 |----|---------|-------|--------|----------|
@@ -292,8 +308,9 @@
 | VOICE.5 | TTS odpowiedź na pytanie głosowe | US11.1 | 📋 TODO | M |
 | VOICE.6 | Feature flag (Premium only) | - | 📋 TODO | S |
 
-### 10. Topic-Clustered Briefings (Premium) 📋 TODO
+### 10. Topic-Clustered Briefings (Premium) 🔮 FUTURE
 **Cel:** AI-generowane briefingi pogrupowane tematycznie
+> Szczegółowy backlog: `docs/premium/backlog-premium.md`
 
 | ID | Zadanie | Story | Status | Estimate |
 |----|---------|-------|--------|----------|
@@ -303,8 +320,9 @@
 | BRIEF.4 | UI: wybór tematów, kontrola głębokości | US12.1 | 📋 TODO | M |
 | BRIEF.5 | Feature flag (Premium only) | - | 📋 TODO | S |
 
-### 11. Multi-Article Q&A (Premium) 📋 TODO
+### 11. Multi-Article Q&A (Premium) 🔮 FUTURE
 **Cel:** Q&A across wielu artykułów jednocześnie
+> Szczegółowy backlog: `docs/premium/backlog-premium.md`
 
 | ID | Zadanie | Story | Status | Estimate |
 |----|---------|-------|--------|----------|

@@ -361,6 +361,38 @@ Cron: GET /api/cron/cleanup-trash (01:00 UTC daily)
 
 ---
 
+## 4.5 Public Routing (Landing Page)
+
+```
+GET /
+  → cookie "session" valid? → pass through (feed via (main)/page.tsx)
+  → no session? → detect locale from Accept-Language → rewrite to /[locale]
+
+GET /pl, /en, /de, /fr, /es, /it, /ar
+  → cookie "session" valid? → redirect to /
+  → no session? → serve landing page
+
+GET /login, /register, /api/*
+  → always pass through
+```
+
+**i18n (landing only):** Prosty JSON import, bez next-intl (YAGNI).
+Pliki: `src/i18n/landing/{locale}.json`, helper `getLandingTranslations()`.
+
+**Route structure:**
+```
+src/app/
+  layout.tsx              → Root layout (bez zmian)
+  (auth)/                 → Login, register (bez zmian)
+  (main)/                 → Feed, editions, settings (bez zmian)
+  [locale]/
+    (landing)/
+      layout.tsx          → Landing layout (Outfit+DM Sans fonts, no sidebar)
+      page.tsx            → Landing page (server component)
+```
+
+---
+
 ## 5. Bezpieczeństwo
 
 ### 5.1 Autentykacja
@@ -558,8 +590,25 @@ Cron: GET /api/cron/cleanup-trash (01:00 UTC daily)
 - Single-article Q&A: kontekst = article content + intro + summary
 - Multi-article Q&A (Premium): context z wielu artykułów z limitem tokenów
 - Provider Abstraction Layer: unified interface LLM/TTS/STT
-- Feature flags dla OSS vs Premium boundary (nie repo split)
+- Feature flags dla OSS vs Premium boundary
 - Conversation history in-memory (nie persisted w MVP)
+
+### ADR-012: Two-Repo Strategy (Private Source → Public Mirror)
+**Status:** Accepted
+**Kontekst:** Projekt jest OSS (AGPL) z planowaną wersją premium. Potrzeba jasnego rozdzielenia kodu OSS i premium bez komplikowania codziennej pracy programisty.
+**Decyzja:** Architektura Private Source → Public Mirror:
+- Prywatne repo (`premium-newsroom`): źródło prawdy, cały kod (OSS + Premium)
+- Publiczne repo (`leszek-newsroom-ai`): automatyczny mirror, tylko kod OSS
+- GitHub Action synchronizuje OSS przy każdym push do master
+- Konwencja katalogów: wszystko poza `premium/` = OSS
+**Konsekwencje:**
+- Praca z jednego repo lokalnie (zero pomyłek)
+- Zero manualnego splitu (automatyczne via GitHub Action)
+- ESLint `no-restricted-imports` blokuje import premium w kodzie OSS
+- Testy OSS muszą przechodzić bez `src/premium/` (`npm run test:oss`)
+- Feature flags (`PREMIUM_ENABLED`) do runtime rozróżnienia OSS/Premium
+- Minimalne ryzyko wycieku kodu premium (Action usuwa przed push)
+- Szczegóły: `docs/oss-premium-split.md`
 
 ---
 

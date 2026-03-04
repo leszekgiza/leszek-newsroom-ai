@@ -1,0 +1,44 @@
+name: Sync OSS to Public Repo
+on:
+  push:
+    branches: [master]
+
+jobs:
+  verify-oss:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run test:oss
+      - run: npm run lint
+
+  sync:
+    needs: verify-oss
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remove premium code
+        run: |
+          rm -rf src/premium/
+          rm -rf docs/premium/
+          rm -rf packages/premium/
+          rm -rf e2e/premium/
+          rm -f .env.premium.example
+          rm -f .github/workflows/sync-oss.yml
+      - name: Push to public repo
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.PUBLIC_REPO_DEPLOY_KEY }}
+        with:
+          source-directory: '.'
+          destination-github-username: 'leszekgiza'
+          destination-repository-name: 'leszek-newsroom-ai'
+          target-branch: 'master'
+          commit-message: 'sync: ${{ github.event.head_commit.message }}'

@@ -54,6 +54,9 @@ System rozróżnia dwa typy źródeł:
 - Użytkownik OSS dostarcza własne klucze API (BYO keys)
 - Dostawcy w dokumencie są tylko przykładami
 
+### 1.6 OSS / Premium Split
+Wymagania premium (F10-F13) opisują planowane funkcje dostępne w wersji Newsroom AI (managed). Szczegóły implementacji premium: `docs/premium/`. Strategia dwóch repozytoriów: `docs/oss-premium-split.md`, ADR-012 w `docs/hld.md`.
+
 ---
 
 ## 2. Wymagania Funkcjonalne
@@ -172,6 +175,7 @@ System rozróżnia dwa typy źródeł:
 | F9.6 | LLM provider-agnostic (BYO keys) | MUST |
 
 ### F10: Voice Input / STT (Premium)
+> Szczegóły implementacji: `docs/premium/requirements-premium.md`
 
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
@@ -181,6 +185,7 @@ System rozróżnia dwa typy źródeł:
 | F10.4 | Odpowiedź głosowa (TTS) na pytanie głosowe | COULD |
 
 ### F11: Topic-Clustered Briefings (Premium)
+> Szczegóły implementacji: `docs/premium/requirements-premium.md`
 
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
@@ -190,6 +195,7 @@ System rozróżnia dwa typy źródeł:
 | F11.4 | Konfiguracja tematów/preferencji przez użytkownika | COULD |
 
 ### F12: Multi-Article Q&A (Premium)
+> Szczegóły implementacji: `docs/premium/requirements-premium.md`
 
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
@@ -197,7 +203,20 @@ System rozróżnia dwa typy źródeł:
 | F12.2 | Context stuffing z wielu artykułów (z limitem tokenów) | COULD |
 | F12.3 | Źródła odpowiedzi (cytaty z konkretnych artykułów) | COULD |
 
+### F14: Landing Page + i18n (Public)
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F14.1 | Landing page dla niezalogowanych użytkowników | MUST |
+| F14.2 | Auth-aware routing: niezalogowani → landing, zalogowani → feed | MUST |
+| F14.3 | Wielojęzyczność landing page (PL, EN, DE, FR, ES, IT, AR) | SHOULD |
+| F14.4 | Wsparcie RTL dla języka arabskiego | SHOULD |
+| F14.5 | Email waitlist signup (Premium teaser) | SHOULD |
+| F14.6 | Responsywna strona z animacjami scroll reveal | SHOULD |
+| F14.7 | SEO-friendly: server-rendered, generateStaticParams | MUST |
+
 ### F13: Managed Connectors (Premium)
+> Szczegóły implementacji: `docs/premium/requirements-premium.md`
 
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|

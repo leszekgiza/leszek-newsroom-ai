@@ -303,6 +303,19 @@ model Briefing {
 // PUSH SUBSCRIPTIONS (Web Push notifications)
 // ============================================
 
+// ============================================
+// WAITLIST SIGNUPS (Landing page premium teaser)
+// ============================================
+
+model WaitlistSignup {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  locale    String   @default("pl")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("waitlist_signups")
+}
+
 model PushSubscription {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")

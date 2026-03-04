@@ -124,9 +124,43 @@ Najpierw osobne konektory, dopiero potem ewentualna baza wspolna.
 
 ---
 
+## OSS / Premium — Strategia dwoch repozytoriow
+
+### Architektura
+- **Prywatne repo** (`premium-newsroom`): zrodlo prawdy, CALY kod (OSS + Premium)
+- **Publiczne repo** (`leszek-newsroom-ai`): automatyczny mirror, TYLKO kod OSS
+- GitHub Action synchronizuje OSS przy kazdym push do master
+
+### Gdzie umieszczac kod
+
+| Typ | Lokalizacja | Repo |
+|-----|------------|------|
+| Kod premium | `src/premium/` | Tylko prywatne |
+| Docs premium (implementacja) | `docs/premium/` | Tylko prywatne |
+| Testy premium | `src/premium/__tests__/` | Tylko prywatne |
+| E2E premium | `e2e/premium/` | Tylko prywatne |
+| Env premium | `.env.premium.example` | Tylko prywatne |
+| Wszystko inne | Normalna struktura | Oba repozytoria |
+
+### Reguly
+1. OSS NIE importuje z `src/premium/` — ESLint to blokuje
+2. Premium MOZE importowac z OSS
+3. Testy OSS MUSZA przechodzic BEZ `src/premium/` (`npm run test:oss`)
+4. Push -> prywatne repo -> automatyczny sync do publicznego
+5. Nigdy nie push recznie do publicznego repo
+
+### Dla Claude Code — decyzja gdzie umiescic kod
+- Feature Matrix: `docs/oss-premium-split.md`
+- Funkcja oznaczona "Premium" -> `src/premium/`
+- Funkcja OSS -> normalna struktura
+- W razie watpliwosci -> zapytaj uzytkownika
+
+---
+
 ## Zrodla konfiguracji
 
-- `.env.example` jest zrodlem prawdy dla zmiennych
+- `.env.example` jest zrodlem prawdy dla zmiennych OSS
+- `.env.premium.example` jest zrodlem prawdy dla zmiennych Premium
 - Nie commituj prawdziwych kluczy i hasel
 
 ---
