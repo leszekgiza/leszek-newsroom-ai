@@ -1,7 +1,7 @@
 # OSS vs Premium Split Plan (AGPL + BYO keys)
 
-**Wersja:** 1.1
-**Data:** 2026-02-09
+**Wersja:** 2.0
+**Data:** 2026-03-04
 **Status:** Draft
 
 ## Cele
