@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Non-app files
+    "_archive/**",
+    "b64decode.js",
+    "debug-startup.mjs",
   ]),
   // OSS code cannot import from premium modules
   {
