@@ -293,11 +293,21 @@ async function handleConnectorSync(source: {
       });
       if (!existing) {
         try {
+          // Generate Polish intro from content (same pattern as scraper pipeline)
+          let intro: string | null = null;
+          if (item.content) {
+            try {
+              intro = await generatePolishIntro(item.title, item.content);
+            } catch (aiError) {
+              console.log(`[CONNECTOR] AI intro failed for "${item.title?.slice(0, 40)}": ${aiError instanceof Error ? aiError.message : "unknown"}`);
+            }
+          }
+
           await prisma.article.create({
             data: {
               url: item.url,
               title: item.title,
-              intro: null,
+              intro,
               summary: null,
               author: item.author,
               publishedAt: item.publishedAt,

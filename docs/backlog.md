@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - Backlog
 
-**Wersja:** 1.4
-**Data:** 2026-02-09
+**Wersja:** 1.5
+**Data:** 2026-03-05
 **Aktualna wersja aplikacji:** 2.8.0
 
 ---
@@ -119,11 +119,11 @@
 #### Sprint SI-2: Gmail Content + Wizard (~2 tyg.)
 **Cel:** Ekstrakcja treści maili + UI wizard z 3 ścieżkami dodawania nadawców
 **Story:** US14.2
-**Stan:** 🚧 IN PROGRESS - Wizard działa, GMAIL.3 (HTML parser) jeszcze TODO.
+**Stan:** ✅ DONE - Wizard działa, HTML parser (cheerio) zaimplementowany.
 
 | ID | Zadanie | Opis | Status | Estimate | Zależy od |
 |----|---------|------|--------|----------|-----------|
-| GMAIL.3 | Email HTML parser | MIME multipart → markdown (cheerio), newsletter content extraction, usuwanie headerów/footerów | 📋 TODO | M | GMAIL.2 |
+| GMAIL.3 | Email HTML parser | MIME multipart → markdown (cheerio), newsletter content extraction, usuwanie headerów/footerów | ✅ DONE | M | GMAIL.2 |
 | GMAIL.4 | Gmail connector | fetchItems z config.senders[], matchQuery, maxAgeDays=7, syncInterval=60, lastSyncMessageId | ✅ DONE | L | GMAIL.3 |
 | GMAIL.5 | UI: Gmail Setup Wizard v2 | 3 zakładki: Wklej nadawcę / Wyszukaj (LLM) / Przeglądaj skrzynkę. Domyślnie NIC nie zaznaczone. Mockup: `ui_gmail_wizard_v2_1.html` | ✅ DONE | L | GMAIL.2 |
 | GMAIL.6 | LLM query generation | Konwersja intencji użytkownika na Gmail query przez istniejący PAL (aiService.ts). Np. "newslettery o AI" → `subject:("AI" OR "machine learning") newer_than:90d` | ✅ DONE | M | GMAIL.2 |
@@ -246,20 +246,20 @@
 | T1.2 | Zapisywanie preferencji głosu w DB | US2.3 | ✅ DONE | S |
 | T1.3 | TTS działający w tle na mobile (Media Session API) | US2.3 | 📋 TODO | L |
 
-### Landing Page + i18n [MUST] 🚧 IN PROGRESS
+### Landing Page + i18n [MUST] ✅ DONE
 **Cel:** Landing page dla niezalogowanych z wielojęzycznością i waitlist signup
 **Story:** US15.1, US15.2, US15.3
 
 | ID | Zadanie | Opis | Status | Estimate |
 |----|---------|------|--------|----------|
-| LP.1 | Dokumentacja | requirements, user-stories, hld, backlog, oss-premium-split | 🚧 IN PROGRESS | S |
-| LP.2 | i18n config + translations (PL, EN) | config.ts, JSON files, helper | 📋 TODO | M |
-| LP.3 | Middleware auth-aware routing | session check, locale rewrite, redirect logic | 📋 TODO | M |
-| LP.4 | Landing layout + page | [locale]/(landing)/layout.tsx + page.tsx, CSS tokens | 📋 TODO | M |
-| LP.5 | Landing components (11) | Navbar, Hero, Problem, Features, HowItWorks, OSS, Premium, Footer, etc. | 📋 TODO | L |
-| LP.6 | Tłumaczenia (DE/FR/ES/IT/AR) | Generowanie + RTL test | 📋 TODO | M |
-| LP.7 | Waitlist API + Prisma migration | POST /api/landing/waitlist, tabela waitlist_signups | 📋 TODO | M |
-| LP.8 | Weryfikacja | lint, tsc, manual test | 📋 TODO | S |
+| LP.1 | Dokumentacja | requirements, user-stories, hld, backlog, oss-premium-split | ✅ DONE | S |
+| LP.2 | i18n config + translations (PL, EN) | config.ts, JSON files, helper | ✅ DONE | M |
+| LP.3 | Middleware auth-aware routing | session check, locale rewrite, redirect logic | ✅ DONE | M |
+| LP.4 | Landing layout + page | [locale]/(landing)/layout.tsx + page.tsx, CSS tokens | ✅ DONE | M |
+| LP.5 | Landing components (12) | Navbar, Hero, Problem, Features, HowItWorks, OSS, Premium, Footer, etc. | ✅ DONE | L |
+| LP.6 | Tłumaczenia (DE/FR/ES/IT/AR) | Generowanie + RTL test | ✅ DONE | M |
+| LP.7 | Waitlist API + Prisma migration | POST /api/landing/waitlist, tabela waitlist_signups | ✅ DONE | M |
+| LP.8 | Weryfikacja | lint, tsc, build OK. Brak pełnych E2E | 🔧 CODE WRITTEN | S |
 
 ### 6. Dark/Light Mode [SHOULD] 📋 TODO
 **Cel:** Przełączanie między ciemnym a jasnym motywem
@@ -330,6 +330,65 @@
 | MULTI.2 | UI: multi-select artykułów do kontekstu | US13.1 | 📋 TODO | M |
 | MULTI.3 | Cytaty i źródła w odpowiedziach | US13.1 | 📋 TODO | M |
 | MULTI.4 | Feature flag (Premium only) | - | 📋 TODO | S |
+
+### 12. Subscription & Billing (Premium) 📋 TODO
+**Cel:** Infrastruktura subskrypcji Stripe — fundament dla wszystkich premium features
+**Story:** US16.1, US16.2, US16.3, US16.4
+**Priorytet:** MUST (fundament premium)
+**Zależności:** Brak (samodzielny)
+**ADR:** ADR-013 w `docs/hld.md`
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| BILL.1 | Prisma schema | UserSubscription model (stripeCustomerId, stripeSubscriptionId, plan, status, currentPeriodEnd) | 📋 TODO | M |
+| BILL.2 | Stripe integration | Checkout session, webhooks (invoice.paid, customer.subscription.*), Customer Portal | 📋 TODO | L |
+| BILL.3 | Middleware tier check | isPremiumUser() helper, per-request tier check via middleware | 📋 TODO | M |
+| BILL.4 | API routes | /api/billing/checkout, /api/billing/webhook, /api/billing/portal | 📋 TODO | M |
+| BILL.5 | Pricing page UI | Feature matrix (free vs premium), toggle monthly/yearly, CTA → Stripe Checkout | 📋 TODO | M |
+| BILL.6 | Settings → Subscription management | Status subskrypcji, przycisk "Zarządzaj" → Customer Portal, upgrade CTA dla free | 📋 TODO | M |
+| BILL.7 | Graceful downgrade logic | Webhook: subscription cancelled/expired → disable premium features, fallback providers | 📋 TODO | M |
+
+### 13. ElevenLabs TTS (Premium) 📋 TODO
+**Cel:** Premium TTS provider z głosami ElevenLabs
+**Story:** US17.1, US17.2
+**Priorytet:** SHOULD
+**Zależności:** BILLING (wymaga tier check)
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| ELEVEN.1 | ElevenLabs provider | `src/lib/ai/tts-providers/elevenlabs.ts` — implementacja TTSProvider interface | 📋 TODO | M |
+| ELEVEN.2 | Per-user provider selection | W `/api/tts/route.ts`: free → EdgeTTS, premium → ElevenLabs. Fallback na Edge gdy ElevenLabs niedostępny | 📋 TODO | M |
+| ELEVEN.3 | UI: ElevenLabs voices w ustawieniach | Lista głosów ElevenLabs (premium only), preview, zapis preferencji. Upgrade CTA dla free users | 📋 TODO | M |
+| ELEVEN.4 | Env var ELEVENLABS_API_KEY | Konfiguracja klucza API ElevenLabs w `.env.premium.example` | 📋 TODO | S |
+
+### 14. Scheduled Background Scraping (Premium) 📋 TODO
+**Cel:** Automatyczne pobieranie artykułów wg harmonogramu usera (premium only)
+**Story:** US18.1, US18.2, US18.3
+**Priorytet:** SHOULD
+**Zależności:** BILLING (wymaga tier check)
+**ADR:** ADR-014 w `docs/hld.md`
+
+| ID | Zadanie | Opis | Status | Estimate |
+|----|---------|------|--------|----------|
+| SCHED.1 | Cron endpoint | `GET /api/cron/scrape-scheduled` — iteruje po premium userach z aktywnym schedule, triggeruje sync | 📋 TODO | L |
+| SCHED.2 | User settings: syncSchedule | Pola w User model: syncEnabled, syncHour, syncDays, syncTimezone | 📋 TODO | M |
+| SCHED.3 | Prisma migration | Nowe pola sync schedule w modelu User | 📋 TODO | S |
+| SCHED.4 | Auto-tworzenie edition po sync | Po zakończeniu scheduled sync → automatyczne tworzenie edition (reuse istniejącej logiki) | 📋 TODO | S |
+| SCHED.5 | UI: Settings → Scheduled Sync config | Sekcja w ustawieniach: godzina, dni tygodnia, timezone, toggle on/off. Premium only (upgrade CTA dla free) | 📋 TODO | M |
+| SCHED.6 | Tier gate | Free = manual sync only, Premium = scheduled + manual. Middleware/helper check | 📋 TODO | S |
+
+### Kolejność realizacji premium features
+
+```
+BILLING (Stripe infrastruktura) ← MUST, fundament dla wszystkiego
+  ↓
+ELEVEN (ElevenLabs TTS) ← zależy od tier check
+SCHED (Scheduled scraping) ← zależy od tier check
+  ↓
+SI-3/SI-4/SI-5 (connectors testy) ← niezależne, premium-only na news.innocy.ai
+  ↓
+Voice STT / Briefings / Multi-Q&A ← FUTURE
+```
 
 ---
 

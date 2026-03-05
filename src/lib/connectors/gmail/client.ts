@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { extractBodyFromMime, htmlToMarkdown } from "./html-parser";
 
 export interface SenderInfo {
   email: string;
@@ -103,17 +104,15 @@ export async function fetchMessages(
     const from = headers.find((h) => h.name === "From")?.value || "";
     const dateStr = headers.find((h) => h.name === "Date")?.value || "";
 
-    // Extract plain text body
+    // Extract body: prefer HTML (converted to markdown), fallback to plain text
     let body = "";
     const payload = detail.data.payload;
-    if (payload?.body?.data) {
-      body = Buffer.from(payload.body.data, "base64").toString("utf8");
-    } else if (payload?.parts) {
-      const textPart = payload.parts.find(
-        (p) => p.mimeType === "text/plain"
-      );
-      if (textPart?.body?.data) {
-        body = Buffer.from(textPart.body.data, "base64").toString("utf8");
+    if (payload) {
+      const { html, plain } = extractBodyFromMime(payload);
+      if (html) {
+        body = htmlToMarkdown(html);
+      } else if (plain) {
+        body = plain;
       }
     }
 
