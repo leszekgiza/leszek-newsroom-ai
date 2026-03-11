@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN "sync_enabled" BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE "users" ADD COLUMN "sync_hour" INTEGER NOT NULL DEFAULT 6;
+ALTER TABLE "users" ADD COLUMN "sync_days" TEXT NOT NULL DEFAULT '1,2,3,4,5';
+ALTER TABLE "users" ADD COLUMN "sync_timezone" TEXT NOT NULL DEFAULT 'UTC';
+ALTER TABLE "users" ADD COLUMN "last_scheduled_sync" TIMESTAMP(3);

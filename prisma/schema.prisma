@@ -24,6 +24,14 @@ model User {
   ttsVoice        String      @default("pl-PL-MarekNeural") @map("tts_voice")
   briefingEnabled Boolean     @default(false) @map("briefing_enabled")
   briefingTime    String?     @default("07:00") @map("briefing_time")
+
+  // Scheduled Sync (Premium)
+  syncEnabled       Boolean   @default(true) @map("sync_enabled")
+  syncHour          Int       @default(6) @map("sync_hour")
+  syncDays          String    @default("1,2,3,4,5") @map("sync_days")
+  syncTimezone      String    @default("UTC") @map("sync_timezone")
+  lastScheduledSync DateTime? @map("last_scheduled_sync")
+
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
 
