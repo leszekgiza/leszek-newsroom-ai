@@ -9,6 +9,15 @@ import { getConnector } from '@/lib/connectors/factory';
 
 const CONNECTOR_TYPES = new Set(['GMAIL', 'LINKEDIN', 'TWITTER']);
 
+export interface ScheduledSyncRunResult {
+  usersProcessed: number;
+  usersSkipped: number;
+  totalArticlesNew: number;
+  totalErrors: number;
+  userResults: SyncResult[];
+  durationMs: number;
+}
+
 export interface SyncResult {
   userId: string;
   sourcesProcessed: number;
@@ -65,6 +74,79 @@ export function isUserDueForSync(user: SyncUser, now: Date): boolean {
   }
 
   return true;
+}
+
+/**
+ * Main orchestrator: find all sync-enabled users, check if due, sync each.
+ * Isolates errors per user so one failure doesn't block others.
+ */
+export async function runScheduledSync(): Promise<ScheduledSyncRunResult> {
+  const startTime = Date.now();
+  const now = new Date();
+
+  const result: ScheduledSyncRunResult = {
+    usersProcessed: 0,
+    usersSkipped: 0,
+    totalArticlesNew: 0,
+    totalErrors: 0,
+    userResults: [],
+    durationMs: 0,
+  };
+
+  const users = await prisma.user.findMany({
+    where: { syncEnabled: true },
+    select: {
+      id: true,
+      syncEnabled: true,
+      syncHour: true,
+      syncDays: true,
+      syncTimezone: true,
+      lastScheduledSync: true,
+    },
+  });
+
+  console.log(`[SCHED] Found ${users.length} users with sync enabled`);
+
+  for (const user of users) {
+    if (!isUserDueForSync(user, now)) {
+      result.usersSkipped++;
+      continue;
+    }
+
+    console.log(`[SCHED] Starting sync for user ${user.id} (${result.usersProcessed + 1})`);
+
+    try {
+      const userResult = await syncSourcesForUser(user.id);
+      result.userResults.push(userResult);
+      result.usersProcessed++;
+      result.totalArticlesNew += userResult.articlesNew;
+      result.totalErrors += userResult.errors.length;
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastScheduledSync: now },
+      });
+
+      console.log(
+        `[SCHED] User ${user.id}: ${userResult.articlesNew} new, ` +
+        `${userResult.articlesSkipped} skipped, ${userResult.errors.length} errors, ` +
+        `${userResult.durationMs}ms`
+      );
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`[SCHED] User ${user.id} FAILED:`, msg);
+      result.totalErrors++;
+    }
+  }
+
+  result.durationMs = Date.now() - startTime;
+  console.log(
+    `[SCHED] Run complete: ${result.usersProcessed} processed, ` +
+    `${result.usersSkipped} skipped, ${result.totalArticlesNew} new articles, ` +
+    `${result.totalErrors} errors, ${result.durationMs}ms total`
+  );
+
+  return result;
 }
 
 /**

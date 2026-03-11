@@ -1,7 +1,7 @@
 // Copyright (c) Leszek Giza. Commercial license — see src/premium/LICENSE-PREMIUM
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { isUserDueForSync } from '../scheduledSyncService';
+import { isUserDueForSync, type SyncUser } from '../scheduledSyncService';
 
 // Mock all external dependencies
 vi.mock('@/lib/prisma', () => ({
@@ -21,6 +21,10 @@ vi.mock('@/lib/prisma', () => ({
     article: {
       findUnique: vi.fn(),
       create: vi.fn(),
+    },
+    user: {
+      findMany: vi.fn(),
+      update: vi.fn(),
     },
   },
 }));
@@ -160,5 +164,129 @@ describe('syncSourcesForUser', () => {
     expect(result.sourcesProcessed).toBe(2);
     expect(result.errors.length).toBe(1);
     expect(result.errors[0]).toContain('Failing Source');
+  });
+});
+
+describe('runScheduledSync', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useRealTimers();
+  });
+
+  // Helper: create a user that IS due for sync at a given time
+  function makeDueUser(id: string, overrides?: Partial<SyncUser>): SyncUser {
+    return {
+      id,
+      syncEnabled: true,
+      syncHour: 6,
+      syncDays: '1,2,3,4,5',
+      syncTimezone: 'UTC',
+      lastScheduledSync: null,
+      ...overrides,
+    };
+  }
+
+  it('skips users who are not due for sync', async () => {
+    const { runScheduledSync } = await import('../scheduledSyncService');
+    const { prisma } = await import('@/lib/prisma');
+
+    // User with syncHour=6 but we set time to 10:00 UTC -> not due
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-09T10:00:00Z')); // Monday 10:00 UTC
+
+    const user = makeDueUser('user-skip', { syncHour: 6 });
+    vi.mocked(prisma.user.findMany).mockResolvedValue([user] as never);
+
+    const result = await runScheduledSync();
+
+    expect(result.usersSkipped).toBe(1);
+    expect(result.usersProcessed).toBe(0);
+    expect(result.totalArticlesNew).toBe(0);
+    expect(prisma.user.update).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
+  });
+
+  it('processes due users and updates lastScheduledSync', async () => {
+    const { runScheduledSync } = await import('../scheduledSyncService');
+    const { prisma } = await import('@/lib/prisma');
+
+    // Monday 06:00 UTC — matches syncHour=6, day=1 (Monday)
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-09T06:00:00Z'));
+
+    const user = makeDueUser('user-due');
+    vi.mocked(prisma.user.findMany).mockResolvedValue([user] as never);
+
+    // syncSourcesForUser internals: no sources
+    vi.mocked(prisma.privateSource.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.userSubscription.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.user.update).mockResolvedValue({} as never);
+
+    const result = await runScheduledSync();
+
+    expect(result.usersProcessed).toBe(1);
+    expect(result.usersSkipped).toBe(0);
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'user-due' },
+      data: { lastScheduledSync: expect.any(Date) },
+    });
+
+    vi.useRealTimers();
+  });
+
+  it('isolates errors per user — one failure does not block others', async () => {
+    const { runScheduledSync } = await import('../scheduledSyncService');
+    const { prisma } = await import('@/lib/prisma');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-09T06:00:00Z'));
+
+    const user1 = makeDueUser('user-fail');
+    const user2 = makeDueUser('user-ok');
+    vi.mocked(prisma.user.findMany).mockResolvedValue([user1, user2] as never);
+
+    // First user's syncSourcesForUser will throw (privateSource.findMany throws on first call)
+    vi.mocked(prisma.privateSource.findMany)
+      .mockRejectedValueOnce(new Error('DB connection lost'))
+      .mockResolvedValueOnce([]);
+    vi.mocked(prisma.userSubscription.findMany)
+      .mockResolvedValue([]);
+    vi.mocked(prisma.user.update).mockResolvedValue({} as never);
+
+    const result = await runScheduledSync();
+
+    // user-fail errored, user-ok processed
+    expect(result.totalErrors).toBeGreaterThanOrEqual(1);
+    expect(result.usersProcessed).toBe(1);
+    // lastScheduledSync updated only for user-ok
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'user-ok' },
+      data: { lastScheduledSync: expect.any(Date) },
+    });
+
+    vi.useRealTimers();
+  });
+
+  it('returns aggregate stats including durationMs', async () => {
+    const { runScheduledSync } = await import('../scheduledSyncService');
+    const { prisma } = await import('@/lib/prisma');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-09T06:00:00Z'));
+
+    // No users with sync enabled
+    vi.mocked(prisma.user.findMany).mockResolvedValue([]);
+
+    const result = await runScheduledSync();
+
+    expect(result.usersProcessed).toBe(0);
+    expect(result.usersSkipped).toBe(0);
+    expect(result.totalArticlesNew).toBe(0);
+    expect(result.totalErrors).toBe(0);
+    expect(result.userResults).toEqual([]);
+    expect(result.durationMs).toBeGreaterThanOrEqual(0);
+
+    vi.useRealTimers();
   });
 });
