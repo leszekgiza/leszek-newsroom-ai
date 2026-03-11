@@ -361,21 +361,22 @@
 | ELEVEN.3 | UI: ElevenLabs voices w ustawieniach | Lista głosów ElevenLabs (premium only), preview, zapis preferencji. Upgrade CTA dla free users | 📋 TODO | M |
 | ELEVEN.4 | Env var ELEVENLABS_API_KEY | Konfiguracja klucza API ElevenLabs w `.env.premium.example` | 📋 TODO | S |
 
-### 14. Scheduled Background Scraping (Premium) 📋 TODO
+### 14. Scheduled Background Scraping (Premium) 🚧 IN PROGRESS
 **Cel:** Automatyczne pobieranie artykułów wg harmonogramu usera (premium only)
 **Story:** US18.1, US18.2, US18.3
 **Priorytet:** SHOULD
-**Zależności:** BILLING (wymaga tier check)
+**Zależności:** BILLING (wymaga tier check) — MVP: feature flag + manual DB flag (pre-Billing)
 **ADR:** ADR-014 w `docs/hld.md`
+**PRD:** `_bmad/bmm/planning-artifacts/prd.md`
 
 | ID | Zadanie | Opis | Status | Estimate |
 |----|---------|------|--------|----------|
-| SCHED.1 | Cron endpoint | `GET /api/cron/scrape-scheduled` — iteruje po premium userach z aktywnym schedule, triggeruje sync | 📋 TODO | L |
-| SCHED.2 | User settings: syncSchedule | Pola w User model: syncEnabled, syncHour, syncDays, syncTimezone | 📋 TODO | M |
-| SCHED.3 | Prisma migration | Nowe pola sync schedule w modelu User | 📋 TODO | S |
-| SCHED.4 | Auto-tworzenie edition po sync | Po zakończeniu scheduled sync → automatyczne tworzenie edition (reuse istniejącej logiki) | 📋 TODO | S |
-| SCHED.5 | UI: Settings → Scheduled Sync config | Sekcja w ustawieniach: godzina, dni tygodnia, timezone, toggle on/off. Premium only (upgrade CTA dla free) | 📋 TODO | M |
-| SCHED.6 | Tier gate | Free = manual sync only, Premium = scheduled + manual. Middleware/helper check | 📋 TODO | S |
+| SCHED.1 | Cron endpoint | `GET /api/cron/scrape-scheduled` — iteruje po premium userach z aktywnym schedule, triggeruje sync | ✅ DONE | L |
+| SCHED.2 | User settings: syncSchedule | Pola w User model: syncEnabled, syncHour, syncDays, syncTimezone | ✅ DONE | M |
+| SCHED.3 | Prisma migration | Nowe pola sync schedule w modelu User | ✅ DONE | S |
+| SCHED.4 | Auto-tworzenie edition po sync | Po zakończeniu scheduled sync → automatyczne tworzenie edition (reuse istniejącej logiki) | ✅ DONE | S |
+| SCHED.5 | UI: Settings → Scheduled Sync config | Sekcja w ustawieniach: godzina, dni tygodnia, timezone, toggle on/off. Premium only (upgrade CTA dla free) | 📋 TODO (Phase 2) | M |
+| SCHED.6 | Tier gate | Free = manual sync only, Premium = scheduled + manual. MVP: feature flag `PREMIUM_ENABLED` + manual DB flag | ✅ DONE | S |
 
 ### Kolejność realizacji premium features
 
