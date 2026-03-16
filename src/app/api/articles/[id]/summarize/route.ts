@@ -113,6 +113,8 @@ export async function POST(
     }
 
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const force = searchParams.get("force") === "true";
 
     // Get article with its private source (needed for Gmail fallback)
     const article = await prisma.article.findUnique({
@@ -129,8 +131,8 @@ export async function POST(
       );
     }
 
-    // If article already has a summary, return it without regenerating
-    if (article.summary) {
+    // If article already has a summary and not forcing regeneration, return it
+    if (article.summary && !force) {
       return NextResponse.json({ summary: article.summary });
     }
 

@@ -32,10 +32,13 @@ export function SummaryModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateSummary = useCallback(async (id: string) => {
+  const generateSummary = useCallback(async (id: string, force = false) => {
     setIsGenerating(true);
     try {
-      const res = await fetch(`/api/articles/${id}/summarize`, {
+      const url = force
+        ? `/api/articles/${id}/summarize?force=true`
+        : `/api/articles/${id}/summarize`;
+      const res = await fetch(url, {
         method: "POST",
       });
       if (res.ok) {
@@ -190,7 +193,7 @@ export function SummaryModal({
 
                 {/* Regenerate button */}
                 <button
-                  onClick={() => generateSummary(article.id)}
+                  onClick={() => generateSummary(article.id, true)}
                   className="text-xs text-accent hover:underline flex items-center gap-1"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
