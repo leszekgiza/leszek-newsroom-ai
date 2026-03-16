@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getConnector } from "@/lib/connectors/factory";
+import { addArticleToEdition } from "@/lib/editionService";
 
 export async function POST(
   _request: NextRequest,
@@ -59,17 +60,19 @@ export async function POST(
         });
         if (!existing) {
           try {
-            await prisma.article.create({
+            const createdArticle = await prisma.article.create({
               data: {
                 url: item.url,
                 title: item.title,
                 intro: null,
                 summary: null,
+                content: item.content || null,
                 author: item.author,
                 publishedAt: item.publishedAt,
                 privateSourceId: source.id,
               },
             });
+            await addArticleToEdition(createdArticle.id, session.userId);
             newCount++;
           } catch (err) {
             if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
