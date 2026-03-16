@@ -453,12 +453,69 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
                 pass
 
         if not filled:
+            # OTP-style: LinkedIn may use multiple single-digit inputs (one per digit)
+            try:
+                otp_selectors = [
+                    'input[data-test="digit-input"]',
+                    'input.otp-input',
+                    'input[inputmode="numeric"]',
+                    'input[maxlength="1"]',
+                    'input[autocomplete="one-time-code"]',
+                ]
+                for otp_sel in otp_selectors:
+                    otp_inputs = await page.query_selector_all(otp_sel)
+                    visible_inputs = []
+                    for inp in otp_inputs:
+                        if await inp.is_visible():
+                            visible_inputs.append(inp)
+                    if len(visible_inputs) >= len(request.code):
+                        for i, digit in enumerate(request.code):
+                            await visible_inputs[i].fill(digit)
+                        filled = True
+                        break
+            except Exception:
+                pass
+
+        if not filled:
+            # Final fallback: find ALL visible non-hidden inputs and try filling the first one
+            try:
+                all_inputs = await page.query_selector_all('input:not([type="hidden"]):not([type="submit"]):not([type="checkbox"]):not([type="radio"])')
+                for inp in all_inputs:
+                    if await inp.is_visible():
+                        inp_type = await inp.get_attribute("type") or "text"
+                        inp_id = await inp.get_attribute("id") or ""
+                        inp_name = await inp.get_attribute("name") or ""
+                        inp_placeholder = await inp.get_attribute("placeholder") or ""
+                        logger.info(f"[LinkedIn 2FA] Visible input: type={inp_type} id={inp_id} name={inp_name} placeholder={inp_placeholder}")
+                        # Skip obvious non-verification inputs
+                        skip_names = {"email", "password", "username", "search", "q"}
+                        if inp_name.lower() in skip_names or inp_id.lower() in skip_names:
+                            continue
+                        await inp.fill(request.code)
+                        filled = True
+                        break
+            except Exception as e:
+                logger.error(f"[LinkedIn 2FA] Final fallback error: {e}")
+
+        if not filled:
             screenshot = await _take_screenshot_b64(page)
             # Log page content for debugging
             try:
                 page_html = await page.content()
                 input_count = page_html.lower().count("<input")
                 form_count = page_html.lower().count("<form")
+                # Dump all input elements for debugging
+                all_inputs_debug = await page.evaluate("""
+                    () => Array.from(document.querySelectorAll('input')).map(el => ({
+                        type: el.type, id: el.id, name: el.name,
+                        className: el.className.substring(0, 80),
+                        placeholder: el.placeholder,
+                        visible: el.offsetParent !== null,
+                        maxLength: el.maxLength,
+                        inputMode: el.inputMode
+                    }))
+                """)
+                logger.error(f"[LinkedIn 2FA] All inputs on page: {all_inputs_debug}")
             except Exception:
                 input_count = -1
                 form_count = -1
