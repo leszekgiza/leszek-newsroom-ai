@@ -175,6 +175,7 @@ model Article {
   title       String
   intro       String? // 2-sentence AI intro
   summary     String? // Full AI summary
+  content     String? // Original article/email content (connector sources)
   imageUrl    String?   @map("image_url")
   author      String?
   publishedAt DateTime? @map("published_at")

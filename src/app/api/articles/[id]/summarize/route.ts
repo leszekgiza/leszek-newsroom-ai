@@ -75,13 +75,20 @@ export async function POST(
 
     // Fetch article content
     let articleContent: string;
-    try {
-      articleContent = await fetchArticleContent(article.url);
-    } catch {
-      return NextResponse.json(
-        { error: "Nie udalo sie pobrac tresci artykulu" },
-        { status: 500 }
-      );
+
+    if (article.content) {
+      // Use stored content (connector sources: Gmail, LinkedIn, Twitter)
+      articleContent = article.content.slice(0, 10000);
+    } else {
+      // Scrape content from URL (website sources)
+      try {
+        articleContent = await fetchArticleContent(article.url);
+      } catch {
+        return NextResponse.json(
+          { error: "Nie udalo sie pobrac tresci artykulu" },
+          { status: 500 }
+        );
+      }
     }
 
     // Generate summary with LLM

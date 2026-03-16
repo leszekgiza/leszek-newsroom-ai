@@ -272,6 +272,7 @@ async function syncConnectorSource(
             title: item.title,
             intro,
             summary: null,
+            content: item.content || null,
             author: item.author,
             publishedAt: item.publishedAt,
             privateSourceId: source.id,

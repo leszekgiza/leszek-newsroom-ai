@@ -9,6 +9,7 @@ import {
   SourceConfig,
 } from "@/lib/scrapeService";
 import { generatePolishIntro } from "@/lib/aiService";
+import { addArticleToEdition } from "@/lib/editionService";
 import { getConnector } from "@/lib/connectors/factory";
 
 // Source types that use the connector pipeline (not the scraper)
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
     // (no scraper health check needed — connectors use their own API)
     if (isPrivate && "type" in source && CONNECTOR_TYPES.has(source.type as string)) {
       console.log(`[SCRAPE] Routing to connector pipeline for type=${source.type}`);
-      return await handleConnectorSync(source as { id: string; type: string; status: string; credentials: string | null; config: Prisma.JsonValue; name: string });
+      return await handleConnectorSync(source as { id: string; type: string; status: string; credentials: string | null; config: Prisma.JsonValue; name: string }, session.userId);
     }
 
     // Check scraper health (only for scraper-type sources)
@@ -250,7 +251,7 @@ async function handleConnectorSync(source: {
   credentials: string | null;
   config: Prisma.JsonValue;
   name: string;
-}) {
+}, userId: string) {
   if (source.status === "DISCONNECTED" || !source.credentials) {
     return NextResponse.json(
       { error: "Konektor nie jest połączony. Przejdź do Integracji aby go skonfigurować." },
@@ -303,17 +304,21 @@ async function handleConnectorSync(source: {
             }
           }
 
-          await prisma.article.create({
+          const createdArticle = await prisma.article.create({
             data: {
               url: item.url,
               title: item.title,
               intro,
               summary: null,
+              content: item.content || null,
               author: item.author,
               publishedAt: item.publishedAt,
               privateSourceId: source.id,
             },
           });
+
+          // Add to today's edition
+          await addArticleToEdition(createdArticle.id, userId);
           newCount++;
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
