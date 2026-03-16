@@ -121,6 +121,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    console.log(`[Summarize] POST ${request.url}`);
     const session = await getCurrentUser();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -147,6 +148,7 @@ export async function POST(
 
     // If article already has a summary and not forcing regeneration, return it
     if (article.summary && !force) {
+      console.log(`[Summarize] Returning cached summary for ${id}`);
       return NextResponse.json({ summary: article.summary });
     }
 
@@ -158,6 +160,7 @@ export async function POST(
       article.url.includes("mail.google.com");
     const needsGmailRefetch =
       isGmail && (force || !isContentUsable(article.content));
+    console.log(`[Summarize] id=${id}, force=${force}, isGmail=${isGmail}, contentUsable=${isContentUsable(article.content)}, needsRefetch=${needsGmailRefetch}`);
 
     if (article.content && isContentUsable(article.content) && !needsGmailRefetch) {
       // Use stored content (connector sources: Gmail, LinkedIn, Twitter)
