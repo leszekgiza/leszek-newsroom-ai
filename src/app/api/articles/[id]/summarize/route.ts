@@ -90,15 +90,21 @@ async function fetchGmailContentOnDemand(
   }
 
   const { html, plain } = extractBodyFromMime(firstMessage.payload);
+  console.log(`[Gmail fetch] threadId=${threadId}, html=${html ? html.length : 0} chars, plain=${plain ? plain.length : 0} chars`);
+
   let content = "";
   if (html) {
     content = htmlToMarkdown(html);
-  } else if (plain) {
+    console.log(`[Gmail fetch] after htmlToMarkdown: ${content.length} chars, usable=${isContentUsable(content)}`);
+  }
+  if (!isContentUsable(content) && plain) {
+    // Fallback to plain text if HTML conversion produced garbage
     content = plain;
+    console.log(`[Gmail fetch] falling back to plain text: ${content.length} chars`);
   }
 
-  if (!content) {
-    throw new Error("Empty email content");
+  if (!isContentUsable(content)) {
+    throw new Error(`Email content is empty or unusable after parsing (html=${html?.length || 0}, plain=${plain?.length || 0})`);
   }
 
   // Persist content for future use
