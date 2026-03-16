@@ -168,6 +168,9 @@ export function htmlToMarkdown(html: string): string {
  * email footers, and common newsletter boilerplate.
  */
 export function cleanEmailContent(text: string): string {
+  // Remove zero-width and invisible characters (preheader hacks, etc.)
+  text = text.replace(/[\u200B\u200C\u200D\uFEFF\u034F\u00AD\u2060\u2061\u2062\u2063\u2064\u180E]/g, "");
+
   // Normalize line endings
   text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 

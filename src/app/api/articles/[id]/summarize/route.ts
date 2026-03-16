@@ -48,7 +48,15 @@ async function fetchArticleContent(url: string): Promise<string> {
   }
 }
 
-// On-demand fetch Gmail content for articles with content=null
+// Check if content is meaningful (not just invisible chars / whitespace)
+function isContentUsable(content: string | null): boolean {
+  if (!content) return false;
+  // Strip all whitespace and invisible chars, check if anything remains
+  const stripped = content.replace(/[\s\u200B\u200C\u200D\uFEFF\u034F\u00AD\u2060-\u2064\u180E]/g, "");
+  return stripped.length > 50;
+}
+
+// On-demand fetch Gmail content for articles with content=null or garbage content
 async function fetchGmailContentOnDemand(
   articleId: string,
   articleUrl: string,
@@ -138,21 +146,23 @@ export async function POST(
 
     // Fetch article content
     let articleContent: string;
-
-    if (article.content) {
-      // Use stored content (connector sources: Gmail, LinkedIn, Twitter)
-      articleContent = article.content.slice(0, 10000);
-    } else if (
+    const isGmail =
       article.privateSource?.type === "GMAIL" &&
       article.privateSource.credentials &&
-      article.url.includes("mail.google.com")
-    ) {
-      // On-demand fetch from Gmail API for legacy articles with content=null
+      article.url.includes("mail.google.com");
+    const needsGmailRefetch =
+      isGmail && (force || !isContentUsable(article.content));
+
+    if (article.content && isContentUsable(article.content) && !needsGmailRefetch) {
+      // Use stored content (connector sources: Gmail, LinkedIn, Twitter)
+      articleContent = article.content.slice(0, 10000);
+    } else if (isGmail && article.privateSource!.credentials) {
+      // On-demand fetch from Gmail API (content missing, garbage, or force regeneration)
       try {
         articleContent = await fetchGmailContentOnDemand(
           article.id,
           article.url,
-          article.privateSource.credentials
+          article.privateSource!.credentials
         );
       } catch (error) {
         console.error("Gmail on-demand fetch failed:", error);
