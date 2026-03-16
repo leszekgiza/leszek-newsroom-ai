@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getLLMProvider } from "@/lib/ai/llm";
+import { google } from "googleapis";
+import { refreshAccessToken } from "@/lib/connectors/gmail/oauth";
+import { extractBodyFromMime, htmlToMarkdown } from "@/lib/connectors/gmail/html-parser";
+import { decrypt } from "@/lib/encryption";
 
 // Fetch article content from URL
 async function fetchArticleContent(url: string): Promise<string> {
@@ -44,6 +48,60 @@ async function fetchArticleContent(url: string): Promise<string> {
   }
 }
 
+// On-demand fetch Gmail content for articles with content=null
+async function fetchGmailContentOnDemand(
+  articleId: string,
+  articleUrl: string,
+  sourceCredentials: string
+): Promise<string> {
+  // Extract threadId from URL: https://mail.google.com/mail/u/0/#inbox/{threadId}
+  const threadId = articleUrl.split("#inbox/")[1];
+  if (!threadId) {
+    throw new Error("Cannot extract threadId from Gmail URL");
+  }
+
+  // Decrypt credentials and refresh access token
+  const creds = JSON.parse(decrypt(sourceCredentials));
+  const accessToken = await refreshAccessToken(creds.refreshToken);
+
+  // Fetch thread from Gmail API
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
+  const gmail = google.gmail({ version: "v1", auth });
+
+  const thread = await gmail.users.threads.get({
+    userId: "me",
+    id: threadId,
+    format: "full",
+  });
+
+  // Extract body from the first message in the thread
+  const firstMessage = thread.data.messages?.[0];
+  if (!firstMessage?.payload) {
+    throw new Error("No message content found in Gmail thread");
+  }
+
+  const { html, plain } = extractBodyFromMime(firstMessage.payload);
+  let content = "";
+  if (html) {
+    content = htmlToMarkdown(html);
+  } else if (plain) {
+    content = plain;
+  }
+
+  if (!content) {
+    throw new Error("Empty email content");
+  }
+
+  // Persist content for future use
+  await prisma.article.update({
+    where: { id: articleId },
+    data: { content },
+  });
+
+  return content.slice(0, 10000);
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -56,9 +114,12 @@ export async function POST(
 
     const { id } = await params;
 
-    // Get article
+    // Get article with its private source (needed for Gmail fallback)
     const article = await prisma.article.findUnique({
       where: { id },
+      include: {
+        privateSource: true,
+      },
     });
 
     if (!article) {
@@ -79,6 +140,25 @@ export async function POST(
     if (article.content) {
       // Use stored content (connector sources: Gmail, LinkedIn, Twitter)
       articleContent = article.content.slice(0, 10000);
+    } else if (
+      article.privateSource?.type === "GMAIL" &&
+      article.privateSource.credentials &&
+      article.url.includes("mail.google.com")
+    ) {
+      // On-demand fetch from Gmail API for legacy articles with content=null
+      try {
+        articleContent = await fetchGmailContentOnDemand(
+          article.id,
+          article.url,
+          article.privateSource.credentials
+        );
+      } catch (error) {
+        console.error("Gmail on-demand fetch failed:", error);
+        return NextResponse.json(
+          { error: "Nie udalo sie pobrac tresci maila z Gmail" },
+          { status: 500 }
+        );
+      }
     } else {
       // Scrape content from URL (website sources)
       try {
