@@ -3,8 +3,15 @@ import { prisma } from "@/lib/prisma";
 import { decrypt, encrypt } from "@/lib/encryption";
 import { exchangeCodeForTokens } from "@/lib/connectors/gmail/oauth";
 
+function getBaseUrl(request: NextRequest): string {
+  const proto = request.headers.get("x-forwarded-proto") || "http";
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "localhost:3000";
+  return `${proto}://${host}`;
+}
+
 export async function GET(request: NextRequest) {
   try {
+    const baseUrl = getBaseUrl(request);
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
     const state = searchParams.get("state");
@@ -12,13 +19,13 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       return NextResponse.redirect(
-        new URL(`/settings/integrations?gmail=error&reason=${error}`, request.url)
+        new URL(`/settings/integrations?gmail=error&reason=${error}`, baseUrl)
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL("/settings/integrations?gmail=error&reason=missing_params", request.url)
+        new URL("/settings/integrations?gmail=error&reason=missing_params", baseUrl)
       );
     }
 
@@ -28,7 +35,7 @@ export async function GET(request: NextRequest) {
       userId = decrypt(state);
     } catch {
       return NextResponse.redirect(
-        new URL("/settings/integrations?gmail=error&reason=invalid_state", request.url)
+        new URL("/settings/integrations?gmail=error&reason=invalid_state", baseUrl)
       );
     }
 
@@ -36,7 +43,7 @@ export async function GET(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       return NextResponse.redirect(
-        new URL("/settings/integrations?gmail=error&reason=user_not_found", request.url)
+        new URL("/settings/integrations?gmail=error&reason=user_not_found", baseUrl)
       );
     }
 
@@ -46,7 +53,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(
         new URL(
           "/settings/integrations?gmail=error&reason=no_refresh_token",
-          request.url
+          baseUrl
         )
       );
     }
@@ -84,12 +91,12 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.redirect(
-      new URL("/settings/integrations?gmail=connected", request.url)
+      new URL("/settings/integrations/gmail?gmail=connected", baseUrl)
     );
   } catch (error) {
     console.error("Google OAuth callback error:", error);
     return NextResponse.redirect(
-      new URL("/settings/integrations?gmail=error&reason=server_error", request.url)
+      new URL("/settings/integrations?gmail=error&reason=server_error", baseUrl)
     );
   }
 }
