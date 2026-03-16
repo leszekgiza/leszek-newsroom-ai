@@ -5,6 +5,7 @@ Playwright-based browser automation for LinkedIn auth with 2FA support.
 
 import asyncio
 import base64
+import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
@@ -12,6 +13,8 @@ from typing import Dict, Optional, Tuple
 from fastapi import APIRouter
 from pydantic import BaseModel
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -402,6 +405,7 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
         )
 
     try:
+        print(f"[LinkedIn 2FA] Verify called. Page URL: {page.url}, closed: {page.is_closed()}")
         # Wait for the verification page to fully render before looking for inputs
         await asyncio.sleep(1)
 
@@ -435,11 +439,15 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
         for selector in code_selectors:
             try:
                 el = await page.query_selector(selector)
-                if el and await el.is_visible():
-                    await el.fill(request.code)
-                    filled = True
-                    break
-            except Exception:
+                if el:
+                    vis = await el.is_visible()
+                    print(f"[LinkedIn 2FA] Selector '{selector}': found, visible={vis}")
+                    if vis:
+                        await el.fill(request.code)
+                        filled = True
+                        break
+            except Exception as e:
+                print(f"[LinkedIn 2FA] Selector '{selector}': error {e}")
                 continue
 
         if not filled:
@@ -499,12 +507,17 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
 
         if not filled:
             screenshot = await _take_screenshot_b64(page)
+            input_count = -1
+            form_count = -1
             # Log page content for debugging
             try:
                 page_html = await page.content()
                 input_count = page_html.lower().count("<input")
                 form_count = page_html.lower().count("<form")
-                # Dump all input elements for debugging
+            except Exception as e:
+                print(f"[LinkedIn 2FA] page.content() failed: {e}")
+
+            try:
                 all_inputs_debug = await page.evaluate("""
                     () => Array.from(document.querySelectorAll('input')).map(el => ({
                         type: el.type, id: el.id, name: el.name,
@@ -515,10 +528,12 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
                         inputMode: el.inputMode
                     }))
                 """)
-                logger.error(f"[LinkedIn 2FA] All inputs on page: {all_inputs_debug}")
-            except Exception:
-                input_count = -1
-                form_count = -1
+                print(f"[LinkedIn 2FA] All inputs on page: {all_inputs_debug}")
+            except Exception as e:
+                print(f"[LinkedIn 2FA] page.evaluate() failed: {e}")
+
+            print(f"[LinkedIn 2FA] Page URL: {page.url}")
+            print(f"[LinkedIn 2FA] Page is closed: {page.is_closed()}")
             return BrowserLoginVerifyResponse(
                 success=False,
                 state="failed",
