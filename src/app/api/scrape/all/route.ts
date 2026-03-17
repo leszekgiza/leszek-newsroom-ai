@@ -243,7 +243,7 @@ async function syncConnectorSource(
     where: { id: sourceId },
   });
 
-  if (!fullSource || !fullSource.credentials || fullSource.status === "DISCONNECTED") {
+  if (!fullSource || fullSource.status === "DISCONNECTED") {
     send({
       type: "source_done",
       sourceId,

@@ -252,7 +252,7 @@ async function handleConnectorSync(source: {
   config: Prisma.JsonValue;
   name: string;
 }, userId: string) {
-  if (source.status === "DISCONNECTED" || !source.credentials) {
+  if (source.status === "DISCONNECTED") {
     return NextResponse.json(
       { error: "Konektor nie jest połączony. Przejdź do Integracji aby go skonfigurować." },
       { status: 400 }
