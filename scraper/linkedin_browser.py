@@ -6,6 +6,7 @@ Playwright-based browser automation for LinkedIn auth with 2FA support.
 import asyncio
 import base64
 import logging
+import random
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
@@ -114,22 +115,27 @@ async def _close_session(session_id: str):
 
 STEALTH_SCRIPT = """
 Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en', 'pl'] });
+Object.defineProperty(navigator, 'languages', { get: () => ['pl-PL', 'pl', 'en-US', 'en'] });
 Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
-window.chrome = { runtime: {} };
+window.chrome = { runtime: {}, loadTimes: function(){}, csi: function(){} };
+Object.defineProperty(navigator, 'maxTouchPoints', { get: () => 0 });
+delete navigator.__proto__.webdriver;
 """
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/120.0.0.0 Safari/537.36"
+    "Chrome/131.0.0.0 Safari/537.36"
 )
 
 
 async def _create_stealth_browser() -> Tuple[Browser, BrowserContext, Page]:
     """Launch Chromium with stealth configuration."""
     pw = await async_playwright().start()
-    browser = await pw.chromium.launch(headless=True)
+    browser = await pw.chromium.launch(
+        headless=True,
+        args=["--disable-blink-features=AutomationControlled"],
+    )
     context = await browser.new_context(
         user_agent=USER_AGENT,
         viewport={"width": 1920, "height": 1080},
@@ -158,6 +164,10 @@ async def _detect_state(page: Page) -> Tuple[str, Optional[str]]:
         content = await page.content()
         content_lower = content.lower()
 
+        # CAPTCHA checkpoint (hidden inputs with captcha fields)
+        if "captchasitekey" in content_lower or "captchauserresponsetoken" in content_lower:
+            return "captcha", None
+
         if "email" in content_lower and ("verification" in content_lower or "verify" in content_lower or "pin" in content_lower):
             return "2fa_email", None
         if "sms" in content_lower or "text message" in content_lower or "phone" in content_lower:
@@ -166,7 +176,7 @@ async def _detect_state(page: Page) -> Tuple[str, Optional[str]]:
             return "2fa_app", None
         return "2fa_unknown", None
 
-    # CAPTCHA
+    # CAPTCHA (URL-based detection)
     if "captcha" in url or "security-verification" in url:
         return "captcha", None
 
@@ -298,11 +308,14 @@ async def browser_login_start(request: BrowserLoginStartRequest):
                         error="Login form not found - cookie consent may be blocking",
                     )
 
-            # Fill credentials
-            await page.fill('input#username', request.email)
-            await asyncio.sleep(0.3)
-            await page.fill('input#password', request.password)
-            await asyncio.sleep(0.5)
+            # Fill credentials with human-like typing delays
+            username_input = await page.query_selector('input#username')
+            await username_input.type(request.email, delay=50)
+            await asyncio.sleep(random.uniform(0.4, 0.8))
+
+            password_input = await page.query_selector('input#password')
+            await password_input.type(request.password, delay=30)
+            await asyncio.sleep(random.uniform(0.5, 1.5))
 
             # Click sign in
             await page.click('button[type="submit"]')
@@ -406,6 +419,19 @@ async def browser_login_verify(request: BrowserLoginVerifyRequest):
 
     try:
         print(f"[LinkedIn 2FA] Verify called. Page URL: {page.url}, closed: {page.is_closed()}")
+
+        # Re-detect state - page may have changed since login start
+        current_state, _ = await _detect_state(page)
+        if current_state == "captcha":
+            screenshot = await _take_screenshot_b64(page)
+            await _close_session(request.session_id)
+            return BrowserLoginVerifyResponse(
+                success=False,
+                state="captcha",
+                screenshot=screenshot,
+                error="Page changed to CAPTCHA. Please retry login.",
+            )
+
         # Wait for the verification page to fully render before looking for inputs
         await asyncio.sleep(1)
 
