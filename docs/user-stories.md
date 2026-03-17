@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - User Stories
 
-**Wersja:** 2.7
-**Data:** 2026-02-09
+**Wersja:** 2.8
+**Data:** 2026-03-05
 **Format:** Jako [rola] chcę [funkcja] aby [korzyść]
 
 ---
@@ -444,27 +444,28 @@
 
 ---
 
-### US14.3 - Połączenie LinkedIn (Voyager API)
+### US14.3 - Połączenie LinkedIn (Publiczny lub Zaawansowany)
 **Jako** użytkownik
 **Chcę** obserwować wybrane profile LinkedIn
 **Aby** otrzymywać ich najnowsze posty w moim feedzie
 
 **Szczegóły:**
-- Login/hasło → Voyager API (linkedin-api Python)
-- Disclaimer o braku oficjalnego API i ryzyku bana (użytkownik musi zaakceptować)
-- Session cookies przechowywane zaszyfrowane
-- Fallback: manual cookie input (li_at z DevTools) gdy 2FA blokuje
+- **Tryb publiczny (zalecany):** Podaj URL-e profili → Playwright scraping publicznie widocznych postów (bez logowania)
+- **Tryb zaawansowany:** Login/hasło → Voyager API (linkedin-api Python) lub manual cookie li_at
+- Disclaimer o braku oficjalnego API i ryzyku (użytkownik musi zaakceptować)
+- W trybie zaawansowanym: session cookies przechowywane zaszyfrowane
 
-> **Nota:** Oficjalne LinkedIn API nie daje dostępu do feeda (r_member_social zamknięte od 06/2023). Używamy nieoficjalnego Voyager API z pełną świadomością ryzyka.
+> **Nota:** Oficjalne LinkedIn API nie daje dostępu do feeda (r_member_social zamknięte od 06/2023). Tryb publiczny scrapuje publicznie dostępne profile. Tryb zaawansowany używa nieoficjalnego Voyager API.
 
 **Kryteria akceptacji:**
-- [ ] Disclaimer o ryzyku (brak oficjalnego API, możliwy ban konta, naruszenie ToS)
-- [ ] Użytkownik musi zaakceptować disclaimer przed połączeniem
-- [ ] Login/hasło → Voyager API session (linkedin-api Python)
-- [ ] Fallback: manual cookie li_at (z DevTools)
-- [ ] Test połączenia przed zapisaniem
-- [ ] Credentials zaszyfrowane AES-256-GCM
-- [ ] UI: mockup `ui_linkedin_wizard_v2_1.html`
+- [x] Disclaimer o ryzyku (brak oficjalnego API, możliwy ban konta, naruszenie ToS)
+- [x] Użytkownik musi zaakceptować disclaimer przed połączeniem
+- [x] Wybór trybu: publiczny (zalecany) lub zaawansowany
+- [x] Tryb publiczny: podanie URL profili, scraping bez credentials
+- [x] Tryb zaawansowany: login/hasło → Voyager API session
+- [x] Fallback: manual cookie li_at (z DevTools)
+- [x] Credentials zaszyfrowane AES-256-GCM (tryb zaawansowany)
+- [x] Tryb publiczny: PrivateSource bez credentials (credentials=null, status=CONNECTED)
 
 ---
 
@@ -474,10 +475,12 @@
 **Aby** kontrolować źródła treści
 
 **Kryteria akceptacji:**
-- [ ] Input na hashtagi (multi-tag, np. #AI, #ML)
-- [ ] Input na profile autorów do śledzenia
-- [ ] Opcja include/exclude reposts
-- [ ] Minimalny rozmiar posta (filtr spamu)
+- [x] Dodawanie profili przez URL (tryb publiczny i zaawansowany)
+- [x] Wyszukiwanie profili po imieniu (tryb zaawansowany — wymaga auth)
+- [x] Usuwanie profili z listy obserwowanych
+- [x] Slider "postów per profil" (5-50)
+- [ ] Input na hashtagi (multi-tag, np. #AI, #ML) — tylko tryb zaawansowany
+- [ ] Opcja include/exclude reposts — tylko tryb zaawansowany
 
 ---
 
@@ -592,6 +595,130 @@
 - [ ] Duplikaty → friendly message "Już jesteś na liście!"
 - [ ] Rate limiting: max 5 req/min per IP
 - [ ] Dane zapisane w tabeli `waitlist_signups`
+
+---
+
+## Epic 16: Subscription & Billing (Premium)
+
+### US16.1 - Pricing page
+**Jako** użytkownik
+**Chcę** zobaczyć pricing page i porównać plany (free vs premium)
+**Aby** zdecydować czy upgrade do premium jest dla mnie wartościowy
+
+**Kryteria akceptacji:**
+- [ ] Strona /pricing z feature matrix (free vs premium)
+- [ ] Toggle monthly/yearly pricing
+- [ ] CTA → Stripe Checkout (dla niezalogowanych → redirect do rejestracji)
+- [ ] Responsywność mobile/desktop
+
+---
+
+### US16.2 - Upgrade do premium
+**Jako** użytkownik free tier
+**Chcę** upgrade do premium via Stripe
+**Aby** uzyskać dostęp do premium features (ElevenLabs TTS, connectors, scheduled sync)
+
+**Kryteria akceptacji:**
+- [ ] Przycisk "Upgrade" w ustawieniach i na pricing page
+- [ ] Stripe Checkout session (redirect do Stripe)
+- [ ] Po płatności: webhook → aktywacja premium tier
+- [ ] Natychmiastowy dostęp do premium features po płatności
+
+---
+
+### US16.3 - Zarządzanie subskrypcją
+**Jako** premium user
+**Chcę** zarządzać swoją subskrypcją (anulowanie, zmiana karty)
+**Aby** mieć kontrolę nad płatnościami
+
+**Kryteria akceptacji:**
+- [ ] Sekcja "Subscription" w ustawieniach
+- [ ] Przycisk "Zarządzaj subskrypcją" → Stripe Customer Portal
+- [ ] Stripe Customer Portal: zmiana karty, przegląd faktur, anulowanie
+- [ ] Status subskrypcji widoczny w UI (active, cancelled, past_due)
+
+---
+
+### US16.4 - Graceful downgrade
+**Jako** premium user po wygaśnięciu subskrypcji
+**Chcę** zachować swoje dane i wrócić do free tier
+**Aby** nie stracić artykułów, konfiguracji i historii
+
+**Kryteria akceptacji:**
+- [ ] Po wygaśnięciu: użytkownik wraca do free tier (nie jest usuwany)
+- [ ] Dane zachowane: artykuły, wydania, historia, konfiguracja
+- [ ] Premium features wyłączone (ElevenLabs → fallback Edge TTS, connectors → manual sync)
+- [ ] Scheduled sync wyłączony (powrót do manual sync only)
+- [ ] Informacja w UI o wygaśnięciu i opcji odnowienia
+
+---
+
+## Epic 17: ElevenLabs TTS (Premium)
+
+### US17.1 - ElevenLabs TTS
+**Jako** premium user
+**Chcę** słuchać artykułów w głosach ElevenLabs
+**Aby** mieć wyższą jakość TTS niż Edge TTS
+
+**Kryteria akceptacji:**
+- [ ] Premium user: ElevenLabs jako domyślny TTS provider
+- [ ] Free user: Edge TTS (bez zmian)
+- [ ] Fallback na Edge TTS gdy ElevenLabs API niedostępne
+- [ ] Jakość audio wyraźnie lepsza niż Edge TTS
+
+---
+
+### US17.2 - Wybór głosu ElevenLabs
+**Jako** premium user
+**Chcę** wybrać głos ElevenLabs w ustawieniach
+**Aby** dopasować narrację do moich preferencji
+
+**Kryteria akceptacji:**
+- [ ] Lista dostępnych głosów ElevenLabs w ustawieniach (premium only)
+- [ ] Podgląd/preview głosu przed zapisaniem
+- [ ] Zapisanie preferencji w DB
+- [ ] Free users widzą sekcję ElevenLabs jako zablokowaną (upgrade CTA)
+
+---
+
+## Epic 18: Scheduled Background Scraping (Premium)
+
+### US18.1 - Konfiguracja scheduled sync
+**Jako** premium user
+**Chcę** ustawić godzinę automatycznego sync (np. 6:00 rano)
+**Aby** mieć artykuły gotowe każdego ranka bez ręcznego sync
+
+**Kryteria akceptacji:**
+- [ ] Sekcja "Scheduled Sync" w ustawieniach (premium only)
+- [ ] Wybór godziny sync (domyślnie 6:00)
+- [ ] Wybór dni tygodnia (domyślnie pon-pt)
+- [ ] Wybór strefy czasowej (domyślnie z przeglądarki)
+- [ ] Toggle on/off
+
+---
+
+### US18.2 - Artykuły gotowe rano
+**Jako** premium user
+**Chcę** rano otworzyć apkę i mieć artykuły już gotowe
+**Aby** nie czekać na sync i od razu zacząć czytać/słuchać
+
+**Kryteria akceptacji:**
+- [ ] Scheduled sync pobiera artykuły z wszystkich źródeł usera
+- [ ] Po sync: automatyczne tworzenie nowego wydania
+- [ ] Artykuły z intro i summary gotowe do czytania/TTS
+- [ ] Czas sync < 10 min (dla typowego usera z 10-20 źródłami)
+
+---
+
+### US18.3 - Manual sync only (free tier)
+**Jako** free user
+**Chcę** sync tylko ręcznie (przycisk "Sync")
+**Aby** system jasno komunikował granicę free/premium
+
+**Kryteria akceptacji:**
+- [ ] Free user: przycisk "Sync" działa jak dotychczas (bez zmian)
+- [ ] Free user: sekcja "Scheduled Sync" w ustawieniach pokazuje upgrade CTA
+- [ ] Premium user: scheduled sync + manual sync (oba dostępne)
 
 ---
 

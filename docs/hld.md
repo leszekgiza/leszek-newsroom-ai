@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - High-Level Design (HLD)
 
-**Wersja:** 1.4
-**Data:** 2026-02-09
+**Wersja:** 1.5
+**Data:** 2026-03-05
 **Status:** Draft
 
 ---
@@ -19,7 +19,7 @@ System agregacji treści z wielu źródeł internetowych z automatycznym generow
 - Codzienne wydania (Editions) z TTS playlist per artykuł (prev/next, prefetch)
 - PWA z offline support (manifest, service worker, installable)
 - SSE streaming dla postępu scrapowania
-- Source Integrations: Gmail (OAuth + 3 ścieżki importu nadawców), LinkedIn (Voyager API + obserwowane profile per-user), X/Twitter (Twikit)
+- Source Integrations: Gmail (OAuth + 3 ścieżki importu nadawców), LinkedIn (tryb publiczny: Playwright scraping bez auth, lub zaawansowany: Voyager API + obserwowane profile per-user), X/Twitter (Twikit)
 - Architektura dwujęzyczna: Gmail w Node.js, LinkedIn + X w Python microservice (scraper/)
 - Autentykacja użytkowników
 - **Planowane:** Text Q&A per article (OSS), Voice STT, Briefings, Multi-Article Q&A (Premium)
@@ -154,8 +154,8 @@ System rozróżnia dwa typy źródeł dla efektywności i prywatności:
 │  │  │   FastAPI    │  │   Crawl4AI   │  │   Social Connectors     │ │ │
 │  │  ├──────────────┤  ├──────────────┤  ├──────────────────────────┤ │ │
 │  │  │ /scrape      │  │ Web scraping │  │ linkedin-api (Voyager)  │ │ │
-│  │  │ /linkedin/*  │  │ JS rendering │  │ twikit (async timeline) │ │ │
-│  │  │ /twitter/*   │  │              │  │                          │ │ │
+│  │  │ /linkedin/*  │  │ JS rendering │  │ linkedin_public.py      │ │ │
+│  │  │ /twitter/*   │  │              │  │ twikit (async timeline) │ │ │
 │  │  └──────────────┘  └──────────────┘  └──────────────────────────┘ │ │
 │  └───────────────────────────────────────────────────────────────────┘ │
 │                                    │                                   │
@@ -215,7 +215,8 @@ oficjalnych API - używamy nieoficjalnych bibliotek (Voyager API, Twikit).
 | Engine | Crawl4AI | Open source, LLM-ready output |
 | Runtime | Python 3.11+ (Docker) | Wymagane przez Crawl4AI, linkedin-api, twikit |
 | Browser | Playwright | JS rendering, login support (Crawl4AI) |
-| LinkedIn | linkedin-api (Voyager API) | Obserwowane profile per-user (oficjalne API zamknięte 06/2023) |
+| LinkedIn (auth) | linkedin-api (Voyager API) | Obserwowane profile per-user, tryb zaawansowany (oficjalne API zamknięte 06/2023) |
+| LinkedIn (public) | Playwright + BeautifulSoup | Publiczny scraping profili bez logowania, tryb zalecany |
 | X/Twitter | twikit (async) | Python async scraper, cookies/login auth, rate limit 600/15min |
 | Framework | FastAPI | Już używany przez Crawl4AI scraper |
 
@@ -291,8 +292,10 @@ oficjalnych API - używamy nieoficjalnych bibliotek (Voyager API, Twikit).
     │                       │                    │
     ▼                       ▼                    ▼
  Gmail: 60min         Decrypt             Gmail: googleapis (Node.js)
- LinkedIn: 120min     credentials         LinkedIn: HTTP → Python /linkedin/profile-posts
- X/Twitter: 180min    (AES-256-GCM)       X/Twitter: HTTP → Python /twitter/timeline
+ LinkedIn: 120min     credentials         LinkedIn (auth): HTTP → Python /linkedin/profile-posts
+ X/Twitter: 180min    (AES-256-GCM)       LinkedIn (public): HTTP → Python /linkedin/public-posts
+                      (or null for            (Playwright scraping, no credentials)
+                       public mode)        X/Twitter: HTTP → Python /twitter/timeline
                                                 │
                                                 ▼
                                           Parse content
@@ -471,7 +474,8 @@ src/app/
 | Środowisko | Cel | URL |
 |------------|-----|-----|
 | Development | Lokalne dev | localhost:3000 |
-| Production | Live | newsroom.example.com |
+| Production (freemium) | Live | news.innocy.ai |
+| Self-hosted (OSS) | Brak domeny | Użytkownik hostuje sam z GitHub repo |
 
 ---
 
@@ -566,7 +570,7 @@ src/app/
 **Decyzja:** Gmail connector w Node.js (blisko Next.js API routes), LinkedIn + X/Twitter w Python microservice (rozszerzenie istniejącego `scraper/`)
 **Konsekwencje:**
 - Gmail: `googleapis` + `google-auth-library` w `package.json`
-- LinkedIn: `linkedin-api` w `scraper/requirements.txt`, endpointy `POST /linkedin/search-profiles`, `POST /linkedin/profile-posts`
+- LinkedIn: `linkedin-api` w `scraper/requirements.txt`, endpointy `POST /linkedin/search-profiles`, `POST /linkedin/profile-posts`, `POST /linkedin/public-posts` (Playwright + BeautifulSoup, bez auth)
 - X/Twitter: `twikit` w `scraper/requirements.txt`, endpoint `POST /scrape/twitter/timeline`
 - Node.js backend komunikuje się z Python microservice przez HTTP (localhost:8000)
 - Wspólny `SourceConnector` interface w Node.js, LinkedIn/Twitter connectors delegują do Python
@@ -593,22 +597,55 @@ src/app/
 - Feature flags dla OSS vs Premium boundary
 - Conversation history in-memory (nie persisted w MVP)
 
-### ADR-012: Two-Repo Strategy (Private Source → Public Mirror)
-**Status:** Accepted
-**Kontekst:** Projekt jest OSS (AGPL) z planowaną wersją premium. Potrzeba jasnego rozdzielenia kodu OSS i premium bez komplikowania codziennej pracy programisty.
-**Decyzja:** Architektura Private Source → Public Mirror:
-- Prywatne repo (`premium-newsroom`): źródło prawdy, cały kod (OSS + Premium)
-- Publiczne repo (`leszek-newsroom-ai`): automatyczny mirror, tylko kod OSS
-- GitHub Action synchronizuje OSS przy każdym push do master
-- Konwencja katalogów: wszystko poza `premium/` = OSS
+### ADR-012: Open Core — Single Public Repo with Dual License
+**Status:** Accepted (updated 2026-03-04, previously Two-Repo Strategy)
+**Kontekst:** Dwu-repozytoryjna strategia (private source → public mirror via GitHub Action) okazała się krucha (force push, diverged history). Model Open Core z jednym repo jest prostszy i sprawdzony (np. GitLab).
+**Decyzja:** Jedno publiczne repo (`leszek-newsroom-ai`) z dual license:
+- Root (`/`): AGPL-3.0
+- `src/premium/`: proprietary commercial license (`src/premium/LICENSE-PREMIUM`)
+- Publiczne repo = "weź i hostuj sam" (self-hosted OSS)
+- Hostowana wersja = `news.innocy.ai` (freemium: free + premium tier)
 **Konsekwencje:**
-- Praca z jednego repo lokalnie (zero pomyłek)
-- Zero manualnego splitu (automatyczne via GitHub Action)
+- Brak sync workflow (usunięty `.github/workflows/sync-oss.yml`)
+- Kod premium widoczny publicznie ale z proprietary license
 - ESLint `no-restricted-imports` blokuje import premium w kodzie OSS
 - Testy OSS muszą przechodzić bez `src/premium/` (`npm run test:oss`)
 - Feature flags (`PREMIUM_ENABLED`) do runtime rozróżnienia OSS/Premium
-- Minimalne ryzyko wycieku kodu premium (Action usuwa przed push)
+- Pliki premium mają header: `// Copyright (c) Leszek Giza. Commercial license — see src/premium/LICENSE-PREMIUM`
 - Szczegóły: `docs/oss-premium-split.md`
+
+### ADR-013: Stripe Billing for Premium Tier
+**Status:** Proposed
+**Kontekst:** Premium tier wymaga infrastruktury płatności — rejestracja, upgrade, zarządzanie subskrypcją, graceful downgrade
+**Decyzja:** Stripe Checkout + Stripe Customer Portal (hosted, minimalny własny kod)
+**Szczegóły:**
+- Stripe Checkout: redirect do hosted payment page (brak własnego formularza karty)
+- Stripe Customer Portal: self-service zmiana karty, faktury, anulowanie (hosted strona Stripe)
+- Webhook-driven subscription lifecycle: `invoice.paid`, `customer.subscription.updated`, `customer.subscription.deleted`
+- UserSubscription model w Prisma: `stripeCustomerId`, `stripeSubscriptionId`, `plan`, `status`, `currentPeriodEnd`
+- Per-request tier check via `isPremiumUser()` middleware helper
+- Graceful downgrade: po wygaśnięciu subskrypcji → free tier, dane zachowane, premium features wyłączone
+**Konsekwencje:**
+- Minimalny własny kod (Stripe Checkout + Portal = hosted UI)
+- Webhook reliability: idempotent handling, signature verification
+- Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`
+- API routes: `/api/billing/checkout`, `/api/billing/webhook`, `/api/billing/portal`
+
+### ADR-014: Scheduled Background Scraping (Premium)
+**Status:** Proposed
+**Kontekst:** Obecnie scraping jest manualny (user klika "Sync"). Premium users chcą mieć artykuły gotowe rano bez ręcznej akcji
+**Decyzja:** Cron endpoint wywoływany per-user wg konfigurowalnego harmonogramu
+**Szczegóły:**
+- Cron job `GET /api/cron/scrape-scheduled` — sprawdza premium userów z aktywnym schedule
+- User konfiguruje: godzinę sync (domyślnie 6:00), dni tygodnia (domyślnie pon-pt), strefę czasową
+- Po sync: auto-tworzenie edition (reuse istniejącej logiki z `editionService`)
+- Free tier: manual sync only (przycisk "Sync"); Premium tier: scheduled + manual
+- Nowe pola w User model: `syncEnabled`, `syncHour`, `syncDays`, `syncTimezone`
+**Konsekwencje:**
+- Cron musi obsłużyć wielu premium userów sekwencyjnie (lub z queue w przyszłości)
+- Timezone handling: przechowywanie IANA timezone per user, konwersja na UTC dla cron
+- Brak push notifications w MVP (user musi otworzyć apkę żeby zobaczyć nowe artykuły)
+- Rate limiting: max 1 scheduled sync per user per dzień
 
 ---
 

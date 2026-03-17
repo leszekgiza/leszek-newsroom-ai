@@ -1,7 +1,7 @@
 # Leszek Newsroom AI - Dokument Wymagań
 
-**Wersja:** 2.6
-**Data:** 2026-02-09
+**Wersja:** 2.7
+**Data:** 2026-03-05
 **Status:** Draft
 
 ---
@@ -42,7 +42,7 @@ System rozróżnia dwa typy źródeł:
 **Private Sources:**
 - Strony wymagające logowania (user podaje credentials)
 - Gmail (OAuth) - newslettery
-- LinkedIn (li_at cookie) - posty ekspertów
+- LinkedIn (tryb publiczny lub li_at cookie) - posty ekspertów
 - Prywatność: widoczne TYLKO dla właściciela
 
 **Future (v3.0):**
@@ -55,7 +55,7 @@ System rozróżnia dwa typy źródeł:
 - Dostawcy w dokumencie są tylko przykładami
 
 ### 1.6 OSS / Premium Split
-Wymagania premium (F10-F13) opisują planowane funkcje dostępne w wersji Newsroom AI (managed). Szczegóły implementacji premium: `docs/premium/`. Strategia dwóch repozytoriów: `docs/oss-premium-split.md`, ADR-012 w `docs/hld.md`.
+Wymagania premium (F10-F13, F15-F18) opisują planowane funkcje dostępne w wersji Newsroom AI (managed). Szczegóły implementacji premium: `docs/premium/`. Strategia Open Core: `docs/oss-premium-split.md`, ADR-012 w `docs/hld.md`.
 
 ---
 
@@ -67,7 +67,7 @@ Wymagania premium (F10-F13) opisują planowane funkcje dostępne w wersji Newsro
 |----|-----------|-----------|
 | F1.1 | Pobieranie artykułów ale to nie jest z RSS feeds po prostu robimy scraping ze strony internetowej| MUST |
 | F1.2 | Integracja z Gmail (newslettery) - OAuth + Gmail API + LLM matching (3 ścieżki dodawania nadawców) | MUST |
-| F1.3 | Integracja z LinkedIn (obserwowane profile) - login/cookies + Voyager API (linkedin-api Python) | MUST |
+| F1.3 | Integracja z LinkedIn (obserwowane profile) - tryb publiczny (Playwright scraping, bez logowania) lub zaawansowany (login/cookies + Voyager API) | MUST |
 | F1.4 | Integracja z X/Twitter (timeline) - cookies + Twikit (Python, async) | SHOULD |
 | F1.5 | Automatyczne odświeżanie co X minut | MUST |
 | F1.6 | Deduplikacja artykułów (ten sam URL) | MUST |
@@ -133,7 +133,7 @@ Wymagania premium (F10-F13) opisują planowane funkcje dostępne w wersji Newsro
 | ID | Wymaganie | Priorytet |
 |----|-----------|-----------|
 | F6.1 | Gmail OAuth (gmail.readonly, test mode) + precyzyjny import nadawców (3 ścieżki: Paste/Search/Browse) | MUST |
-| F6.2 | LinkedIn feed - Voyager API (linkedin-api Python) + disclaimer o ryzyku | MUST |
+| F6.2 | LinkedIn feed - tryb publiczny (Playwright + BeautifulSoup, bez auth) lub zaawansowany (Voyager API + login/cookies) + disclaimer o ryzyku | MUST |
 | F6.3 | X/Twitter timeline - Twikit (Python, async) + cookies auth | SHOULD |
 | F6.4 | Connector Status Dashboard - status, last sync, article count, inline progress | MUST |
 | F6.5 | Connector health check + retry (max 3, exponential backoff) | MUST |
@@ -226,6 +226,50 @@ Wymagania premium (F10-F13) opisują planowane funkcje dostępne w wersji Newsro
 | F13.4 | SLA monitoring + alerting (Premium ops) | SHOULD |
 
 > **Nota:** F6 (OSS) = BYO credentials/keys. F13 (Premium) = managed infrastructure, wyższe SLA.
+>
+> **Nota dot. connectors:** Gmail/LinkedIn/X są w kodzie OSS (`src/`, nie `src/premium/`), dostępne dla self-hosted. Na news.innocy.ai connectors = premium only (gated za tier check, nie za kod).
+
+### F15: Subscription & Billing (Premium)
+> Szczegóły implementacji: `src/premium/`
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F15.1 | Rejestracja = free tier (bez karty płatniczej) | MUST |
+| F15.2 | Upgrade do premium via Stripe Checkout | MUST |
+| F15.3 | Zarządzanie subskrypcją (anulowanie, zmiana planu) | MUST |
+| F15.4 | Stripe Customer Portal (self-service: zmiana karty, faktury, anulowanie) | MUST |
+| F15.5 | Webhook handling (payment success/failure, subscription lifecycle) | MUST |
+| F15.6 | Graceful downgrade (premium → free, zachowanie danych) | MUST |
+
+### F16: Pricing Page (Premium)
+> Szczegóły implementacji: `src/premium/`
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F16.1 | Porównanie free vs premium (feature matrix) | MUST |
+| F16.2 | Toggle monthly/yearly pricing | MUST |
+| F16.3 | CTA → Stripe Checkout | MUST |
+
+### F17: ElevenLabs TTS (Premium)
+> Szczegóły implementacji: `src/premium/`
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F17.1 | ElevenLabs provider w TTS factory | MUST |
+| F17.2 | Per-user provider selection (free=Edge TTS, premium=ElevenLabs) | MUST |
+| F17.3 | Wybór głosu ElevenLabs w ustawieniach | SHOULD |
+| F17.4 | Fallback na Edge TTS gdy ElevenLabs niedostępny | MUST |
+
+### F18: Scheduled Background Scraping (Premium)
+> Szczegóły implementacji: `src/premium/`
+
+| ID | Wymaganie | Priorytet |
+|----|-----------|-----------|
+| F18.1 | Automatyczne pobieranie artykułów w tle wg harmonogramu (premium only) | MUST |
+| F18.2 | Konfigurowalna godzina sync (domyślnie 6:00 rano, strefa czasowa usera) | MUST |
+| F18.3 | Wybór dni tygodnia (np. pon-pt vs codziennie) | MUST |
+| F18.4 | Auto-tworzenie edition po zakończeniu sync | MUST |
+| F18.5 | Free tier = manual sync only, Premium = scheduled + manual | MUST |
 
 ---
 
