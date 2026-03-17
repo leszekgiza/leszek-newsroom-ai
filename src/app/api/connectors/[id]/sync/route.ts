@@ -35,7 +35,7 @@ export async function POST(
       );
     }
 
-    if (source.status === "DISCONNECTED" || !source.credentials) {
+    if (source.status === "DISCONNECTED") {
       return NextResponse.json(
         { error: "Connector is not connected" },
         { status: 400 }

@@ -19,6 +19,7 @@ import aiohttp
 
 from linkedin_service import router as linkedin_router
 from linkedin_browser import router as linkedin_browser_router
+from linkedin_public import router as linkedin_public_router
 from twitter_service import router as twitter_router
 
 app = FastAPI(
@@ -39,6 +40,7 @@ app.add_middleware(
 # Mount connector routers
 app.include_router(linkedin_router, prefix="/linkedin", tags=["linkedin"])
 app.include_router(linkedin_browser_router, prefix="/linkedin", tags=["linkedin-browser"])
+app.include_router(linkedin_public_router, prefix="/linkedin", tags=["linkedin-public"])
 app.include_router(twitter_router, prefix="/twitter", tags=["twitter"])
 
 # =============================================================================

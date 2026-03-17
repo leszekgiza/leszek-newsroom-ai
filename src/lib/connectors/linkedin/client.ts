@@ -219,6 +219,49 @@ export async function linkedInDisconnect(sessionId: string): Promise<void> {
   });
 }
 
+// === Public Profile Posts ===
+
+export interface LinkedInPublicPostItem {
+  content: string;
+  publishedAt?: string;
+  externalId?: string;
+  url?: string;
+  author?: string;
+  title?: string;
+}
+
+export interface LinkedInPublicPostsResult {
+  success: boolean;
+  posts: LinkedInPublicPostItem[];
+  profileName?: string;
+  error?: string;
+}
+
+export async function linkedInFetchPublicPosts(
+  publicId: string,
+  maxPosts?: number
+): Promise<LinkedInPublicPostsResult> {
+  const res = await fetchWithRetry(`${getBaseUrl()}/linkedin/public-posts`, {
+    public_id: publicId,
+    max_posts: maxPosts ?? 10,
+  });
+
+  const data = await res.json();
+  return {
+    success: data.success,
+    posts: (data.posts || []).map((p: Record<string, unknown>) => ({
+      content: p.content,
+      publishedAt: p.published_at,
+      externalId: p.external_id,
+      url: p.url,
+      author: p.author,
+      title: p.title,
+    })),
+    profileName: data.profile_name,
+    error: data.error,
+  };
+}
+
 // === Browser Auth (Playwright) ===
 
 export type BrowserLoginState =

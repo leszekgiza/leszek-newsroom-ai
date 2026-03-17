@@ -5,6 +5,8 @@ import Link from "next/link";
 
 type Step =
   | "disclaimer"
+  | "mode_select"
+  | "public_config"
   | "auth"
   | "authenticating"
   | "2fa"
@@ -93,6 +95,10 @@ export function LinkedInWizard({
 
   // URL input
   const [urlInput, setUrlInput] = useState("");
+
+  // Public mode save
+  const [publicSaving, setPublicSaving] = useState(false);
+  const [publicError, setPublicError] = useState<string | null>(null);
 
   // Disconnect
   const [disconnecting, setDisconnecting] = useState(false);
@@ -310,6 +316,35 @@ export function LinkedInWizard({
     setUrlInput("");
   };
 
+  const handlePublicSave = async () => {
+    if (config.profiles.length === 0) {
+      setPublicError("Dodaj przynajmniej jeden profil");
+      return;
+    }
+    setPublicSaving(true);
+    setPublicError(null);
+    try {
+      const res = await fetch("/api/connectors/linkedin/public", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          disclaimerAccepted: true,
+          profiles: config.profiles,
+          maxPostsPerProfile: config.maxPostsPerProfile,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Zapisywanie nie powiodło się");
+      }
+      window.location.href = "/settings/integrations";
+    } catch (err) {
+      setPublicError(err instanceof Error ? err.message : "Wystąpił błąd");
+    } finally {
+      setPublicSaving(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -368,7 +403,7 @@ export function LinkedInWizard({
       </div>
 
       {/* DISCLAIMER */}
-      {(step === "disclaimer" || step === "auth") && (
+      {(step === "disclaimer" || step === "mode_select" || step === "auth") && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 space-y-3">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -437,15 +472,199 @@ export function LinkedInWizard({
         </div>
       )}
 
-      {/* Continue to auth */}
+      {/* Continue to mode select */}
       {step === "disclaimer" && (
         <button
-          onClick={() => setStep("auth")}
+          onClick={() => setStep("mode_select")}
           disabled={!disclaimerAccepted}
           className="w-full py-3.5 bg-[#0A66C2] text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
           Kontynuuj
         </button>
+      )}
+
+      {/* MODE SELECT */}
+      {step === "mode_select" && (
+        <div className="bg-card rounded-2xl border border-border p-4 space-y-4">
+          <h3 className="font-semibold text-foreground">Wybierz tryb połączenia</h3>
+
+          <button
+            onClick={() => setStep("public_config")}
+            className="w-full p-4 bg-muted/5 border-2 border-[#0A66C2] rounded-xl text-left hover:bg-[#0A66C2]/5 transition-colors"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-[#0A66C2]/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5 text-[#0A66C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-foreground">
+                  Publiczny
+                  <span className="ml-2 text-xs font-normal bg-[#0A66C2]/10 text-[#0A66C2] px-2 py-0.5 rounded-full">
+                    Zalecany
+                  </span>
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Podaj URL-e profili do obserwowania. Bez logowania — pobieramy publicznie widoczne posty.
+                </p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setStep("auth")}
+            className="w-full p-4 bg-muted/5 border border-border rounded-xl text-left hover:bg-muted/10 transition-colors"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-muted/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-foreground">Zaawansowany</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Zaloguj się do LinkedIn dla pełnego dostępu do feeda (cookie li_at lub login).
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* PUBLIC CONFIG */}
+      {step === "public_config" && (
+        <>
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-2xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold text-blue-800 dark:text-blue-300 text-sm">
+                  Tryb publiczny
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
+                  Dodaj profile LinkedIn do obserwowania. Posty zostaną pobrane z publicznych profili.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Followed Profiles */}
+          <div className="bg-card rounded-2xl border border-border p-4 space-y-4">
+            <h3 className="font-semibold text-foreground">Profile do obserwowania</h3>
+
+            {config.profiles.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Dodaj przynajmniej jeden profil LinkedIn.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {config.profiles.map((profile) => (
+                  <div
+                    key={profile.publicId}
+                    className="flex items-center gap-3 p-3 bg-muted/10 rounded-xl"
+                  >
+                    <div className="w-9 h-9 bg-[#0A66C2]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {profile.name}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveProfile(profile.publicId)}
+                      className="text-muted-foreground hover:text-red-500 flex-shrink-0 p-1"
+                      title="Usuń profil"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add Profile by URL */}
+          <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
+            <label className="text-xs font-medium text-muted-foreground block">
+              Wklej URL profilu LinkedIn
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="https://www.linkedin.com/in/nazwa-profilu"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddByUrl()}
+                className="flex-1 px-4 py-2.5 bg-muted/10 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0A66C2]/20"
+              />
+              <button
+                onClick={handleAddByUrl}
+                disabled={!urlInput.trim() || !urlInput.includes("linkedin.com/in/")}
+                className="px-4 py-2.5 bg-[#0A66C2] text-white rounded-xl text-sm hover:bg-blue-700 disabled:opacity-50"
+              >
+                Dodaj
+              </button>
+            </div>
+          </div>
+
+          {/* Posts per profile slider */}
+          <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
+            <label className="text-xs font-medium text-muted-foreground block">
+              Postów per profil: {config.maxPostsPerProfile}
+            </label>
+            <input
+              type="range"
+              min={5}
+              max={50}
+              value={config.maxPostsPerProfile}
+              onChange={(e) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  maxPostsPerProfile: Number(e.target.value),
+                }))
+              }
+              className="w-full accent-[#0A66C2]"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>5</span>
+              <span>50</span>
+            </div>
+          </div>
+
+          {publicError && (
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 p-3 rounded-xl">
+              {publicError}
+            </p>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setStep("mode_select")}
+              className="flex-1 py-3.5 bg-muted/10 text-foreground border border-border font-medium rounded-xl hover:bg-muted/20 transition-colors"
+            >
+              Wstecz
+            </button>
+            <button
+              onClick={handlePublicSave}
+              disabled={publicSaving || config.profiles.length === 0}
+              className="flex-1 py-3.5 bg-[#0A66C2] text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {publicSaving ? "Zapisywanie..." : "Zapisz i połącz"}
+            </button>
+          </div>
+        </>
       )}
 
       {/* AUTH FORM */}
@@ -1006,7 +1225,8 @@ export function LinkedInWizard({
       {/* Cancel */}
       {step !== "connected" &&
         step !== "authenticating" &&
-        step !== "2fa" && (
+        step !== "2fa" &&
+        step !== "public_config" && (
           <div className="flex gap-3">
             <Link
               href="/settings/integrations"

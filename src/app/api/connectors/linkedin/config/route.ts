@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
     if (!source) {
       return NextResponse.json(
-        { error: "LinkedIn nie jest połączony" },
+        { error: "LinkedIn nie jest skonfigurowany. Najpierw wybierz tryb połączenia." },
         { status: 404 }
       );
     }

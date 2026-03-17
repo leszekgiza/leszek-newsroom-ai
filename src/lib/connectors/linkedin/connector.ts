@@ -10,6 +10,7 @@ import { encrypt, decrypt } from "@/lib/encryption";
 import {
   linkedInAuth,
   linkedInFetchProfilePosts,
+  linkedInFetchPublicPosts,
   linkedInTest,
   linkedInDisconnect,
 } from "./client";
@@ -38,11 +39,16 @@ interface LinkedInConfig {
   includeReposts?: boolean;
 }
 
-function parseCredentials(source: PrivateSource): LinkedInCredentials {
+function parseCredentials(source: PrivateSource): LinkedInCredentials | null {
   if (!source.credentials) {
-    throw new Error("No credentials found");
+    return null;
   }
   return JSON.parse(decrypt(source.credentials));
+}
+
+function isPublicMode(creds: LinkedInCredentials | null): boolean {
+  if (!creds) return true;
+  return !creds.liAt && !creds.sessionId && !creds.email;
 }
 
 export class LinkedInConnector implements SourceConnector {
@@ -97,60 +103,104 @@ export class LinkedInConnector implements SourceConnector {
       return [];
     }
 
-    // Re-authenticate if no sessionId cached
-    let sessionId = creds.sessionId;
-    if (!sessionId) {
-      const authResult = await linkedInAuth(
-        creds.email,
-        creds.password,
-        creds.liAt,
-        creds.jsessionid
-      );
-      if (!authResult.success) {
-        throw new Error(authResult.error || "Re-authentication failed");
-      }
-      sessionId = authResult.sessionId;
-    }
+    const publicMode = isPublicMode(creds);
+    console.log(`[LINKEDIN] Mode: ${publicMode ? "public" : "authenticated"}`);
 
     const maxPostsPerProfile = config.maxPostsPerProfile ?? 10;
     const allItems: ConnectorItem[] = [];
     const seenIds = new Set<string>();
 
-    for (let i = 0; i < profiles.length; i++) {
-      const profile = profiles[i];
+    if (publicMode) {
+      // Public mode — scrape each profile via /linkedin/public-posts
+      for (let i = 0; i < profiles.length; i++) {
+        const profile = profiles[i];
 
-      this.onProgress?.({
-        phase: "senders",
-        current: i + 1,
-        total: profiles.length,
-        currentLabel: profile.name,
-      });
+        this.onProgress?.({
+          phase: "senders",
+          current: i + 1,
+          total: profiles.length,
+          currentLabel: profile.name,
+        });
 
-      console.log(`[LINKEDIN] Fetching posts for profile: ${profile.publicId}`);
-      const result = await linkedInFetchProfilePosts(
-        sessionId!,
-        profile.publicId,
-        maxPostsPerProfile
-      );
+        console.log(`[LINKEDIN-PUBLIC] Fetching posts for: ${profile.publicId}`);
+        const result = await linkedInFetchPublicPosts(
+          profile.publicId,
+          maxPostsPerProfile
+        );
 
-      console.log(`[LINKEDIN] Result for ${profile.publicId}: success=${result.success}, posts=${result.posts.length}, error=${result.error}`);
-      if (!result.success) {
-        console.log(`[LINKEDIN] Failed for ${profile.publicId}: ${result.error}`);
-        continue;
+        console.log(`[LINKEDIN-PUBLIC] Result for ${profile.publicId}: success=${result.success}, posts=${result.posts.length}, error=${result.error}`);
+        if (!result.success) {
+          console.log(`[LINKEDIN-PUBLIC] Failed for ${profile.publicId}: ${result.error}`);
+          continue;
+        }
+
+        for (const post of result.posts) {
+          const extId = post.externalId || post.title?.slice(0, 16) || String(i);
+          if (seenIds.has(extId)) continue;
+          seenIds.add(extId);
+
+          allItems.push({
+            externalId: extId,
+            title: post.title || post.content.slice(0, 120),
+            content: post.content,
+            url: post.url || `https://www.linkedin.com/in/${profile.publicId}/recent-activity/`,
+            author: post.author || result.profileName || profile.name,
+            publishedAt: post.publishedAt ? new Date(post.publishedAt) : undefined,
+          });
+        }
+      }
+    } else {
+      // Authenticated mode — existing Voyager API flow
+      let sessionId = creds!.sessionId;
+      if (!sessionId) {
+        const authResult = await linkedInAuth(
+          creds!.email,
+          creds!.password,
+          creds!.liAt,
+          creds!.jsessionid
+        );
+        if (!authResult.success) {
+          throw new Error(authResult.error || "Re-authentication failed");
+        }
+        sessionId = authResult.sessionId;
       }
 
-      for (const post of result.posts) {
-        if (seenIds.has(post.externalId)) continue;
-        seenIds.add(post.externalId);
+      for (let i = 0; i < profiles.length; i++) {
+        const profile = profiles[i];
 
-        allItems.push({
-          externalId: post.externalId,
-          title: post.title,
-          content: post.content,
-          url: post.url,
-          author: post.author || profile.name,
-          publishedAt: post.publishedAt ? new Date(post.publishedAt) : undefined,
+        this.onProgress?.({
+          phase: "senders",
+          current: i + 1,
+          total: profiles.length,
+          currentLabel: profile.name,
         });
+
+        console.log(`[LINKEDIN] Fetching posts for profile: ${profile.publicId}`);
+        const result = await linkedInFetchProfilePosts(
+          sessionId!,
+          profile.publicId,
+          maxPostsPerProfile
+        );
+
+        console.log(`[LINKEDIN] Result for ${profile.publicId}: success=${result.success}, posts=${result.posts.length}, error=${result.error}`);
+        if (!result.success) {
+          console.log(`[LINKEDIN] Failed for ${profile.publicId}: ${result.error}`);
+          continue;
+        }
+
+        for (const post of result.posts) {
+          if (seenIds.has(post.externalId)) continue;
+          seenIds.add(post.externalId);
+
+          allItems.push({
+            externalId: post.externalId,
+            title: post.title,
+            content: post.content,
+            url: post.url,
+            author: post.author || profile.name,
+            publishedAt: post.publishedAt ? new Date(post.publishedAt) : undefined,
+          });
+        }
       }
     }
 
@@ -192,20 +242,29 @@ export class LinkedInConnector implements SourceConnector {
   }
 
   async getConnectionStatus(source: PrivateSource): Promise<ConnectionStatus> {
+    const creds = parseCredentials(source);
+
+    // Public mode — always connected (no credentials needed)
+    if (isPublicMode(creds)) {
+      return {
+        status: source.status,
+        profileName: "Tryb publiczny",
+        lastSyncAt: source.lastScrapedAt || undefined,
+      };
+    }
+
     if (!source.credentials) {
       return { status: "DISCONNECTED" };
     }
 
     try {
-      const creds = parseCredentials(source);
-
-      if (!creds.sessionId) {
+      if (!creds!.sessionId) {
         // Try re-auth
         const authResult = await linkedInAuth(
-          creds.email,
-          creds.password,
-          creds.liAt,
-          creds.jsessionid
+          creds!.email,
+          creds!.password,
+          creds!.liAt,
+          creds!.jsessionid
         );
         if (!authResult.success) {
           return { status: "EXPIRED", error: authResult.error };
@@ -217,7 +276,7 @@ export class LinkedInConnector implements SourceConnector {
         };
       }
 
-      const testResult = await linkedInTest(creds.sessionId);
+      const testResult = await linkedInTest(creds!.sessionId);
       if (!testResult.success) {
         return { status: "EXPIRED", error: testResult.error };
       }
@@ -239,7 +298,7 @@ export class LinkedInConnector implements SourceConnector {
 
     try {
       const creds = parseCredentials(source);
-      if (creds.sessionId) {
+      if (creds?.sessionId) {
         await linkedInDisconnect(creds.sessionId);
       }
     } catch {
